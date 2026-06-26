@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif; background: #edecea; margin: 0; padding: 40px 0 80px; }
+  </style>
+</helmet>
+
+<div style="max-width:900px;margin:0 auto;padding:0 32px;display:flex;flex-direction:column;gap:48px;">
+
+  <!-- タイトル -->
+  <div style="padding-top:8px;">
+    <div style="font:700 15px/1 system-ui;color:#444;letter-spacing:0.04em;">新田西口商店会 管理ポータル</div>
+    <div style="font:13px system-ui;color:#888;margin-top:6px;">ワイヤーフレーム — 全6画面</div>
+  </div>
+
+  <!-- ===== 0. 構成図 ===== -->
+  <div>
+    <div style="font:600 10px system-ui;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">0. アプリ全体構成</div>
+    <div style="background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:20px 24px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="background:#2d3142;color:#fff;padding:10px 14px;border-radius:4px;text-align:center;flex-shrink:0;">
+          <div style="font:700 11px system-ui;">ダッシュボード</div>
+          <div style="font:400 9px system-ui;opacity:0.5;margin-top:2px;">概要・集計</div>
+        </div>
+        <div style="color:#ccc;font:16px system-ui;">→</div>
+        <div style="flex:1;min-width:140px;border:1.5px dashed #93c5fd;border-radius:5px;padding:10px;">
+          <div style="font:600 9px system-ui;color:#3b82f6;margin-bottom:5px;">会員管理</div>
+          <div style="background:#eff6ff;padding:4px 8px;border-radius:3px;font:11px system-ui;margin-bottom:3px;">👥 役員名簿</div>
+          <div style="background:#eff6ff;padding:4px 8px;border-radius:3px;font:11px system-ui;">🏪 会員 · 請求書 · 入金</div>
+        </div>
+        <div style="flex:1.2;min-width:140px;border:1.5px dashed #86efac;border-radius:5px;padding:10px;">
+          <div style="font:600 9px system-ui;color:#16a34a;margin-bottom:5px;">財務管理</div>
+          <div style="background:#f0fdf4;padding:4px 8px;border-radius:3px;font:11px system-ui;margin-bottom:3px;">💰 入出金管理</div>
+          <div style="background:#f0fdf4;padding:4px 8px;border-radius:3px;font:11px system-ui;">📊 予算管理 · 📋 決算書</div>
+        </div>
+        <div style="flex:1;min-width:120px;border:1.5px dashed #fca5a5;border-radius:5px;padding:10px;">
+          <div style="font:600 9px system-ui;color:#dc2626;margin-bottom:5px;">活動記録</div>
+          <div style="background:#fef2f2;padding:4px 8px;border-radius:3px;font:11px system-ui;margin-bottom:3px;">🎉 事業記録</div>
+          <div style="background:#fef2f2;padding:4px 8px;border-radius:3px;font:11px system-ui;">📝 総会資料</div>
+        </div>
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:4px;">
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:4px 9px;border-radius:3px;font:10px system-ui;color:#6b7280;white-space:nowrap;">🖨️ PDF出力</div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:4px 9px;border-radius:3px;font:10px system-ui;color:#6b7280;white-space:nowrap;">📤 CSV出力</div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:4px 9px;border-radius:3px;font:10px system-ui;color:#6b7280;white-space:nowrap;">💾 localStorage</div>
+        </div>
+      </div>
+      <!-- Post-its row -->
+      <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+        <div style="background:#fef4a8;padding:8px 11px;font:11px/1.6 system-ui;box-shadow:0 1px 3px rgba(0,0,0,.1);flex:1;min-width:160px;">💾 全データをブラウザのlocalStorageに保存。ローカルで完結。</div>
+        <div style="background:#fef4a8;padding:8px 11px;font:11px/1.6 system-ui;box-shadow:0 1px 3px rgba(0,0,0,.1);flex:1;min-width:160px;">📅 第◯期で切り替え。役員・財務・事業を期ごとに分けて管理。</div>
+        <div style="background:#fef4a8;padding:8px 11px;font:11px/1.6 system-ui;box-shadow:0 1px 3px rgba(0,0,0,.1);flex:1;min-width:160px;">🖨️ 請求書・領収書・決算書・議事録をすべてPDF出力対応。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 1. ダッシュボード ===== -->
+  <div>
+    <div style="font:600 10px system-ui;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">① ダッシュボード</div>
+    <div style="background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;height:500px;overflow:hidden;">
+      <div style="width:145px;background:#2d3142;flex-shrink:0;display:flex;flex-direction:column;">
+        <div style="padding:12px 13px 9px;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="color:#fff;font:700 10px/1.5 system-ui;">新田西口商店会</div>
+          <div style="color:rgba(255,255,255,0.35);font:9px system-ui;">第3期</div>
+        </div>
+        <div style="flex:1;padding:4px 0;display:flex;flex-direction:column;">
+          <div style="padding:7px 13px;font:11px system-ui;color:#fff;background:rgba(255,255,255,0.12);border-left:3px solid #60a5fa;padding-left:10px;">ダッシュボード</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">役員名簿</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">会員管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">請求書管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">入出金管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">予算管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">決算書</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">事業記録</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">総会資料</div>
+        </div>
+        <div style="padding:9px 13px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font:10px system-ui;color:rgba(255,255,255,0.35);">⚙ 設定</div>
+        </div>
+      </div>
+      <div style="flex:1;padding:15px 17px;background:#f8f9fa;display:flex;flex-direction:column;gap:11px;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font:700 14px system-ui;color:#111;">ダッシュボード</div>
+            <div style="font:10px system-ui;color:#888;margin-top:1px;">第3期 令和6年度（2024.4 〜 2025.3）</div>
+          </div>
+          <div style="background:#2d3142;color:#fff;padding:4px 10px;border-radius:3px;font:10px system-ui;">期を変更 ▼</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:4px;padding:10px;">
+            <div style="font:9px system-ui;color:#999;">年間収入</div>
+            <div style="font:700 18px system-ui;color:#111;margin-top:3px;">¥850,000</div>
+            <div style="font:9px system-ui;color:#16a34a;margin-top:2px;">▲ +5% 前期比</div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:4px;padding:10px;">
+            <div style="font:9px system-ui;color:#999;">年間支出</div>
+            <div style="font:700 18px system-ui;color:#111;margin-top:3px;">¥620,000</div>
+            <div style="font:9px system-ui;color:#888;margin-top:2px;">— ±0% 前期比</div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:4px;padding:10px;">
+            <div style="font:9px system-ui;color:#999;">未払い会員</div>
+            <div style="font:700 18px system-ui;color:#dc2626;margin-top:3px;">3 社</div>
+            <div style="font:9px system-ui;color:#888;margin-top:2px;">全20社中</div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:4px;padding:10px;">
+            <div style="font:9px system-ui;color:#999;">次回イベント</div>
+            <div style="font:700 12px system-ui;color:#111;margin-top:3px;line-height:1.4;">夏祭り<br>2024.8.3</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:11px;flex:1;min-height:0;">
+          <div style="flex:1.6;background:#fff;border:1px solid #e5e7eb;border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:5px;overflow:hidden;">
+            <div style="font:600 10px system-ui;color:#444;margin-bottom:3px;">最近の取引</div>
+            <div style="display:flex;gap:6px;font:600 9px system-ui;color:#bbb;padding-bottom:4px;border-bottom:1px solid #f0f0f0;">
+              <span style="width:48px;">日付</span><span style="flex:1;">摘要</span><span style="width:60px;text-align:right;">金額</span>
+            </div>
+            <div style="display:flex;gap:6px;font:10px system-ui;"><span style="width:48px;color:#bbb;">7/12</span><span style="flex:1;">夏祭り準備費</span><span style="width:60px;text-align:right;color:#dc2626;">−¥32,000</span></div>
+            <div style="display:flex;gap:6px;font:10px system-ui;"><span style="width:48px;color:#bbb;">7/10</span><span style="flex:1;">会費入金 田中商店</span><span style="width:60px;text-align:right;color:#16a34a;">+¥12,000</span></div>
+            <div style="display:flex;gap:6px;font:10px system-ui;"><span style="width:48px;color:#bbb;">7/5</span><span style="flex:1;">印刷費</span><span style="width:60px;text-align:right;color:#dc2626;">−¥8,500</span></div>
+            <div style="display:flex;gap:6px;font:10px system-ui;"><span style="width:48px;color:#bbb;">6/30</span><span style="flex:1;">会費入金 山本青果</span><span style="width:60px;text-align:right;color:#16a34a;">+¥12,000</span></div>
+            <div style="display:flex;gap:6px;font:10px system-ui;"><span style="width:48px;color:#bbb;">6/28</span><span style="flex:1;">清掃用品購入</span><span style="width:60px;text-align:right;color:#dc2626;">−¥4,200</span></div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:4px;padding:10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;">
+            <div style="font:600 10px system-ui;color:#444;margin-bottom:3px;">直近のイベント</div>
+            <div style="padding:7px;background:#fef9c3;border-radius:3px;border-left:2px solid #f59e0b;">
+              <div style="font:700 10px system-ui;">夏祭り・縁日</div>
+              <div style="font:9px system-ui;color:#888;margin-top:1px;">2024.8.3–4 / 準備中</div>
+            </div>
+            <div style="padding:7px;background:#f0f9ff;border-radius:3px;border-left:2px solid #38bdf8;">
+              <div style="font:700 10px system-ui;">商工会研修</div>
+              <div style="font:9px system-ui;color:#888;margin-top:1px;">2024.9.14 / 計画中</div>
+            </div>
+            <div style="padding:7px;background:#f0fdf4;border-radius:3px;border-left:2px solid #4ade80;">
+              <div style="font:700 10px system-ui;">秋の定期総会</div>
+              <div style="font:9px system-ui;color:#888;margin-top:1px;">2024.10.20 / 計画中</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2. 役員名簿 ===== -->
+  <div>
+    <div style="font:600 10px system-ui;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">② 役員名簿</div>
+    <div style="background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;height:460px;overflow:hidden;">
+      <div style="width:145px;background:#2d3142;flex-shrink:0;display:flex;flex-direction:column;">
+        <div style="padding:12px 13px 9px;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="color:#fff;font:700 10px/1.5 system-ui;">新田西口商店会</div>
+          <div style="color:rgba(255,255,255,0.35);font:9px system-ui;">第3期</div>
+        </div>
+        <div style="flex:1;padding:4px 0;display:flex;flex-direction:column;">
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">ダッシュボード</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:#fff;background:rgba(255,255,255,0.12);border-left:3px solid #60a5fa;padding-left:10px;">役員名簿</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">会員管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">請求書管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">入出金管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">予算管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">決算書</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">事業記録</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">総会資料</div>
+        </div>
+        <div style="padding:9px 13px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font:10px system-ui;color:rgba(255,255,255,0.35);">⚙ 設定</div>
+        </div>
+      </div>
+      <div style="flex:1;padding:15px 17px;background:#f8f9fa;display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font:700 14px system-ui;color:#111;">役員名簿</div>
+          <div style="display:flex;gap:7px;">
+            <div style="background:#fff;border:1px solid #e2e8f0;padding:4px 11px;border-radius:3px;font:10px system-ui;color:#555;">🖨️ 印刷</div>
+            <div style="background:#2d3142;color:#fff;padding:4px 11px;border-radius:3px;font:10px system-ui;">＋ 役員追加</div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:3px;padding:6px 11px;font:11px system-ui;color:#ccc;">🔍　氏名・役職で検索...</div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:4px;overflow:hidden;flex:1;">
+          <div style="display:flex;background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:6px 12px;font:600 9px system-ui;color:#999;">
+            <span style="width:62px;">役職</span><span style="width:72px;">氏名</span><span style="flex:1;">店舗名</span><span style="width:92px;">電話</span><span style="width:80px;">任期</span><span style="width:48px;">操作</span>
+          </div>
+          <div style="display:flex;padding:7px 12px;font:11px system-ui;border-bottom:1px solid #f5f5f5;align-items:center;">
+            <span style="width:62px;"><span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;font:10px system-ui;">会長</span></span>
+            <span style="width:72px;">山田 太郎</span><span style="flex:1;color:#777;">山田時計店</span>
+            <span style="width:92px;color:#aaa;font:10px system-ui;">090-0000-0001</span><span style="width:80px;color:#aaa;font:10px system-ui;">R5.4〜R7.3</span><span style="width:48px;color:#3b82f6;font:10px system-ui;">編集 ✕</span>
+          </div>
+          <div style="display:flex;padding:7px 12px;font:11px system-ui;border-bottom:1px solid #f5f5f5;align-items:center;">
+            <span style="width:62px;"><span style="background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:8px;font:10px system-ui;">副会長</span></span>
+            <span style="width:72px;">鈴木 花子</span><span style="flex:1;color:#777;">鈴木青果</span>
+            <span style="width:92px;color:#aaa;font:10px system-ui;">090-0000-0002</span><span style="width:80px;color:#aaa;font:10px system-ui;">R5.4〜R7.3</span><span style="width:48px;color:#3b82f6;font:10px system-ui;">編集 ✕</span>
+          </div>
+          <div style="display:flex;padding:7px 12px;font:11px system-ui;border-bottom:1px solid #f5f5f5;align-items:center;">
+            <span style="width:62px;"><span style="background:#f0fdf4;color:#166534;padding:1px 6px;border-radius:8px;font:10px system-ui;">会計</span></span>
+            <span style="width:72px;">田中 一郎</span><span style="flex:1;color:#777;">田中書店</span>
+            <span style="width:92px;color:#aaa;font:10px system-ui;">090-0000-0003</span><span style="width:80px;color:#aaa;font:10px system-ui;">R5.4〜R7.3</span><span style="width:48px;color:#3b82f6;font:10px system-ui;">編集 ✕</span>
+          </div>
+          <div style="display:flex;padding:7px 12px;font:11px system-ui;border-bottom:1px solid #f5f5f5;align-items:center;">
+            <span style="width:62px;"><span style="background:#fdf4ff;color:#7e22ce;padding:1px 6px;border-radius:8px;font:10px system-ui;">書記</span></span>
+            <span style="width:72px;">佐藤 美咲</span><span style="flex:1;color:#777;">佐藤米店</span>
+            <span style="width:92px;color:#aaa;font:10px system-ui;">090-0000-0004</span><span style="width:80px;color:#aaa;font:10px system-ui;">R5.4〜R7.3</span><span style="width:48px;color:#3b82f6;font:10px system-ui;">編集 ✕</span>
+          </div>
+          <div style="display:flex;padding:7px 12px;font:11px system-ui;border-bottom:1px solid #f5f5f5;align-items:center;">
+            <span style="width:62px;"><span style="background:#fff7ed;color:#c2410c;padding:1px 6px;border-radius:8px;font:10px system-ui;">監査</span></span>
+            <span style="width:72px;">伊藤 健二</span><span style="flex:1;color:#777;">伊藤薬局</span>
+            <span style="width:92px;color:#aaa;font:10px system-ui;">090-0000-0005</span><span style="width:80px;color:#aaa;font:10px system-ui;">R5.4〜R7.3</span><span style="width:48px;color:#3b82f6;font:10px system-ui;">編集 ✕</span>
+          </div>
+          <div style="display:flex;padding:7px 12px;font:11px system-ui;align-items:center;">
+            <span style="width:62px;"><span style="background:#f8fafc;color:#64748b;padding:1px 6px;border-radius:8px;font:10px system-ui;">理事</span></span>
+            <span style="width:72px;">渡辺 次郎</span><span style="flex:1;color:#777;">渡辺電気</span>
+            <span style="width:92px;color:#aaa;font:10px system-ui;">090-0000-0006</span><span style="width:80px;color:#aaa;font:10px system-ui;">R5.4〜R7.3</span><span style="width:48px;color:#3b82f6;font:10px system-ui;">編集 ✕</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. 請求書管理 ===== -->
+  <div>
+    <div style="font:600 10px system-ui;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">③ 請求書管理・入金確認</div>
+    <div style="background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;height:480px;overflow:hidden;">
+      <div style="width:145px;background:#2d3142;flex-shrink:0;display:flex;flex-direction:column;">
+        <div style="padding:12px 13px 9px;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="color:#fff;font:700 10px/1.5 system-ui;">新田西口商店会</div>
+          <div style="color:rgba(255,255,255,0.35);font:9px system-ui;">第3期</div>
+        </div>
+        <div style="flex:1;padding:4px 0;display:flex;flex-direction:column;">
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">ダッシュボード</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">役員名簿</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:rgba(255,255,255,0.5);">会員管理</div>
+          <div style="padding:7px 13px;font:11px system-ui;color:#fff;background:rgba(255,255,255,0.12);border-left:3px solid #60a5fa;padding-left:10px;">請求書管理</div>
+          <div style="padding:7
+</x-dc>
+</body>
+</html>
