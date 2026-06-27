@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>新田西口商店会 管理ポータル</title>
@@ -22,6 +23,7 @@
   </style>
 
 
+
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async></script>
   <style>
@@ -38,15 +40,16 @@
       padding:48px 52px;text-align:center;width:360px;
     }
     .auth-title { font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px; }
-    .auth-sub { font-size:13px;color:#6e6e73;margin-bottom:32px; }
+    .auth-sub { font-size:13px;color:#6e6e73;margin-bottom:32px;line-height:1.6; }
     .auth-error { font-size:12px;color:#ff3b30;margin-top:16px;display:none; }
   </style>
 </head>
+
 <body>
 
   <div id="gas-auth-overlay">
     <div class="auth-card">
-      <div style="font-size:32px;margin-bottom:12px;">🏪</div>
+      <div style="font-size:36px;margin-bottom:14px;">🏪</div>
       <div class="auth-title">新田西口商店会</div>
       <div class="auth-sub">管理ポータルへようこそ<br>Googleアカウントでログインしてください</div>
       <div id="g_id_onload"
@@ -68,49 +71,55 @@
   </div>
 
   <script>
-    // 許可するGoogleアカウント（空配列=全員許可）
     const ALLOWED_EMAILS = ['clmiwa.hotline@gmail.com'];
 
-    function handleGoogleLogin(response) {
+    function parseJWT(token) {
       try {
-        const payload = JSON.parse(atob(response.credential.split('.')[1]));
-        const email = payload.email;
-        const name = payload.name || email;
-
-        if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {
-          document.getElementById('auth-error').style.display = 'block';
-          document.getElementById('auth-error').textContent =
-            email + ' はアクセスが許可されていません。';
-          return;
-        }
-
-        // ログイン成功: ユーザー情報をセット
-        window.__GAS_USER__ = { email, name };
-        window.__GAS_MODE__ = false; // GitHub Pages なのでGASは不使用
-        window.__AUTH_TOKEN__ = response.credential;
-
-        // セッションに保存（タブを閉じると消える）
-        sessionStorage.setItem('nitta_auth', JSON.stringify({ email, name, exp: payload.exp }));
-
-        // オーバーレイを非表示
-        document.getElementById('gas-auth-overlay').classList.add('hidden');
-
-        // ポータルを初期化
-        if (window.__initPortal) window.__initPortal({ email, name });
-
-      } catch(e) {
-        document.getElementById('auth-error').style.display = 'block';
-        document.getElementById('auth-error').textContent = 'ログインに失敗しました。再試行してください。';
-      }
+        // base64url → base64 変換（JWT標準）
+        const base64 = token.split('.')[1]
+          .replace(/-/g, '+')
+          .replace(/_/g, '/')
+          .padEnd(Math.ceil(token.split('.')[1].length / 4) * 4, '=');
+        return JSON.parse(atob(base64));
+      } catch(e) { return null; }
     }
 
-    // セッション復元（リロード時に再ログイン不要）
+    function handleGoogleLogin(response) {
+      const payload = parseJWT(response.credential);
+      if (!payload) {
+        showAuthError('認証情報の解析に失敗しました。再試行してください。');
+        return;
+      }
+      const email = payload.email;
+      const name = payload.name || email;
+
+      if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {
+        showAuthError(email + ' はアクセスが許可されていません。');
+        return;
+      }
+
+      // セッションに保存（タブを閉じると消える）
+      sessionStorage.setItem('nitta_auth', JSON.stringify({ email, name, exp: payload.exp }));
+
+      window.__GAS_USER__ = { email, name };
+      window.__GAS_MODE__ = false;
+      document.getElementById('gas-auth-overlay').classList.add('hidden');
+      if (window.__initPortal) window.__initPortal({ email, name });
+    }
+
+    function showAuthError(msg) {
+      const el = document.getElementById('auth-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    // リロード時のセッション復元
     window.addEventListener('DOMContentLoaded', function() {
       const saved = sessionStorage.getItem('nitta_auth');
       if (saved) {
         try {
           const u = JSON.parse(saved);
-          if (u.exp && Date.now() / 1000 < u.exp) {
+          if (u.exp && Math.floor(Date.now() / 1000) < u.exp) {
             window.__GAS_USER__ = { email: u.email, name: u.name };
             window.__GAS_MODE__ = false;
             document.getElementById('gas-auth-overlay').classList.add('hidden');
@@ -121,7 +130,6 @@
       }
     });
 
-    // ログアウト
     window.__logout = function() {
       sessionStorage.removeItem('nitta_auth');
       location.reload();
@@ -169,7 +177,7 @@
       <div style="fontSize:10px;color:{{ syncStatusColor }};marginBottom:3px;">{{ syncStatusLabel }}</div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
-        <a onClick="window.__logout && window.__logout()" style="fontSize:10px;color:#aeaeb2;textDecoration:none;">ログアウト</a>
+        <a href="{{ gasLogoutUrl }}" style="fontSize:10px;color:#aeaeb2;textDecoration:none;">ログアウト</a>
       </sc-if>
     </div>
   </div>
@@ -1556,1332 +1564,6 @@
   <div style="position:fixed;bottom:28px;right:28px;background:#1d1d1f;color:#fff;padding:12px 20px;borderRadius:10px;fontSize:13px;fontWeight:500;zIndex:300;boxShadow:0 4px 16px rgba(0,0,0,0.25);">{{ toast }}</div>
 </sc-if>
 </x-dc>
-<script data-dc-script>
-
-class Component extends DCLogic {
-  state = {
-    page: 'dashboard',
-    periods: [], currentPeriodId: null,
-    officers: [], members: [], invoices: [],
-    transactions: [], budgetItems: [], events: [],
-    memberChangeLogs: [], memberPage: 0,
-    modal: { show: false, type: null, editId: null },
-    formData: {},
-    toast: null, _tt: null,
-    scriptUrl: '', scriptUrlInput: '',
-    syncStatus: null, loading: false,
-    orgInfo: {name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},
-    orgInfoInput: null,
-    transferModal: false,
-    transferDate: new Date().toISOString().slice(0,10),
-    transferAmount: 0,
-    transferFrom: '口座',
-    transferTo: '現金',
-    transferDesc: '',
-    compositeModal: false,
-    compositeDate: new Date().toISOString().slice(0,10),
-    compositeGroupName: '',
-    compositeLines: [],
-    budgetDraftModal: false,
-    budgetDraft: null, // {targetPeriodId, items:[{id,category,type,nextAmount,remark}], savedAt}
-    invoiceFilter: '全て',
-    txFilter: '全て',
-    txYear: null,
-    txMonth: '全月',
-    invoiceLogs: [],
-    printDoc: null,
-    hankoUnlocked: false,
-    hankoPwdInput: '',
-    bulkModal: false,
-    bulkIssuedDate: new Date().toISOString().slice(0,10),
-    bulkSelectedIds: [],
-    bulkType: '会費',
-    bulkDescription: '',
-    installmentModal: false,
-    installmentInvoiceId: null,
-    installmentCount: 12,
-    installmentDebitDay: 27,
-    installmentStartMonth: new Date().toISOString().slice(0,7),
-  };
-
-  gen() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  fmt(n) { return '¥' + Math.abs(n||0).toLocaleString('ja-JP'); }
-  fmtD(d) { if (!d) return '—'; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); }
-
-  componentDidMount() {
-    // GAS Web App として動作しているか検出
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-      this.setState({ loading: true, syncStatus: 'syncing' });
-      // ユーザー情報を取得
-      google.script.run
-        .withSuccessHandler((userInfo) => {
-          this.setState({ gasUser: userInfo });
-          // データを読み込む
-          google.script.run
-            .withSuccessHandler((d) => {
-              const parsed = this.migrate(this.parseSheets(d));
-              if (!parsed.periods || parsed.periods.length === 0) {
-                this.seed();
-              } else {
-                this.setState({ ...parsed, loading: false, syncStatus: 'ok' });
-              }
-              this.showToast('ようこそ ' + (userInfo.email || '') + ' さん');
-            })
-            .withFailureHandler((err) => {
-              this.setState({ loading: false, syncStatus: 'error' });
-              this.showToast('データ読込エラー: ' + err.message);
-            })
-            .loadData();
-        })
-        .withFailureHandler(() => {
-          this.setState({ loading: false, syncStatus: 'error' });
-        })
-        .getUserInfo();
-      return;
-    }
-    // 通常ブラウザモード (localStorage + optional Sheets URL)
-    const url = localStorage.getItem('nitta_script_url') || '';
-    if (url) {
-      this.setState({ scriptUrl: url, scriptUrlInput: url, loading: true });
-      this.fetchSheets(url);
-    } else {
-      this.loadLocal();
-    }
-  }
-
-  migrate(d) {
-    // 全会員に不足フィールドを補完
-    const memberDefaults = {address:'',fax:'',email:'',joinDate:'',status:'在籍',statusDate:null,statusNote:''};
-    const members = (d.members||[]).map(m=>({...memberDefaults,...m}));
-    // 全請求書に不足フィールドを補完
-    const invoiceDefaults = {description:'',paymentMethod:'',reminderNote:'',installment:null};
-    const invoices = (d.invoices||[]).map(i=>({...invoiceDefaults,...i}));
-    return {...d, members, invoices};
-  }
-
-  loadLocal() {
-    try {
-      const raw = localStorage.getItem('nitta_v5');
-      if (raw) {
-        const d = this.migrate(JSON.parse(raw));
-        this.setState({...d, loading:false}, ()=>this.persist());
-        return;
-      }
-    } catch(e) {}
-    this.seed();
-  }
-
-  parseSheets(d) {
-    const n = v => parseFloat(v)||0;
-    return {
-      periods: d.periods||[],
-      members: (d.members||[]).map(m=>({...m, fee:n(m.fee), no:n(m.no)})),
-      officers: d.officers||[],
-      invoices: (d.invoices||[]).map(i=>({...i, amount:n(i.amount)})),
-      transactions: (d.transactions||[]).map(t=>({...t, income:n(t.income), expense:n(t.expense)})),
-      budgetItems: (d.budgetItems||[]).map(b=>({...b, amount:n(b.amount)})),
-      events: d.events||[],
-      memberChangeLogs: d.memberChangeLogs||[],
-      currentPeriodId: d.currentPeriodId||null,
-    };
-  }
-
-  fetchSheets(url) {
-    fetch(url + '?t=' + Date.now())
-      .then(r => r.json())
-      .then(d => {
-        if (d.error) throw new Error(d.error);
-        const parsed = this.migrate(this.parseSheets(d));
-        if (!parsed.periods || parsed.periods.length === 0) {
-          this.loadLocal();
-          this.setState({ syncStatus: 'ok' }, () => {
-            this.persist();
-            this.showToast('データをスプレッドシートに初回保存しました');
-          });
-        } else {
-          this.setState({ ...parsed, loading: false, syncStatus: 'ok' });
-          localStorage.setItem('nitta_v5', JSON.stringify(parsed));
-          this.showToast('スプレッドシートから読み込みました');
-        }
-      })
-      .catch(err => {
-        console.warn('Sheets fetch failed:', err.message);
-        this.loadLocal();
-        this.setState({ syncStatus: 'error' });
-        this.showToast('スプレッドシート接続失敗。ローカルデータを使用します');
-      });
-  }
-
-  saveOrgInfo() {
-    const inp = this.state.orgInfoInput||{};
-    this.setState(s=>({orgInfo:{...s.orgInfo,...inp},orgInfoInput:null}),()=>this.persist());
-    this.showToast('代表者情報を保存しました');
-  }
-
-  saveScriptUrl() {
-    const url = (this.state.scriptUrlInput||'').trim();
-    localStorage.setItem('nitta_script_url', url);
-    if (!url) {
-      this.setState({ scriptUrl: '', syncStatus: null });
-      this.showToast('連携を解除しました');
-      return;
-    }
-    this.setState({ scriptUrl: url, syncStatus: 'syncing', loading: true });
-    this.fetchSheets(url);
-  }
-
-  persist() {
-    const {page,modal,formData,toast,_tt,loading,syncStatus,scriptUrl,scriptUrlInput,orgInfoInput,gasUser,...d} = this.state;
-    try { localStorage.setItem('nitta_v5', JSON.stringify(d)); } catch(e){}
-    // GAS Web App モード
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-      this.setState({ syncStatus: 'syncing' });
-      google.script.run
-        .withSuccessHandler(() => this.setState({ syncStatus: 'ok' }))
-        .withFailureHandler(() => this.setState({ syncStatus: 'error' }))
-        .saveData(JSON.stringify(d));
-      return;
-    }
-    // 通常ブラウザ + Sheets URL モード
-    if (scriptUrl) {
-      fetch(scriptUrl, {
-        method: 'POST',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify(d),
-      })
-      .then(r => r.json())
-      .then(res => this.setState({ syncStatus: res.ok ? 'ok' : 'error' }))
-      .catch(() => this.setState({ syncStatus: 'error' }));
-    }
-  }
-
-  seed() {
-    const p38 = this.gen();
-    const p39 = this.gen();
-    const periods = [
-      {id:p38,name:'第38期',startDate:'2025-04-01',endDate:'2026-03-31'},
-      {id:p39,name:'第39期',startDate:'2026-04-01',endDate:'2027-03-31'},
-    ];
-    // 会員名簿（令和8年6月19日現在）25名 + 役員代理1名
-    const mb = [
-      {no:1,name:'安斎 義憲',store:'(株)アンザイ',fee:24000,phone:'048-941-8326'},
-      {no:2,name:'伊藤 浩',store:'ヘアーサロン ウイング',fee:24000,phone:'048-942-7993'},
-      {no:3,name:'山中 利彦',store:'(株)カワチ薬品',fee:24000,phone:'048-941-4183'},
-      {no:4,name:'奥住 公一',store:'(有)新田金寿司',fee:24000,phone:'048-942-5381'},
-      {no:5,name:'小島 岳洋',store:'小島測量・土地家屋調査士事務所',fee:24000,phone:'048-941-8857'},
-      {no:6,name:'横山 貞雄',store:'新田幼稚園',fee:24000,phone:'048-942-5516'},
-      {no:7,name:'指田 泰三',store:'スポーツランド',fee:24000,phone:'048-944-2662'},
-      {no:8,name:'岩波 秀一',store:'セブンイレブン草加金明通り店',fee:24000,phone:'048-944-2477'},
-      {no:9,name:'中村 義弘',store:'草加建設(株)',fee:24000,phone:'048-943-7900'},
-      {no:10,name:'高木 元一',store:'(株)高木商会',fee:24000,phone:'048-941-9941'},
-      {no:11,name:'青柳 健',store:'(株)筑波',fee:24000,phone:'048-931-5832'},
-      {no:12,name:'田中 一也',store:'ハートランドゴルフクラブ',fee:72000,phone:'048-942-7744'},
-      {no:13,name:'中村 諭史',store:'(有)クリーニングみわ',fee:24000,phone:'048-943-2370'},
-      {no:14,name:'広田 雅徳',store:'(株)広田',fee:24000,phone:'048-941-2165'},
-      {no:15,name:'河野 文寿',store:'(株)山香煎餅本舗',fee:24000,phone:'048-941-1000'},
-      {no:16,name:'青羽 吉治',store:'与志鮨',fee:24000,phone:'048-942-8144'},
-      {no:17,name:'児玉 広行',store:'パンとケーキのお店 Asahido',fee:24000,phone:'048-942-1104'},
-      {no:18,name:'(支店長)',store:'東京東信用金庫',fee:24000,phone:'048-931-1541'},
-      {no:19,name:'石丸 妙子',store:'ビューティースタジオ モコ',fee:24000,phone:'048-943-0560'},
-      {no:20,name:'小森 豊',store:'ざぼう',fee:24000,phone:'048-946-7278'},
-      {no:21,name:'髙橋 利幸',store:'シンコースポーツ(株)',fee:24000,phone:'048-942-8181'},
-      {no:22,name:'長沼 雅弘',store:'ドレミ薬局',fee:24000,phone:'048-931-5534'},
-      {no:23,name:'新井 浩介',store:'セブンイレブン草加新田店',fee:24000,phone:'048-932-2770'},
-      {no:24,name:'伊藤 博之',store:'広島お好み焼き 空島',fee:24000,phone:'048-944-7588'},
-      {no:25,name:'(店長)',store:'ピーアーク',fee:72000,phone:'048-943-0061'},
-      {no:26,name:'渡辺 強一',store:'草加建設(株)（役員代理）',type:'その他',fee:0,phone:'048-943-7900'},
-    ].map(m=>({id:this.gen(),type:'正会員',email:'',...m}));
-    const members = mb;
-
-    // 役員（会員IDを参照）
-    const od = [
-      {role:'会長',memberId:mb[7].id},   // 岩波 秀一
-      {role:'副会長',memberId:mb[10].id}, // 青柳 健（庶務）
-      {role:'副会長',memberId:mb[0].id},  // 安斎 義憲（渉外）
-      {role:'監事',memberId:mb[25].id},   // 渡辺 強一
-      {role:'監事',memberId:mb[1].id},    // 伊藤 浩
-      {role:'役員',memberId:mb[20].id},   // 髙橋 利幸
-      {role:'役員',memberId:mb[12].id},   // 中村 諭史（会計）
-      {role:'役員',memberId:mb[16].id},   // 児玉 広行
-      {role:'相談役',memberId:mb[5].id},  // 横山 貞雄
-    ];
-    const officers = [
-      ...od.map(o=>({id:this.gen(),periodId:p38,...o})),
-      ...od.map(o=>({id:this.gen(),periodId:p39,...o})),
-    ];
-
-    // 請求書（第38期：済み / 第39期：未払い）
-    const inv38 = mb.filter(m=>m.fee>0).map(m=>({
-      id:this.gen(),periodId:p38,memberId:m.id,memberName:m.name,memberStore:m.store,
-      type:'会費',amount:m.fee,status:'済み',issuedDate:'2025-04-01',paidDate:'2025-05-31',dueDate:'2025-04-30',
-    }));
-    const inv39 = mb.filter(m=>m.fee>0).map(m=>({
-      id:this.gen(),periodId:p39,memberId:m.id,memberName:m.name,memberStore:m.store,
-      type:'会費',amount:m.fee,status:'未払い',issuedDate:'2026-04-01',paidDate:null,dueDate:'2026-04-30',
-    }));
-
-    // 第38期 入出金（令和7年度 収支決算書より）
-    const tx38 = [
-      {id:this.gen(),periodId:p38,date:'2025-04-01',description:'前期繰越金',category:'繰越金',income:2175259,expense:0},
-      {id:this.gen(),periodId:p38,date:'2025-05-31',description:'会費収入（全会員）',category:'会費収入',income:696000,expense:0},
-      {id:this.gen(),periodId:p38,date:'2025-09-30',description:'草加市補助金・盆踊り手伝い・利息等',category:'雑収入',income:126270,expense:0},
-      {id:this.gen(),periodId:p38,date:'2025-04-15',description:'草加市商店連合協同組合費',category:'諸会費',income:0,expense:15500},
-      {id:this.gen(),periodId:p38,date:'2026-02-11',description:'シンサヤママーケット視察（研修）',category:'研修事業費',income:0,expense:62273},
-      {id:this.gen(),periodId:p38,date:'2026-02-06',description:'新年会（於：与志鮨）',category:'親睦事業費',income:0,expense:72380},
-      {id:this.gen(),periodId:p38,date:'2025-06-13',description:'定期総会費（於：ざぼう）',category:'総会費',income:0,expense:44080},
-      {id:this.gen(),periodId:p38,date:'2025-07-01',description:'役員会等 会議費',category:'会議費',income:0,expense:10756},
-      {id:this.gen(),periodId:p38,date:'2025-08-01',description:'切手代等 事務費',category:'事務費',income:0,expense:5040},
-      {id:this.gen(),periodId:p38,date:'2025-07-26',description:'盆踊り・運動会祝い金等',category:'交際費',income:0,expense:44000},
-      {id:this.gen(),periodId:p38,date:'2025-04-01',description:'レンタル倉庫賃料（通年）',category:'トランクルーム倉庫費',income:0,expense:123250},
-      {id:this.gen(),periodId:p38,date:'2025-12-01',description:'証明手数料・振込手数料等',category:'雑費',income:0,expense:3655},
-      {id:this.gen(),periodId:p38,date:'2025-11-23',description:'新田村TGF2025秋（地域活性化事業）',category:'地域活性化事業費',income:0,expense:350294},
-    ];
-    const tx39 = [
-      {id:this.gen(),periodId:p39,date:'2026-04-01',description:'前期繰越金（第38期より）',category:'繰越金',income:2271301,expense:0},
-    ];
-
-    // 予算（第38期：令和7年度予算 / 第39期：令和8年度予算）
-    const bg38 = [
-      {id:this.gen(),periodId:p38,type:'収入',category:'繰越金',amount:2175259},
-      {id:this.gen(),periodId:p38,type:'収入',category:'会費収入',amount:696000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'諸会費',amount:19500},
-      {id:this.gen(),periodId:p38,type:'支出',category:'研修事業費',amount:20000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'親睦事業費',amount:50000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'会議費',amount:50000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'総会費',amount:80000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'事務費',amount:5000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'交際費',amount:40000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'慶弔費',amount:50000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'トランクルーム倉庫費',amount:123250},
-      {id:this.gen(),periodId:p38,type:'支出',category:'雑費',amount:10000},
-      {id:this.gen(),periodId:p38,type:'支出',category:'地域活性化事業費',amount:600000},
-    ];
-    const bg39 = [
-      {id:this.gen(),periodId:p39,type:'収入',category:'会費収入',amount:696000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'諸会費',amount:71500},
-      {id:this.gen(),periodId:p39,type:'支出',category:'研修事業費',amount:150000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'親睦事業費',amount:25000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'会議費',amount:20000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'総会費',amount:80000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'事務費',amount:5000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'交際費',amount:50000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'慶弔費',amount:50000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'レンタル倉庫',amount:123250},
-      {id:this.gen(),periodId:p39,type:'支出',category:'雑費',amount:10000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'地域活性化事業費',amount:700000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'info.ボード準備金',amount:452183},
-      {id:this.gen(),periodId:p39,type:'支出',category:'備品購入',amount:200000},
-      {id:this.gen(),periodId:p39,type:'支出',category:'予備費',amount:535798},
-    ];
-
-    // 事業記録（第38期：令和7年度事業報告 / 第39期：令和8年度事業計画）
-    const ev38 = [
-      {id:this.gen(),periodId:p38,name:'草加市補助金制度説明会',type:'総会・会議',date:'2025-04-15',endDate:'',participants:'中村・岩波',notes:'草加市補助金制度の説明会に出席。'},
-      {id:this.gen(),periodId:p38,name:'草加市商連総会',type:'総会・会議',date:'2025-05-22',endDate:'',participants:'横山・岩波',notes:'草加市商店連合協同組合総会に出席。'},
-      {id:this.gen(),periodId:p38,name:'第38回定期総会',type:'総会・会議',date:'2025-06-13',endDate:'',participants:'全役員',notes:'於：ざぼう。令和6年度決算・令和7年度予算承認。'},
-      {id:this.gen(),periodId:p38,name:'金明町夏祭りお手伝い',type:'お祭り・縁日',date:'2025-07-25',endDate:'2025-07-26',participants:'役員複数名',notes:'金明町夏祭りのお手伝い。'},
-      {id:this.gen(),periodId:p38,name:'新田村TGF2025秋',type:'文化・交流',date:'2025-11-23',endDate:'',participants:'一般来場者多数',notes:'計5回の実行委員会を経て開催。12/4 西口反省会（於：アンザイ）。'},
-      {id:this.gen(),periodId:p38,name:'新年会',type:'その他',date:'2026-02-06',endDate:'',participants:'役員',notes:'於：与志鮨。'},
-      {id:this.gen(),periodId:p38,name:'シンサヤママーケット視察',type:'研修事業',date:'2026-02-11',endDate:'',participants:'役員',notes:'研修事業として視察を実施。'},
-    ];
-    const ev39 = [
-      {id:this.gen(),periodId:p39,name:'SOKA新田村TGF2026春',type:'文化・交流',date:'2026-04-29',endDate:'',participants:'',notes:'於：新田幼稚園。3/30出店者説明会実施済み。'},
-      {id:this.gen(),periodId:p39,name:'草加市商連総会',type:'総会・会議',date:'2026-05-25',endDate:'',participants:'横山・岩波',notes:'草加市商連総会に出席。'},
-      {id:this.gen(),periodId:p39,name:'第39回定期総会',type:'総会・会議',date:'2026-06-19',endDate:'',participants:'',notes:'於：金寿司。'},
-      {id:this.gen(),periodId:p39,name:'金明町夏祭りお手伝い',type:'お祭り・縁日',date:'2026-07-01',endDate:'',participants:'',notes:'日程未定。'},
-      {id:this.gen(),periodId:p39,name:'研修・視察事業（第2回）',type:'研修事業',date:'2026-08-01',endDate:'',participants:'',notes:'日程・内容未定。'},
-      {id:this.gen(),periodId:p39,name:'SOKA新田村TGF2026秋',type:'文化・交流',date:'2026-11-23',endDate:'',participants:'',notes:'於：新田幼稚園。6〜11月に準備会合を開催予定。'},
-      {id:this.gen(),periodId:p39,name:'新年会',type:'その他',date:'2027-02-01',endDate:'',participants:'',notes:'会場未定。'},
-      {id:this.gen(),periodId:p39,name:'研修・視察事業（第3回）',type:'研修事業',date:'2027-02-15',endDate:'',participants:'',notes:'日程・内容未定。'},
-    ];
-
-    this.setState({
-      periods, currentPeriodId:p39,
-      officers, members,
-      invoices:[...inv38,...inv39],
-      transactions:[...tx38,...tx39],
-      budgetItems:[...bg38,...bg39],
-      events:[...ev38,...ev39],
-    }, ()=>this.persist());
-  }
-
-  nav(p) { this.setState({page:p,modal:{show:false,type:null,editId:null}}); }
-  openModal(type,editId=null,fd={}) { this.setState({modal:{show:true,type,editId},formData:{...fd}}); }
-  closeModal() { this.setState({modal:{show:false,type:null,editId:null},formData:{}}); }
-  setField(k,v) { this.setState(s=>({formData:{...s.formData,[k]:v}})); }
-  onInput(e) { this.setField(e.target.dataset.field, e.target.value); }
-
-  showToast(msg) {
-    if (this.state._tt) clearTimeout(this.state._tt);
-    const t = setTimeout(()=>this.setState({toast:null,_tt:null}),3000);
-    this.setState({toast:msg,_tt:t});
-  }
-
-  saveOfficer() {
-    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
-    const rec = {role:f.role||'理事',memberId:f.memberId||'',periodId:pid};
-    if (m.editId) this.setState(s=>({officers:s.officers.map(o=>o.id===m.editId?{...o,...rec}:o)}),()=>this.persist());
-    else this.setState(s=>({officers:[...s.officers,{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal();
-  }
-  delOfficer(id) {
-    if (!confirm('この役員を削除しますか？')) return;
-    this.setState(s=>({officers:s.officers.filter(o=>o.id!==id)}),()=>this.persist());
-  }
-
-  saveMember() {
-    const {formData:f,modal:m,members} = this.state;
-    const autoFee = f.type==='大型店正会員'?72000:24000;
-    const rec = {name:f.name||'',store:f.store||'',type:f.type||'正会員',fee:parseInt(f.fee)||autoFee,phone:f.phone||'',fax:f.fax||'',email:f.email||'',address:f.address||'',joinDate:f.joinDate||''};
-    const now = new Date().toISOString();
-    const FL = {name:'氏名',store:'店舗名',type:'種別',fee:'年会費',phone:'電話',fax:'FAX',address:'住所',email:'メール'};
-    if (m.editId) {
-      const old = members.find(mb=>mb.id===m.editId)||{};
-      const changes = Object.keys(rec).filter(k=>FL[k]&&String(old[k]||'')!==String(rec[k]||'')).map(k=>`${FL[k]}: ${old[k]||'—'}→${rec[k]||'—'}`);
-      this.setState(s=>({
-        members:s.members.map(mb=>mb.id===m.editId?{...mb,...rec}:mb),
-        ...(changes.length>0?{memberChangeLogs:[...(s.memberChangeLogs||[]),{id:this.gen(),memberId:m.editId,memberName:rec.name,timestamp:now,action:'情報変更',detail:changes.join(' / ')}]}:{}),
-      }),()=>this.persist());
-    } else {
-      const no=Math.max(0,...this.state.members.map(mb=>mb.no||0))+1;
-      const newM={id:this.gen(),no,status:'在籍',statusDate:null,statusNote:'',...rec};
-      this.setState(s=>({
-        members:[...s.members,newM],
-        memberChangeLogs:[...(s.memberChangeLogs||[]),{id:this.gen(),memberId:newM.id,memberName:rec.name,timestamp:now,action:'新規入会',detail:rec.joinDate?`入会: ${rec.joinDate}`:''}],
-      }),()=>this.persist());
-    }
-    this.closeModal();
-  }
-  recordMemberStatus(id,name) {
-    this.openModal('memberStatus',id,{memberId:id,memberName:name,statusType:'退会',statusDate:new Date().toISOString().slice(0,10),statusNote:''});
-  }
-  saveStatusChange() {
-    const {formData:f,modal:m} = this.state;
-    const now = new Date().toISOString();
-    this.setState(s=>({
-      members:s.members.map(mb=>mb.id===m.editId?{...mb,status:f.statusType,statusDate:f.statusDate,statusNote:f.statusNote||''}:mb),
-      memberChangeLogs:[...(s.memberChangeLogs||[]),{id:this.gen(),memberId:m.editId,memberName:f.memberName,timestamp:now,action:f.statusType,detail:f.statusNote||''}],
-    }),()=>this.persist());
-    this.closeModal();
-    this.showToast(f.statusType+'を記録しました');
-  }
-
-  generateInvoices() {
-    const {currentPeriodId:pid,members,invoices} = this.state;
-    const existing = new Set(invoices.filter(i=>i.periodId===pid).map(i=>i.memberId));
-    const newOnes = members.filter(m=>!existing.has(m.id)).map(m=>({
-      id:this.gen(),periodId:pid,memberId:m.id,memberName:m.name,memberStore:m.store,
-      type:'会費',amount:m.fee,status:'未払い',
-      issuedDate:new Date().toISOString().slice(0,10),paidDate:null,dueDate:'',
-    }));
-    if (!newOnes.length) { alert('全会員の請求書が既に発行済みです'); return; }
-    this.setState(s=>({invoices:[...s.invoices,...newOnes]}),()=>this.persist());
-    this.showToast(newOnes.length+'件の請求書を発行しました');
-  }
-  saveInvoice() {
-    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
-    const rec = {...f,periodId:pid,amount:parseInt(f.amount)||0,paidDate:f.status==='済み'?(f.paidDate||new Date().toISOString().slice(0,10)):null};
-    if (m.editId) this.setState(s=>({invoices:s.invoices.map(i=>i.id===m.editId?{...i,...rec}:i)}),()=>this.persist());
-    else this.setState(s=>({invoices:[...s.invoices,{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal(); this.showToast('保存しました');
-  }
-  markPaid(id) {
-    const inv = this.state.invoices.find(i=>i.id===id);
-    if (!inv) return;
-    const date = prompt('入金日を入力（例: 2026-04-15）', new Date().toISOString().slice(0,10));
-    if (!date) return;
-    const method = prompt('入金方法を入力（現金 / 振込 / 口座振替）', inv.paymentMethod||'現金');
-    const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:inv.memberStore,action:'入金登録',amount:inv.amount,detail:`${method||'—'}　入金日: ${this.fmtD(date)}`};
-    this.setState(s=>({
-      invoices:s.invoices.map(i=>i.id===id?{...i,status:'済み',paidDate:date,paymentMethod:method||''}:i),
-      invoiceLogs:[...(s.invoiceLogs||[]),log],
-    }),()=>this.persist());
-    this.showToast('入金を登録しました');
-  }
-
-  printInvoice(id) {
-    const inv = this.state.invoices.find(i=>i.id===id);
-    if (!inv) return;
-    this.setState({printDoc:{...inv,docType:'invoice'},hankoUnlocked:false,hankoPwdInput:''});
-  }
-
-  printReceipt(id) {
-    const inv = this.state.invoices.find(i=>i.id===id);
-    if (!inv) return;
-    this.setState({printDoc:{...inv,docType:'receipt'},hankoUnlocked:false,hankoPwdInput:''});
-  }
-
-  openInstallmentModal(id) {
-    const inv = this.state.invoices.find(i=>i.id===id);
-    if (!inv) return;
-    const inst = inv.installment||{};
-    this.setState({
-      installmentModal:true,
-      installmentInvoiceId:id,
-      installmentCount:inst.count||12,
-      installmentDebitDay:inst.debitDay||27,
-      installmentStartMonth:inst.startMonth||new Date().toISOString().slice(0,7),
-    });
-  }
-
-  saveInstallment() {
-    const {installmentInvoiceId:id,installmentCount:cnt,installmentDebitDay:day,installmentStartMonth:start} = this.state;
-    const inv = this.state.invoices.find(i=>i.id===id);
-    if (!inv) return;
-    const total = inv.amount||0;
-    const perAmt = Math.floor(total/cnt);
-    const lastAmt = total - perAmt*(cnt-1);
-    const payments = Array.from({length:cnt},(_,i)=>{
-      const [y,m] = start.split('-').map(Number);
-      const date = new Date(y, m-1+i, day);
-      // 月末補正
-      const maxDay = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
-      const actualDay = Math.min(day,maxDay);
-      const dueDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(actualDay).padStart(2,'0')}`;
-      const existing = (inv.installment&&inv.installment.payments&&inv.installment.payments[i])||{};
-      return {seq:i+1,dueDate,amount:i===cnt-1?lastAmt:perAmt,status:existing.status||'未払い',paidDate:existing.paidDate||null};
-    });
-    const installment = {enabled:true,count:cnt,debitDay:day,startMonth:start,payments};
-    const paidAll = payments.every(p=>p.status==='済み');
-    this.setState(s=>({
-      invoices:s.invoices.map(i=>i.id===id?{...i,installment,status:paidAll?'済み':'未払い'}:i),
-      installmentModal:false,
-    }),()=>this.persist());
-    this.showToast('分割払いを設定しました');
-  }
-
-  markInstallmentPaid(invoiceId, seq) {
-    const date = prompt('入金日を入力', new Date().toISOString().slice(0,10));
-    if (!date) return;
-    this.setState(s=>({
-      invoices:s.invoices.map(i=>{
-        if (i.id!==invoiceId||!i.installment) return i;
-        const payments = i.installment.payments.map(p=>p.seq===seq?{...p,status:'済み',paidDate:date}:p);
-        const paidAll = payments.every(p=>p.status==='済み');
-        const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:i.memberStore,action:'入金登録',amount:i.installment.payments.find(p=>p.seq===seq)?.amount||0,detail:`分割 第${seq}回　${this.fmtD(date)}`};
-        this.setState(s2=>({invoiceLogs:[...(s2.invoiceLogs||[]),log]}));
-        return {...i,installment:{...i.installment,payments},status:paidAll?'済み':'未払い',paidDate:paidAll?date:i.paidDate};
-      }),
-    }),()=>this.persist());
-    this.showToast(`第${seq}回の入金を登録しました`);
-  }
-
-  cancelInvoice(id) {
-    const inv = this.state.invoices.find(i=>i.id===id);
-    if (!inv) return;
-    if (!confirm(`「${inv.memberStore}」の請求を取消しますか？`)) return;
-    const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:inv.memberStore,action:'取消',amount:inv.amount,detail:`種別: ${inv.type}`};
-    this.setState(s=>({
-      invoices:s.invoices.map(i=>i.id===id?{...i,status:'取消'}:i),
-      invoiceLogs:[...(s.invoiceLogs||[]),log],
-    }),()=>this.persist());
-    this.showToast('請求を取消しました');
-  }
-
-  calcFiscalYear(dateStr) {
-    const d = dateStr ? new Date(dateStr) : new Date();
-    const y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear()-1; // 4月以降が新年度
-    const reiwa = y - 2018;
-    return `令和${reiwa}年度`;
-  }
-
-  openBulkModal() {
-    const today = new Date().toISOString().slice(0,10);
-    const existing = new Set(this.state.invoices.filter(i=>i.periodId===this.state.currentPeriodId).map(i=>i.memberId));
-    const allIds = this.state.members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>m.id);
-    this.setState({
-      bulkModal:true,
-      bulkIssuedDate:today,
-      bulkType:'会費',
-      bulkDescription:`${this.calcFiscalYear(today)}商店会会費として`,
-      bulkSelectedIds:allIds.filter(id=>!existing.has(id)),
-    });
-  }
-
-  generateBulkInvoices() {
-    const {currentPeriodId:pid,members,invoices,bulkSelectedIds,bulkIssuedDate,bulkType,bulkDescription} = this.state;
-    const targets = members.filter(m=>bulkSelectedIds.includes(m.id));
-    if (!targets.length) { alert('対象会員が選択されていません'); return; }
-    const newInvs = targets.map(m=>({
-      id:this.gen(),periodId:pid,memberId:m.id,memberName:m.name,memberStore:m.store,
-      type:bulkType||'会費',description:bulkDescription||'',amount:m.fee,status:'未払い',
-      issuedDate:bulkIssuedDate||new Date().toISOString().slice(0,10),
-      paidDate:null,dueDate:'',paymentMethod:'',reminderNote:'',
-    }));
-    const logs = newInvs.map(i=>({id:this.gen(),timestamp:new Date().toISOString(),memberStore:i.memberStore,action:'一括発行',amount:i.amount,detail:`${i.type} / ${i.description||'—'}`}));
-    this.setState(s=>({invoices:[...s.invoices,...newInvs],invoiceLogs:[...(s.invoiceLogs||[]),...logs],bulkModal:false}),()=>this.persist());
-    this.showToast(`${newInvs.length}件の請求書を発行しました`);
-  }
-
-  saveTx() {
-    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
-    const amt = parseFloat(f.amount)||0;
-    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
-    if (m.editId) this.setState(s=>({transactions:s.transactions.map(t=>t.id===m.editId?{...t,...rec}:t)}),()=>this.persist());
-    else this.setState(s=>({transactions:[...s.transactions,{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal();
-  }
-  delTx(id) {
-    if (!confirm('この取引を削除しますか？')) return;
-    this.setState(s=>({transactions:s.transactions.filter(t=>t.id!==id)}),()=>this.persist());
-  }
-
-  saveTransfer() {
-    const {transferDate:d,transferAmount:a,transferFrom:fr,transferTo:to,transferDesc:desc,currentPeriodId:pid} = this.state;
-    const amt = parseFloat(a)||0;
-    if (!amt) { alert('金額を入力してください'); return; }
-    const gid = this.gen();
-    const t1 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:0,expense:amt,accountType:fr,groupId:gid,groupType:'振替'};
-    const t2 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:amt,expense:0,accountType:to,groupId:gid,groupType:'振替'};
-    this.setState(s=>({transactions:[...s.transactions,t1,t2],transferModal:false}),()=>this.persist());
-    this.showToast(`振替を記録しました（${this.fmt(amt)}）`);
-  }
-
-  saveComposite() {
-    const {compositeDate:d,compositeGroupName:gn,compositeLines:lines,currentPeriodId:pid} = this.state;
-    const valid = lines.filter(l=>parseFloat(l.amount)>0);
-    if (!valid.length) { alert('明細を1件以上入力してください'); return; }
-    const gid = this.gen();
-    const txs = valid.map(l=>({
-      id:this.gen(),periodId:pid,date:d,
-      description:`【複合】${gn||'複合処理'}${l.description?'_'+l.description:''}`,
-      category:l.category||'',income:l.txType==='収入'?parseFloat(l.amount)||0:0,
-      expense:l.txType==='支出'?parseFloat(l.amount)||0:0,
-      accountType:l.accountType||'口座',groupId:gid,groupType:'複合',
-    }));
-    this.setState(s=>({transactions:[...s.transactions,...txs],compositeModal:false,compositeLines:[]}),()=>this.persist());
-    this.showToast(`${txs.length}件の複合処理を記録しました`);
-  }
-
-  addCompositeLine() {
-    const line = {id:this.gen(),txType:'収入',category:'',description:'',amount:0,accountType:'口座'};
-    this.setState(s=>({compositeLines:[...s.compositeLines,line]}));
-  }
-
-  updateCompositeLine(id,field,value) {
-    this.setState(s=>({compositeLines:s.compositeLines.map(l=>l.id===id?{...l,[field]:value}:l)}));
-  }
-
-  delCompositeLine(id) {
-    this.setState(s=>({compositeLines:s.compositeLines.filter(l=>l.id!==id)}));
-  }
-
-  openBudgetDraft() {
-    const {currentPeriodId,budgetItems,transactions,periods} = this.state;
-    const cp = periods.find(p=>p.id===currentPeriodId)||{};
-    // Find or create next period
-    const nextPeriod = periods.find(p=>p.id!==currentPeriodId&&p.startDate>cp.startDate)||null;
-    const targetPeriodId = nextPeriod?nextPeriod.id:null;
-    const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
-    const pTx = transactions.filter(t=>t.periodId===currentPeriodId);
-    const calcActual = (cat,type)=>pTx.reduce((s,t)=>s+(t.category===cat?(type==='収入'?t.income:t.expense)||0:0),0);
-    // Load existing draft or build from current period
-    const existing = this.state.budgetDraft;
-    const existingItems = (existing&&existing.targetPeriodId===targetPeriodId)?existing.items:null;
-    const items = existingItems || pBudget.map(b=>({
-      id:this.gen(), category:b.category, type:b.type,
-      currentBudget:b.amount, currentActual:calcActual(b.category,b.type),
-      nextAmount:b.amount, remark:'',
-    }));
-    this.setState({budgetDraftModal:true, budgetDraft:{targetPeriodId, items, savedAt:existing?.savedAt||null}});
-  }
-
-  updateDraftItem(id, field, value) {
-    this.setState(s=>{
-      const draft = s.budgetDraft;
-      if (!draft) return {};
-      const items = draft.items.map(item=>item.id===id?{...item,[field]:value}:item);
-      return {budgetDraft:{...draft,items,savedAt:new Date().toISOString()}};
-    },()=>this.persist());
-  }
-
-  addDraftItem(type) {
-    const cat = prompt(`新しい科目名を入力（${type}）`,'');
-    if (!cat) return;
-    const item = {id:this.gen(),category:cat,type,currentBudget:0,currentActual:0,nextAmount:0,remark:''};
-    this.setState(s=>{
-      const draft = s.budgetDraft;
-      if (!draft) return {};
-      return {budgetDraft:{...draft,items:[...draft.items,item],savedAt:new Date().toISOString()}};
-    },()=>this.persist());
-  }
-
-  delDraftItem(id) {
-    this.setState(s=>{
-      const draft = s.budgetDraft;
-      if (!draft) return {};
-      return {budgetDraft:{...draft,items:draft.items.filter(i=>i.id!==id)}};
-    },()=>this.persist());
-  }
-
-  confirmBudgetDraft() {
-    const {budgetDraft,periods,currentPeriodId} = this.state;
-    if (!budgetDraft) return;
-    const {targetPeriodId,items} = budgetDraft;
-    if (!targetPeriodId) {
-      alert('翌期が設定されていません。先に設定ページで翌期を追加してください。');
-      return;
-    }
-    if (!confirm(`翌期（${periods.find(p=>p.id===targetPeriodId)?.name||'翌期'}）の予算として確定しますか？\n既存の予算は上書きされます。`)) return;
-    const newItems = items.map(item=>({
-      id:this.gen(), periodId:targetPeriodId, type:item.type,
-      category:item.category, amount:parseInt(item.nextAmount)||0, remark:item.remark||'',
-    }));
-    this.setState(s=>({
-      budgetItems:[...s.budgetItems.filter(b=>b.periodId!==targetPeriodId),...newItems],
-      budgetDraftModal:false,
-    }),()=>this.persist());
-    this.showToast('翌年度予算を確定しました');
-  }
-
-  saveBudget() {
-    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
-    const rec = {type:f.type||'収入',category:f.category||'',amount:parseInt(f.amount)||0,periodId:pid};
-    if (m.editId) this.setState(s=>({budgetItems:s.budgetItems.map(b=>b.id===m.editId?{...b,...rec}:b)}),()=>this.persist());
-    else this.setState(s=>({budgetItems:[...s.budgetItems,{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal();
-  }
-  delBudget(id) {
-    if (!confirm('この科目を削除しますか？')) return;
-    this.setState(s=>({budgetItems:s.budgetItems.filter(b=>b.id!==id)}),()=>this.persist());
-  }
-
-  saveEvent() {
-    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
-    const rec = {...f,periodId:pid};
-    if (m.editId) this.setState(s=>({events:s.events.map(e=>e.id===m.editId?{...e,...rec}:e)}),()=>this.persist());
-    else this.setState(s=>({events:[...s.events,{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal();
-  }
-  delEvent(id) {
-    if (!confirm('この事業記録を削除しますか？')) return;
-    this.setState(s=>({events:s.events.filter(e=>e.id!==id)}),()=>this.persist());
-  }
-
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
-    this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
-    }),()=>this.persist());
-    this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
-  }
-
-  renderVals() {
-    const {page,periods,currentPeriodId,officers,members,invoices,transactions,budgetItems,events,modal,formData,toast} = this.state;
-    const cp = periods.find(p=>p.id===currentPeriodId)||{name:'—',startDate:'',endDate:''};
-
-    const pOfficers = officers.filter(o=>o.periodId===currentPeriodId);
-    const pInvoices = invoices.filter(i=>i.periodId===currentPeriodId);
-    const pTx = transactions.filter(t=>t.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
-    const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
-    const pEvents = events.filter(e=>e.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
-
-    const totalIncome = pTx.reduce((s,t)=>s+(t.income||0),0);
-    const totalExpense = pTx.reduce((s,t)=>s+(t.expense||0),0);
-    const unpaidCount = pInvoices.filter(i=>i.status==='未払い').length;
-    const today = new Date().toISOString().slice(0,10);
-
-    // Badge helper
-    const bBase = {padding:'2px 9px',borderRadius:'20px',fontSize:'11px',fontFamily:'-apple-system,sans-serif',whiteSpace:'nowrap',display:'inline-block',fontWeight:'500'};
-    const rolePalette = {'会長':['#fff3cd','#9c6b00'],'副会長':['#dbeafe','#1d4ed8'],'会計':['#dcfce7','#166534'],'書記':['#f3e8ff','#7e22ce'],'監査':['#ffedd5','#c2410c'],'理事':['#f1f5f9','#475569']};
-    const etPalette = {'お祭り・縁日':['#fef9c3','#854d0e'],'総会・会議':['#dbeafe','#1d4ed8'],'研修事業':['#dcfce7','#166534'],'文化・交流':['#f3e8ff','#7e22ce'],'その他':['#f1f5f9','#475569']};
-    const badge = (p) => p ? {...bBase,background:p[0],color:p[1]} : {...bBase,background:'#f1f5f9',color:'#555'};
-
-    // Ledger: year/month/account filters
-    const txFilter = this.state.txFilter||'全て';
-    const txMonth = this.state.txMonth||'全月';
-
-    // Determine display year (fiscal year = 4月start). Default to current period's year
-    const periodStartYear = cp.startDate?parseInt(cp.startDate.slice(0,4)):new Date().getFullYear();
-    const txYear = this.state.txYear||periodStartYear;
-
-    // Year navigation
-    const REIWA_BASE = 2018;
-    // Period tabs: 前期・当期・翌期
-    const prevPeriodYear = periodStartYear - 1;
-    const nextPeriodYear = periodStartYear + 1;
-    const periodTabData = [
-      {label:'前期', year:prevPeriodYear},
-      {label:'当期', year:periodStartYear},
-      {label:'翌期', year:nextPeriodYear},
-    ];
-    const txPeriodTabs = periodTabData.map(tab=>({
-      ...tab,
-      onClick:()=>this.setState({txYear:tab.year,txMonth:'全月'}),
-      style:{border:'none',padding:'6px 18px',borderRadius:'20px',fontSize:'12px',fontWeight:'600',cursor:'pointer',
-        background:txYear===tab.year?'#1d1d1f':'rgba(0,0,0,0.05)',
-        color:txYear===tab.year?'#fff':'#1d1d1f'},
-    }));
-    const txYearLabel = `${txYear}年度`;
-    const onTxPrevYear = ()=>this.setState({txYear:txYear-1,txMonth:'全月'});
-    const onTxNextYear = ()=>this.setState({txYear:txYear+1,txMonth:'全月'});
-
-    // Month tabs (4月〜3月)
-    const MONTHS = ['全月','4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
-    const btnTabStyle = (active)=>({border:'none',padding:'5px 11px',borderRadius:'16px',fontSize:'11px',fontWeight:'500',cursor:'pointer',background:active?'#1d1d1f':'rgba(0,0,0,0.04)',color:active?'#fff':'#6e6e73'});
-    const txMonthTabs = MONTHS.map(m=>({
-      label:m, onClick:()=>this.setState({txMonth:m}),
-      style:btnTabStyle(txMonth===m),
-    }));
-
-    // Filter pTx by year (fiscal), month, account
-    const monthToNum = {'4月':4,'5月':5,'6月':6,'7月':7,'8月':8,'9月':9,'10月':10,'11月':11,'12月':12,'1月':1,'2月':2,'3月':3};
-    const yearFiltered = pTx.filter(t=>{
-      if (!t.date) return false;
-      const d = new Date(t.date);
-      const y = d.getMonth()>=3 ? d.getFullYear() : d.getFullYear()-1;
-      return y===txYear;
-    });
-    const monthFiltered = txMonth==='全月'?yearFiltered:yearFiltered.filter(t=>{
-      const mn = monthToNum[txMonth];
-      return t.date && parseInt(t.date.slice(5,7))===mn;
-    });
-    const filteredTx = txFilter==='全て'?monthFiltered:monthFiltered.filter(t=>(t.accountType||'口座')===txFilter);
-
-    // Account filter
-    const TX_FILTERS = ['全て','口座','現金'];
-    const txFilters = TX_FILTERS.map(f=>({
-      label:f, onClick:()=>this.setState({txFilter:f}),
-      style:{border:'none',padding:'6px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:'500',cursor:'pointer',
-        background:txFilter===f?'#1d1d1f':'rgba(0,0,0,0.05)',
-        color:txFilter===f?'#fff':'#1d1d1f'},
-    }));
-
-    // KPI always from full period
-    let bal=0;
-    pTx.forEach(t=>{bal+=(t.income||0)-(t.expense||0);});
-    const cashBal = pTx.filter(t=>(t.accountType||'口座')==='現金').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
-    const bankBal = pTx.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
-
-    // Running balance for filtered view
-    let filtBal=0;
-    const txSortedFiltered = [...filteredTx].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{filtBal+=(t.income||0)-(t.expense||0);return{...t,_fbal:filtBal};});
-    const bBase3={padding:'1px 6px',borderRadius:'8px',fontSize:'10px',fontWeight:'500',display:'inline-block'};
-    const txRows = [...txSortedFiltered].reverse().map(t=>({
-      ...t,
-      dateStr:this.fmtD(t.date),
-      incStr:t.income>0?this.fmt(t.income):'—',
-      expStr:t.expense>0?this.fmt(t.expense):'—',
-      balStr:this.fmt(t._fbal),
-      accountType:t.accountType||'口座',
-      accountBadge:{...bBase3,background:(t.accountType||'口座')==='現金'?'#fff3cd':'#dbeafe',color:(t.accountType||'口座')==='現金'?'#856404':'#1d4ed8'},
-      incStyle:{width:'88px',textAlign:'right',fontSize:'12px',fontWeight:t.income>0?'600':'400',color:t.income>0?'#34c759':'#aeaeb2'},
-      expStyle:{width:'88px',textAlign:'right',fontSize:'12px',fontWeight:t.expense>0?'600':'400',color:t.expense>0?'#ff3b30':'#aeaeb2'},
-      isTransfer:t.groupType==='振替',
-      isComposite:t.groupType==='複合',
-      onEdit:()=>this.openModal('transaction',t.id,{...t,txType:t.income>0?'収入':'支出',amount:t.income||t.expense,accountType:t.accountType||'口座'}),
-      onDel:()=>this.delTx(t.id),
-    }));
-
-    // Budget category options split by type
-    const budgetCategoryOptions = pBudget.map(b=>({value:b.category,label:`[${b.type}] ${b.category}`}));
-    const budgetIncomeCats = pBudget.filter(b=>b.type==='収入').map(b=>({value:b.category,label:b.category}));
-    const budgetExpenseCats = pBudget.filter(b=>b.type==='支出').map(b=>({value:b.category,label:b.category}));
-    const txTypeIsIncome = (formData.txType||'収入')==='収入';
-    const txTypeIsExpense = (formData.txType||'収入')==='支出';
-
-    // Budget rows
-    const calcActual = (cat,type) => pTx.reduce((s,t)=>s+(t.category===cat?(type==='収入'?t.income:t.expense)||0:0),0);
-    const mkBRow = b => {
-      const actual=calcActual(b.category,b.type);
-      const pct=b.amount>0?Math.min(Math.round(actual/b.amount*100),999):0;
-      const diff=actual-b.amount;
-      const isGood=b.type==='収入'?diff>=0:diff<=0;
-      return {
-        ...b,
-        budgetStr:this.fmt(b.amount), actualStr:this.fmt(actual),
-        diffStr2:(diff>=0?'+':'-')+this.fmt(Math.abs(diff)),
-        diffStyle:{width:'80px',textAlign:'right',fontSize:'12px',fontWeight:'600',color:isGood?'#34c759':'#ff3b30'},
-        barStyle:{background:isGood?'#34c759':'#ff3b30',width:Math.min(pct,100)+'%',height:'100%',borderRadius:'3px'},
-        pctStr:pct+'%',
-        onEdit:()=>this.openModal('budget',b.id,{...b}),
-        onDel:()=>this.delBudget(b.id),
-      };
-    };
-    const incomeBudget=pBudget.filter(b=>b.type==='収入').map(mkBRow);
-    const expenseBudget=pBudget.filter(b=>b.type==='支出').map(mkBRow);
-
-    // Officer rows — look up member data by memberId
-    const officerRows = pOfficers.map(o=>{
-      const mb = members.find(m=>m.id===o.memberId)||{};
-      return {
-        ...o,
-        name: mb.name || o.name || '（未設定）',
-        store: mb.store || o.store || '',
-        phone: mb.phone || o.phone || '',
-        badgeStyle: badge(rolePalette[o.role]),
-        onEdit: ()=>this.openModal('officer',o.id,{role:o.role,memberId:o.memberId||''}),
-        onDel: ()=>this.delOfficer(o.id),
-      };
-    });
-
-    // Member rows
-    // Member rows with pagination & new fields
-    const PAGE_SIZE = 10;
-    const memberPage = this.state.memberPage||0;
-    const bsStatus = {
-      '在籍':{...bBase,background:'#dcfce7',color:'#166534'},
-      '退会':{...bBase,background:'#fee2e2',color:'#991b1b'},
-      '訂正その他':{...bBase,background:'#fff3cd',color:'#92400e'},
-    };
-    const otherMemberRows = members.filter(m=>m.type==='その他').map(m=>({
-      ...m,
-      onEdit:()=>this.openModal('member',m.id,{type:m.type||'その他',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
-      onDel:()=>{ if(!confirm(`「${m.name}」を削除しますか？`)) return; this.setState(s=>({members:s.members.filter(mb=>mb.id!==m.id)}),()=>this.persist()); this.showToast('削除しました'); },
-    }));
-    const allMemberRows = members.filter(m=>m.type!=='その他').map(m=>({
-      ...m, feeStr:this.fmt(m.fee),
-      faxStr:m.fax?`FAX: ${m.fax}`:'',
-      address:m.address||'',
-      typeBadge:badge(m.type==='大型店正会員'?['#ede9fe','#4c1d95']:['#dbeafe','#1d4ed8']),
-      statusLabel:m.status||'在籍',
-      statusBadge:bsStatus[m.status||'在籍']||bsStatus['在籍'],
-      rowBg:m.status==='退会'?'background:rgba(0,0,0,0.015);':'',
-      onEdit:()=>this.openModal('member',m.id,{type:m.type||'正会員',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
-      onStatus:()=>this.recordMemberStatus(m.id,m.name),
-    }));
-    const totalMemberPages = Math.max(1,Math.ceil(allMemberRows.length/PAGE_SIZE));
-    const memberRows = allMemberRows.slice(memberPage*PAGE_SIZE,(memberPage+1)*PAGE_SIZE);
-    const btnPage = {padding:'6px 14px',borderRadius:'7px',fontSize:'12px',fontWeight:'500',border:'1px solid rgba(0,0,0,0.1)'};
-    const clStyle = {
-      '新規入会':{...bBase,background:'#dcfce7',color:'#166534'},
-      '情報変更':{...bBase,background:'#dbeafe',color:'#1d4ed8'},
-      '退会':{...bBase,background:'#fee2e2',color:'#991b1b'},
-      '訂正その他':{...bBase,background:'#fff3cd',color:'#92400e'},
-    };
-    const memberChangeLogs = [...(this.state.memberChangeLogs||[])].reverse().slice(0,30).map(log=>({
-      ...log,
-      timeStr:log.timestamp?(this.fmtD(log.timestamp.slice(0,10))+' '+log.timestamp.slice(11,16)):'',
-      actionBadge:clStyle[log.action]||{...bBase,background:'#f1f5f9',color:'#475569'},
-      onDel:()=>this.setState(s=>({memberChangeLogs:(s.memberChangeLogs||[]).filter(l=>l.id!==log.id)}),()=>this.persist()),
-    }));
-
-    // Invoice rows with filter
-    const invoiceFilter = this.state.invoiceFilter||'全て';
-    const FILTERS = ['全て','未払い','済み'];
-    const invoiceFilters = FILTERS.map(f=>({
-      label:f+(f==='未払い'?` (${unpaidCount})`:''),
-      onClick:()=>this.setState({invoiceFilter:f}),
-      style:{border:'none',padding:'6px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:'500',cursor:'pointer',
-        background:invoiceFilter===f?'#1d1d1f':'rgba(0,0,0,0.05)',
-        color:invoiceFilter===f?'#fff':'#1d1d1f'},
-    }));
-    const filteredInvoices = invoiceFilter==='全て'?pInvoices:pInvoices.filter(i=>i.status===invoiceFilter);
-    const btnPay = {border:'none',background:'rgba(52,199,89,0.12)',color:'#34c759',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'};
-    const btnPayDone = {border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'default'};
-    const invoiceRows = filteredInvoices.map((i,idx)=>({
-      ...i,
-      amountStr:this.fmt(i.amount),
-      issuedStr:this.fmtD(i.issuedDate),
-      paidStr:this.fmtD(i.paidDate),
-      paymentMethodStr:i.paymentMethod||'—',
-      statusBadge:badge(i.status==='済み'?['#dcfce7','#166534']:['#fee2e2','#b91c1c']),
-      rowBg:i.status==='未払い'?'background:#fffafa;':'',
-      markPaidStyle:i.status==='未払い'?btnPay:btnPayDone,
-      onMarkPaid:i.status==='未払い'?()=>this.markPaid(i.id):()=>{},
-      onEdit:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
-      onPrintInvoice:()=>this.printInvoice(i.id),
-      onPrintReceipt:i.status==='済み'?()=>this.printReceipt(i.id):()=>{},
-      receiptStyle:i.status==='済み'?{border:'none',background:'rgba(52,199,89,0.08)',color:'#34c759',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'},
-      cancelStyle:i.status==='取消'?{border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'}:{border:'none',background:'rgba(255,59,48,0.08)',color:'#ff3b30',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'},
-      onCancel:i.status!=='取消'?()=>this.cancelInvoice(i.id):()=>{},
-      onInstallment:()=>this.openInstallmentModal(i.id),
-      hasReminder:!!(i.reminderNote),
-      noReminder:!(i.reminderNote),
-      onReminder:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
-    }));
-
-    // Event rows
-    const periodEnd = cp.endDate||'9999-12-31';
-    const evtCardBg = {'お祭り・縁日':{background:'#fefce8',borderLeft:'3px solid #facc15'},'総会・会議':{background:'#eff6ff',borderLeft:'3px solid #60a5fa'},'研修事業':{background:'#f0fdf4',borderLeft:'3px solid #4ade80'},'文化・交流':{background:'#faf5ff',borderLeft:'3px solid #c084fc'}};
-    const eventRows = pEvents.map(e=>({
-      ...e, typeBadge:badge(etPalette[e.type]),
-      dateStr:this.fmtD(e.date)+(e.endDate?'〜'+this.fmtD(e.endDate):''),
-      isScheduled: e.date >= today,
-      isBeyondPeriod: e.date > periodEnd,
-      cardStyle:{...(evtCardBg[e.type]||{background:'#f9fafb',borderLeft:'3px solid #d1d5db'}),padding:'10px 13px',borderRadius:'8px',marginBottom:'10px'},
-      onEdit:()=>this.openModal('event',e.id,{...e}),
-      onDel:()=>this.delEvent(e.id),
-    }));
-
-    // Nav
-    const NAV=[
-      {id:'dashboard',label:'ダッシュボード'},{id:'officers',label:'役員名簿'},
-      {id:'members',label:'会員管理'},{id:'invoices',label:'請求書管理'},
-      {id:'ledger',label:'入出金管理'},{id:'budget',label:'予算管理'},
-      {id:'statements',label:'決算書'},{id:'events',label:'事業記録'},
-      {id:'assembly',label:'総会資料'},{id:'settings',label:'設定'},
-    ];
-    const navItems = NAV.map(n=>({
-      ...n, onClick:()=>this.nav(n.id),
-      navStyle: n.id===page
-        ? {display:'block',padding:'7px 12px',fontSize:'13px',fontWeight:'500',color:'#0071e3',background:'rgba(0,113,227,0.08)',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'}
-        : {display:'block',padding:'7px 12px',fontSize:'13px',color:'#1d1d1f',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'},
-    }));
-
-    // Dashboard recent
-    const recentTx = [...pTx].reverse().slice(0,5).map(t=>({
-      ...t, dateStr:this.fmtD(t.date),
-      amtStr:t.income>0?'+'+this.fmt(t.income):'−'+this.fmt(t.expense),
-      amtStyle:{width:'72px',textAlign:'right',fontSize:'12px',fontWeight:'600',color:t.income>0?'#34c759':'#ff3b30'},
-    }));
-    const upcomingEvts = pEvents.filter(e=>e.date>=today).slice(0,4).map(e=>({
-      ...e, dateStr:this.fmtD(e.date),
-      cardStyle:{...(evtCardBg[e.type]||{background:'#f9fafb',borderLeft:'3px solid #d1d5db'}),padding:'10px 13px',borderRadius:'8px',marginBottom:'10px'},
-    }));
-
-    // Financial statement
-    const incMap={},expMap={};
-    pTx.forEach(t=>{
-      if(t.income>0) incMap[t.category]=(incMap[t.category]||0)+t.income;
-      if(t.expense>0) expMap[t.category]=(expMap[t.category]||0)+t.expense;
-    });
-    const stmtIncomeRows=Object.entries(incMap).map(([cat,amt])=>({cat,amtStr:this.fmt(amt)}));
-    const stmtExpenseRows=Object.entries(expMap).map(([cat,amt])=>({cat,amtStr:this.fmt(amt)}));
-
-    // Period options
-    const periodOptions = periods.map(p=>({...p}));
-    const periodRows = periods.map(p=>({
-      ...p,
-      startStr:this.fmtD(p.startDate), endStr:this.fmtD(p.endDate),
-      activeLabel:p.id===currentPeriodId?'現在の期':'',
-      activeBadge:p.id===currentPeriodId?{...bBase,background:'#dcfce7',color:'#166534'}:{...bBase,background:'transparent',color:'transparent'},
-      onSelect:()=>this.setState({currentPeriodId:p.id}),
-    }));
-
-    // Modal
-    const TITLES={officer:modal.editId?'役員を編集':'役員を追加',member:modal.editId?'会員情報を編集':'新規会員登録',memberStatus:'退会・訂正の記録',invoice:modal.editId?'請求書を編集':'請求書を追加',transaction:modal.editId?'取引を編集':'取引を追加',budget:modal.editId?'予算科目を編集':'予算科目を追加',event:modal.editId?'事業を編集':'事業を追加',period:'新しい期を追加'};
-    const SAVES={officer:()=>this.saveOfficer(),member:()=>this.saveMember(),memberStatus:()=>this.saveStatusChange(),invoice:()=>this.saveInvoice(),transaction:()=>this.saveTx(),budget:()=>this.saveBudget(),event:()=>this.saveEvent(),period:()=>this.savePeriod()};
-
-    return {
-      p:{dashboard:page==='dashboard',officers:page==='officers',members:page==='members',invoices:page==='invoices',ledger:page==='ledger',budget:page==='budget',statements:page==='statements',events:page==='events',assembly:page==='assembly',settings:page==='settings',printInvoice:!!(this.state.printDoc)},
-      navItems, periodOptions, currentPeriodId,
-      onChangePeriod:(e)=>this.setState({currentPeriodId:e.target.value}),
-      currentPeriodName:cp.name,
-      periodName:cp.name, periodStart:this.fmtD(cp.startDate), periodEnd:this.fmtD(cp.endDate),
-      prevPeriodName:cp.name,
-      kpi:{income:this.fmt(totalIncome),expense:this.fmt(totalExpense),balance:this.fmt(totalIncome-totalExpense),unpaid:unpaidCount+'社'},
-      recentTx, upcomingEvts,
-      officerRows,
-      memberOptions: members.map(m=>({id:m.id, label:`${m.name}（${m.store}）`})),
-      onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:''}),
-      onPrint:()=>window.print(),
-      memberRows,
-      memberCount:members.filter(m=>m.type!=='その他').length,
-      activeMemberCount:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).length,
-      memberPageInfo:`全${allMemberRows.length}件中 ${memberPage*PAGE_SIZE+1}〜${Math.min((memberPage+1)*PAGE_SIZE,allMemberRows.length)}件`,
-      onMemberPrev:memberPage>0?()=>this.setState({memberPage:memberPage-1}):()=>{},
-      onMemberNext:memberPage<totalMemberPages-1?()=>this.setState({memberPage:memberPage+1}):()=>{},
-      memberPrevStyle:{...btnPage,background:memberPage>0?'#fff':'#f9f9f9',color:memberPage>0?'#1d1d1f':'#aeaeb2',cursor:memberPage>0?'pointer':'not-allowed'},
-      memberNextStyle:{...btnPage,background:memberPage<totalMemberPages-1?'#fff':'#f9f9f9',color:memberPage<totalMemberPages-1?'#1d1d1f':'#aeaeb2',cursor:memberPage<totalMemberPages-1?'pointer':'not-allowed'},
-      otherMemberRows,
-      memberChangeLogs, hasNoChangeLogs:memberChangeLogs.length===0,
-      onMemberTypeChange:(e)=>{this.setField('type',e.target.value);this.setField('fee',e.target.value==='大型店正会員'?72000:e.target.value==='その他'?0:24000);},
-      onAddMember:()=>this.openModal('member',null,{type:'正会員',fee:24000,name:'',store:'',phone:'',fax:'',email:'',address:'',joinDate:''}),
-      invoiceRows, invoiceFilters,
-      paidCount:pInvoices.filter(i=>i.status==='済み').length,
-      unpaidCount,
-      totalInvoiceAmt:this.fmt(pInvoices.reduce((s,i)=>s+i.amount,0)),
-      onGenerateInvoices:()=>this.generateInvoices(),
-      onOpenBulk:()=>this.openBulkModal(),
-      onAddInvoice:()=>this.openModal('invoice',null,{type:'会費',status:'未払い',issuedDate:new Date().toISOString().slice(0,10),paidDate:'',amount:0,memberStore:'',memberName:'',memberId:'',paymentMethod:'',reminderNote:''}),
-      onInvoiceMemberSelect:(e)=>{
-        const mb = members.find(m=>m.id===e.target.value);
-        if (mb) {
-          const autoFill = confirm(`${mb.store} の年会費 ${this.fmt(mb.fee)} を自動入力しますか？\n（キャンセルで金額は手入力できます）`);
-          this.setState(s=>({formData:{...s.formData,memberId:mb.id,memberStore:mb.store,memberName:mb.name,...(autoFill?{amount:mb.fee}:{})}}));
-        } else {
-          this.setState(s=>({formData:{...s.formData,memberId:''}}));
-        }
-      },
-      // Invoice logs
-      invoiceLogRows:[...(this.state.invoiceLogs||[])].reverse().slice(0,50).map(log=>({
-        ...log,
-        timeStr:log.timestamp?(this.fmtD(log.timestamp.slice(0,10))+' '+log.timestamp.slice(11,16)):'',
-        amountStr:this.fmt(log.amount||0),
-        actionBadge:{padding:'2px 8px',borderRadius:'20px',fontSize:'10px',fontWeight:'500',display:'inline-block',whiteSpace:'nowrap',
-          background:({'一括発行':'#dbeafe','発行':'#dbeafe','入金登録':'#dcfce7','取消':'#fee2e2'})[log.action]||'#f1f5f9',
-          color:({'一括発行':'#1d4ed8','発行':'#1d4ed8','入金登録':'#166534','取消':'#991b1b'})[log.action]||'#475569'},
-        onDel:()=>this.setState(s=>({invoiceLogs:(s.invoiceLogs||[]).filter(l=>l.id!==log.id)}),()=>this.persist()),
-      })),
-      hasNoInvoiceLogs:!(this.state.invoiceLogs&&this.state.invoiceLogs.length),
-      // Bulk modal
-      showBulkModal:this.state.bulkModal||false,
-      onCloseBulk:()=>this.setState({bulkModal:false}),
-      bulkIssuedDate:this.state.bulkIssuedDate||new Date().toISOString().slice(0,10),
-      bulkType:this.state.bulkType||'会費',
-      bulkDescription:this.state.bulkDescription||'',
-      onBulkDateChange:(e)=>{
-        const d = e.target.value;
-        this.setState(s=>({bulkIssuedDate:d,bulkDescription:`${this.calcFiscalYear(d)}商店会会費として`}));
-      },
-      onBulkTypeChange:(e)=>this.setState({bulkType:e.target.value}),
-      onBulkDescChange:(e)=>this.setState({bulkDescription:e.target.value}),
-      onBulkSelectAll:()=>{
-        const existing = new Set(invoices.filter(i=>i.periodId===currentPeriodId).map(i=>i.memberId));
-        this.setState({bulkSelectedIds:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>m.id)});
-      },
-      onBulkClearAll:()=>this.setState({bulkSelectedIds:[]}),
-      onBulkGenerate:()=>this.generateBulkInvoices(),
-      bulkSelectedCount:(this.state.bulkSelectedIds||[]).length,
-      bulkMemberList:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>{
-        const sel=(this.state.bulkSelectedIds||[]).includes(m.id);
-        const hasInv=pInvoices.some(i=>i.memberId===m.id&&i.status!=='取消');
-        return {
-          ...m,feeStr:this.fmt(m.fee),
-          rowStyle:sel?'background:#eff6ff;':'',
-          checkStyle:{width:'18px',height:'18px',borderRadius:'5px',border:sel?'none':'1.5px solid #d1d5db',background:sel?'#0071e3':'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0},
-          checkMark:sel?'✓':'',
-          existsLabel:hasInv?'発行済':'',
-          existsBadge:hasInv?{fontSize:'10px',color:'#6e6e73',background:'#f1f5f9',padding:'1px 6px',borderRadius:'8px'}:{display:'none'},
-          onToggle:()=>{
-            const ids=this.state.bulkSelectedIds||[];
-            this.setState({bulkSelectedIds:ids.includes(m.id)?ids.filter(id=>id!==m.id):[...ids,m.id]});
-          },
-        };
-      }),
-      // Installment modal
-      showInstallmentModal:this.state.installmentModal||false,
-      onCloseInstallment:()=>this.setState({installmentModal:false}),
-      onSaveInstallment:()=>this.saveInstallment(),
-      onInstallmentCountChange:(e)=>this.setState({installmentCount:parseInt(e.target.value)||12}),
-      onInstallmentDebitDayChange:(e)=>this.setState({installmentDebitDay:parseInt(e.target.value)||27}),
-      onInstallmentStartChange:(e)=>this.setState({installmentStartMonth:e.target.value}),
-      installmentCount:String(this.state.installmentCount||12),
-      installmentDebitDay:String(this.state.installmentDebitDay||27),
-      installmentStartMonth:this.state.installmentStartMonth||new Date().toISOString().slice(0,7),
-      ...(() => {
-        const invId = this.state.installmentInvoiceId;
-        const inv = invId ? (this.state.invoices||[]).find(i=>i.id===invId) : null;
-        if (!inv) return {installmentInvoiceStore:'',installmentTotalStr:'',installmentPerStr:'',installmentPaidCount:0,installmentRemainingStr:'',installmentSchedule:[]};
-        const cnt = this.state.installmentCount||12;
-        const day = this.state.installmentDebitDay||27;
-        const start = this.state.installmentStartMonth||new Date().toISOString().slice(0,7);
-        const total = inv.amount||0;
-        const perAmt = Math.floor(total/cnt);
-        const lastAmt = total - perAmt*(cnt-1);
-        const existPmts = (inv.installment&&inv.installment.payments)||[];
-        const bBase2 = {padding:'2px 7px',borderRadius:'20px',fontSize:'10px',fontWeight:'500',display:'inline-block'};
-        const schedule = Array.from({length:cnt},(_,i)=>{
-          const [y,m] = start.split('-').map(Number);
-          const date = new Date(y,m-1+i,1);
-          const maxDay = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
-          const actualDay = Math.min(day,maxDay);
-          const dueDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(actualDay).padStart(2,'0')}`;
-          const existing = existPmts.find(p=>p.seq===i+1)||{};
-          const amt = i===cnt-1?lastAmt:perAmt;
-          const status = existing.status||'未払い';
-          return {
-            seq:i+1,
-            dueDateStr:this.fmtD(dueDate),
-            amountStr:this.fmt(amt),
-            status,
-            statusBadge:{...bBase2,background:status==='済み'?'#dcfce7':'#fee2e2',color:status==='済み'?'#166534':'#991b1b'},
-            markPaidStyle:status==='未払い'?{border:'none',background:'rgba(52,199,89,0.12)',color:'#34c759',padding:'3px 8px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 8px',borderRadius:'5px',fontSize:'10px',cursor:'default'},
-            onMarkPaid:status==='未払い'?()=>this.markInstallmentPaid(invId,i+1):()=>{},
-          };
-        });
-        const paidCount = schedule.filter(s=>s.status==='済み').length;
-        const paidAmt = existPmts.filter(p=>p.status==='済み').reduce((s,p)=>s+(p.amount||0),0);
-        return {
-          installmentInvoiceStore:inv.memberStore||'',
-          installmentTotalStr:`合計 ${this.fmt(total)}`,
-          installmentPerStr:`${this.fmt(perAmt)}（最終回 ${this.fmt(lastAmt)}）`,
-          installmentPaidCount:paidCount,
-          installmentRemainingStr:this.fmt(total-paidAmt),
-          installmentSchedule:schedule,
-        };
-      })(),
-
-      // Hanko
-      hankoUnlocked:this.state.hankoUnlocked||false,
-      hankoPwdInput:this.state.hankoPwdInput||'',
-      onHankoPwdInput:(e)=>this.setState({hankoPwdInput:e.target.value}),
-      onHankoUnlock:()=>{
-        if(this.state.hankoPwdInput==='2490'){this.setState({hankoUnlocked:true});this.showToast('印鑑を押しました');}
-        else{this.setState({hankoUnlocked:false});this.showToast('パスワードが違います');}
-      },
-      hankoStatusMsg:this.state.hankoUnlocked?'✓ 印鑑あり':'—',
-      hankoStatusColor:this.state.hankoUnlocked?'#34c759':'#aeaeb2',
-      txRows, txFilters, budgetCategoryOptions, budgetIncomeCats, budgetExpenseCats,
-      txTypeIsIncome, txTypeIsExpense,
-      txYearLabel, txMonthTabs, txPeriodTabs, onTxPrevYear, onTxNextYear,
-      totalIncome:this.fmt(totalIncome), totalExpense:this.fmt(totalExpense), netBalance:this.fmt(totalIncome-totalExpense),
-      cashBalance:this.fmt(cashBal), bankBalance:this.fmt(bankBal),
-      onAddTx:()=>this.openModal('transaction',null,{txType:'収入',date:new Date().toISOString().slice(0,10),description:'',category:'',amount:0,accountType:'口座'}),
-
-      // Transfer modal
-      showTransferModal:this.state.transferModal||false,
-      onAddTransfer:()=>this.setState({transferModal:true,transferDate:new Date().toISOString().slice(0,10),transferAmount:0,transferFrom:'口座',transferTo:'現金',transferDesc:''}),
-      onCloseTransfer:()=>this.setState({transferModal:false}),
-      onSaveTransfer:()=>this.saveTransfer(),
-      transferDate:this.state.transferDate||new Date().toISOString().slice(0,10),
-      transferAmount:String(this.state.transferAmount||0),
-      transferFrom:this.state.transferFrom||'口座',
-      transferTo:this.state.transferTo||'現金',
-      transferDesc:this.state.transferDesc||'',
-      transferAmountStr:this.fmt(parseFloat(this.state.transferAmount)||0),
-      onTransferDateChange:(e)=>this.setState({transferDate:e.target.value}),
-      onTransferAmountChange:(e)=>this.setState({transferAmount:e.target.value}),
-      onTransferFromChange:(e)=>this.setState({transferFrom:e.target.value}),
-      onTransferToChange:(e)=>this.setState({transferTo:e.target.value}),
-      onTransferDescChange:(e)=>this.setState({transferDesc:e.target.value}),
-
-      // Composite modal
-      showCompositeModal:this.state.compositeModal||false,
-      onAddComposite:()=>this.setState({compositeModal:true,compositeDate:new Date().toISOString().slice(0,10),compositeGroupName:'',compositeLines:[{id:this.gen(),txType:'収入',category:'',description:'',amount:0,accountType:'口座'},{id:this.gen(),txType:'支出',category:'',description:'',amount:0,accountType:'口座'}]}),
-      onCloseComposite:()=>this.setState({compositeModal:false}),
-      onSaveComposite:()=>this.saveComposite(),
-      onAddCompositeLine:()=>this.addCompositeLine(),
-      compositeDate:this.state.compositeDate||new Date().toISOString().slice(0,10),
-      compositeGroupName:this.state.compositeGroupName||'',
-      onCompositeDateChange:(e)=>this.setState({compositeDate:e.target.value}),
-      onCompositeGroupChange:(e)=>this.setState({compositeGroupName:e.target.value}),
-      compositeLines:(this.state.compositeLines||[]).map(l=>({
-        ...l,
-        amount:String(l.amount||0),
-        onTypeChange:(e)=>this.updateCompositeLine(l.id,'txType',e.target.value),
-        onCatChange:(e)=>this.updateCompositeLine(l.id,'category',e.target.value),
-        onDescChange:(e)=>this.updateCompositeLine(l.id,'description',e.target.value),
-        onAccChange:(e)=>this.updateCompositeLine(l.id,'accountType',e.target.value),
-        onAmtChange:(e)=>this.updateCompositeLine(l.id,'amount',e.target.value),
-        onDel:()=>this.delCompositeLine(l.id),
-      })),
-      compositeTotalIncome:this.fmt((this.state.compositeLines||[]).filter(l=>l.txType==='収入').reduce((s,l)=>s+(parseFloat(l.amount)||0),0)),
-      compositeTotalExpense:this.fmt((this.state.compositeLines||[]).filter(l=>l.txType==='支出').reduce((s,l)=>s+(parseFloat(l.amount)||0),0)),
-      compositeNet:this.fmt((this.state.compositeLines||[]).reduce((s,l)=>s+(l.txType==='収入'?1:-1)*(parseFloat(l.amount)||0),0)),
-      incomeBudget, expenseBudget,
-      totalBudgetI:this.fmt(pBudget.filter(b=>b.type==='収入').reduce((s,b)=>s+b.amount,0)),
-      totalBudgetE:this.fmt(pBudget.filter(b=>b.type==='支出').reduce((s,b)=>s+b.amount,0)),
-      totalActualI:this.fmt(totalIncome), totalActualE:this.fmt(totalExpense),
-      onAddIncomeBudget:()=>this.openModal('budget',null,{type:'収入',category:'',amount:0}),
-      onAddExpenseBudget:()=>this.openModal('budget',null,{type:'支出',category:'',amount:0}),
-      onOpenBudgetDraft:()=>this.openBudgetDraft(),
-      // Budget draft modal
-      showBudgetDraftModal:this.state.budgetDraftModal||false,
-      onCloseBudgetDraft:()=>this.setState({budgetDraftModal:false}),
-      onConfirmBudgetDraft:()=>this.confirmBudgetDraft(),
-      onAddDraftIncome:()=>this.addDraftItem('収入'),
-      onAddDraftExpense:()=>this.addDraftItem('支出'),
-      ...(() => {
-        const draft = this.state.budgetDraft;
-        if (!draft) return {
-          draftIncomeRows:[],draftExpenseRows:[],
-          draftIncomeTotalStr:'¥0',draftExpenseTotalStr:'¥0',
-          budgetDraftTargetName:'翌期',
-          budgetDraftSavedLabel:'未保存',budgetDraftSavedColor:'#aeaeb2',
-        };
-        const nextPeriod = periods.find(p=>p.id===draft.targetPeriodId);
-        const mkDraftRow = item => ({
-          ...item,
-          currentBudgetStr:this.fmt(item.currentBudget||0),
-          currentActualStr:this.fmt(item.currentActual||0),
-          nextAmountStr:String(item.nextAmount||0),
-          remark:item.remark||'',
-          onAmountChange:(e)=>this.updateDraftItem(item.id,'nextAmount',parseInt(e.target.value)||0),
-          onRemarkChange:(e)=>this.updateDraftItem(item.id,'remark',e.target.value),
-          onDel:()=>this.delDraftItem(item.id),
-        });
-        const draftIncomeRows = draft.items.filter(i=>i.type==='収入').map(mkDraftRow);
-        const draftExpenseRows = draft.items.filter(i=>i.type==='支出').map(mkDraftRow);
-        const draftIncomeTotal = draft.items.filter(i=>i.type==='収入').reduce((s,i)=>s+(parseInt(i.nextAmount)||0),0);
-        const draftExpenseTotal = draft.items.filter(i=>i.type==='支出').reduce((s,i)=>s+(parseInt(i.nextAmount)||0),0);
-        return {
-          draftIncomeRows, draftExpenseRows,
-          draftIncomeTotalStr:this.fmt(draftIncomeTotal),
-          draftExpenseTotalStr:this.fmt(draftExpenseTotal),
-          budgetDraftTargetName:nextPeriod?`${nextPeriod.name}予算`:'翌期予算',
-          budgetDraftSavedLabel:draft.savedAt?('自動保存 '+this.fmtD(draft.savedAt.slice(0,10))+' '+draft.savedAt.slice(11,16)):'未保存',
-          budgetDraftSavedColor:draft.savedAt?'#34c759':'#aeaeb2',
-        };
-      })(),
-      stmtIncomeRows, stmtExpenseRows,
-      stmtTotalI:this.fmt(totalIncome), stmtTotalE:this.fmt(totalExpense), stmtNet:this.fmt(totalIncome-totalExpense),
-      eventRows,
-      onAddEvent:()=>this.openModal('event',null,{name:'',type:'総会・会議',date:new Date().toISOString().slice(0,10),endDate:'',participants:'',notes:''}),
-      assemblyOfficers:officerRows,
-      assemblyIncome:this.fmt(totalIncome), assemblyExpense:this.fmt(totalExpense), assemblyBalance:this.fmt(totalIncome-totalExpense),
-      assemblyEvents:eventRows.filter(e=>!e.isBeyondPeriod&&!e.isScheduled),
-      periodRows,
-      onAddPeriod:()=>this.openModal('period',null,{name:`第${periods.length+1}期`,startDate:'',endDate:''}),
-      modal, formData, modalShow:modal.show,
-      modalTitle:TITLES[modal.type]||'',
-      modalSaveLabel:modal.editId?'更新':'追加',
-      onSave:SAVES[modal.type]||(()=>{}),
-      onClose:()=>this.closeModal(),
-      onInput:(e)=>this.setField(e.target.dataset.field,e.target.value),
-      onModalBgClick:(e)=>{ if(e.target===e.currentTarget) this.closeModal(); },
-      stopProp:(e)=>e.stopPropagation(),
-      isOfficer:modal.type==='officer', isMember:modal.type==='member', isMemberStatus:modal.type==='memberStatus',
-      isInvoice:modal.type==='invoice', isTx:modal.type==='transaction',
-      isBudget:modal.type==='budget', isEvent:modal.type==='event', isPeriod:modal.type==='period',
-      toast, showToast:!!toast,
-
-      // Print doc
-      ...(() => {
-        const pd = this.state.printDoc;
-        if (!pd) return {printIsInvoice:false,printIsReceipt:false,printStore:'',printName:'',printNo:'',printIssuedStr:'',printPaidStr:'',printDueStr:'',printAmountStr:'',printItemName:'',printPaymentMethod:'',printDocTitle:'',onClosePrint:()=>{},onPrint:()=>{},stopProp:(e)=>e.stopPropagation()};
-        return {
-          printIsInvoice:pd.docType==='invoice',
-          printIsReceipt:pd.docType==='receipt',
-          printStore:pd.memberStore||'',
-          printName:pd.memberName||'',
-          printNo:'INV-'+pd.id.slice(-6).toUpperCase(),
-          printIssuedStr:this.fmtD(pd.issuedDate),
-          printPaidStr:this.fmtD(pd.paidDate),
-          printDueStr:this.fmtD(pd.dueDate||pd.issuedDate),
-          printAmountStr:Math.abs(pd.amount||0).toLocaleString('ja-JP'),
-          printItemName:pd.type||'会費',
-          printDescription:pd.description||'',
-          printPaymentMethod:pd.paymentMethod||'—',
-          printOrgName:(this.state.orgInfo||{}).name||'新田西口商店会',
-          printOrgRepName:(this.state.orgInfo||{}).repName||'',
-          printOrgAddress:(this.state.orgInfo||{}).address||'',
-          printOrgPhone:(this.state.orgInfo||{}).phone||'',
-          printHasBankInfo:!!((this.state.orgInfo||{}).bankName),
-          printBankName:(this.state.orgInfo||{}).bankName||'',
-          printBankBranch:(this.state.orgInfo||{}).bankBranch||'',
-          printBankType:(this.state.orgInfo||{}).bankType||'普通',
-          printBankAccount:(this.state.orgInfo||{}).bankAccount||'',
-          printBankHolder:(this.state.orgInfo||{}).bankHolder||'',
-          printDocTitle:pd.docType==='invoice'?'請求書':'領収書',
-          onClosePrint:()=>this.setState({printDoc:null}),
-          onPrint:()=>window.print(),
-          stopProp:(e)=>e.stopPropagation(),
-        };
-      })(),
-
-      // Org info settings
-      orgInfo: {...{name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},...(this.state.orgInfo||{}),...(this.state.orgInfoInput||{})},
-      onOrgInput:(e)=>this.setState(s=>({orgInfoInput:{...(s.orgInfoInput||s.orgInfo||{}), [e.target.dataset.field]:e.target.value}})),
-      onSaveOrgInfo:()=>this.saveOrgInfo(),
-
-      scriptUrl:this.state.scriptUrl||'',
-      scriptUrlInput:this.state.scriptUrlInput||'',
-      loading:this.state.loading||false,
-      syncStatusLabel:({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
-      syncStatusColor:({null:'#aeaeb2',syncing:'#f59e0b',ok:'#34c759',error:'#ff3b30'})[String(this.state.syncStatus)]||'#aeaeb2',
-      gasUserEmail:(this.state.gasUser||{}).email||'',
-      gasLogoutUrl:'https://accounts.google.com/logout',
-      onScriptUrlInput:(e)=>this.setState({scriptUrlInput:e.target.value}),
-      onSaveScriptUrl:()=>this.saveScriptUrl(),
-    };
-  }
-}
-
-</script>
 <script>
 // GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with `cd dc-runtime && bun run build`.
 "use strict";
@@ -4478,6 +3160,1332 @@ class Component extends DCLogic {
     throw err;
   });
 })();
+
+</script>
+<script data-dc-script>
+
+class Component extends DCLogic {
+  state = {
+    page: 'dashboard',
+    periods: [], currentPeriodId: null,
+    officers: [], members: [], invoices: [],
+    transactions: [], budgetItems: [], events: [],
+    memberChangeLogs: [], memberPage: 0,
+    modal: { show: false, type: null, editId: null },
+    formData: {},
+    toast: null, _tt: null,
+    scriptUrl: '', scriptUrlInput: '',
+    syncStatus: null, loading: false,
+    orgInfo: {name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},
+    orgInfoInput: null,
+    transferModal: false,
+    transferDate: new Date().toISOString().slice(0,10),
+    transferAmount: 0,
+    transferFrom: '口座',
+    transferTo: '現金',
+    transferDesc: '',
+    compositeModal: false,
+    compositeDate: new Date().toISOString().slice(0,10),
+    compositeGroupName: '',
+    compositeLines: [],
+    budgetDraftModal: false,
+    budgetDraft: null, // {targetPeriodId, items:[{id,category,type,nextAmount,remark}], savedAt}
+    invoiceFilter: '全て',
+    txFilter: '全て',
+    txYear: null,
+    txMonth: '全月',
+    invoiceLogs: [],
+    printDoc: null,
+    hankoUnlocked: false,
+    hankoPwdInput: '',
+    bulkModal: false,
+    bulkIssuedDate: new Date().toISOString().slice(0,10),
+    bulkSelectedIds: [],
+    bulkType: '会費',
+    bulkDescription: '',
+    installmentModal: false,
+    installmentInvoiceId: null,
+    installmentCount: 12,
+    installmentDebitDay: 27,
+    installmentStartMonth: new Date().toISOString().slice(0,7),
+  };
+
+  gen() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  fmt(n) { return '¥' + Math.abs(n||0).toLocaleString('ja-JP'); }
+  fmtD(d) { if (!d) return '—'; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); }
+
+  componentDidMount() {
+    // GAS Web App として動作しているか検出
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      this.setState({ loading: true, syncStatus: 'syncing' });
+      // ユーザー情報を取得
+      google.script.run
+        .withSuccessHandler((userInfo) => {
+          this.setState({ gasUser: userInfo });
+          // データを読み込む
+          google.script.run
+            .withSuccessHandler((d) => {
+              const parsed = this.migrate(this.parseSheets(d));
+              if (!parsed.periods || parsed.periods.length === 0) {
+                this.seed();
+              } else {
+                this.setState({ ...parsed, loading: false, syncStatus: 'ok' });
+              }
+              this.showToast('ようこそ ' + (userInfo.email || '') + ' さん');
+            })
+            .withFailureHandler((err) => {
+              this.setState({ loading: false, syncStatus: 'error' });
+              this.showToast('データ読込エラー: ' + err.message);
+            })
+            .loadData();
+        })
+        .withFailureHandler(() => {
+          this.setState({ loading: false, syncStatus: 'error' });
+        })
+        .getUserInfo();
+      return;
+    }
+    // 通常ブラウザモード (localStorage + optional Sheets URL)
+    const url = localStorage.getItem('nitta_script_url') || '';
+    if (url) {
+      this.setState({ scriptUrl: url, scriptUrlInput: url, loading: true });
+      this.fetchSheets(url);
+    } else {
+      this.loadLocal();
+    }
+  }
+
+  migrate(d) {
+    // 全会員に不足フィールドを補完
+    const memberDefaults = {address:'',fax:'',email:'',joinDate:'',status:'在籍',statusDate:null,statusNote:''};
+    const members = (d.members||[]).map(m=>({...memberDefaults,...m}));
+    // 全請求書に不足フィールドを補完
+    const invoiceDefaults = {description:'',paymentMethod:'',reminderNote:'',installment:null};
+    const invoices = (d.invoices||[]).map(i=>({...invoiceDefaults,...i}));
+    return {...d, members, invoices};
+  }
+
+  loadLocal() {
+    try {
+      const raw = localStorage.getItem('nitta_v5');
+      if (raw) {
+        const d = this.migrate(JSON.parse(raw));
+        this.setState({...d, loading:false}, ()=>this.persist());
+        return;
+      }
+    } catch(e) {}
+    this.seed();
+  }
+
+  parseSheets(d) {
+    const n = v => parseFloat(v)||0;
+    return {
+      periods: d.periods||[],
+      members: (d.members||[]).map(m=>({...m, fee:n(m.fee), no:n(m.no)})),
+      officers: d.officers||[],
+      invoices: (d.invoices||[]).map(i=>({...i, amount:n(i.amount)})),
+      transactions: (d.transactions||[]).map(t=>({...t, income:n(t.income), expense:n(t.expense)})),
+      budgetItems: (d.budgetItems||[]).map(b=>({...b, amount:n(b.amount)})),
+      events: d.events||[],
+      memberChangeLogs: d.memberChangeLogs||[],
+      currentPeriodId: d.currentPeriodId||null,
+    };
+  }
+
+  fetchSheets(url) {
+    fetch(url + '?t=' + Date.now())
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) throw new Error(d.error);
+        const parsed = this.migrate(this.parseSheets(d));
+        if (!parsed.periods || parsed.periods.length === 0) {
+          this.loadLocal();
+          this.setState({ syncStatus: 'ok' }, () => {
+            this.persist();
+            this.showToast('データをスプレッドシートに初回保存しました');
+          });
+        } else {
+          this.setState({ ...parsed, loading: false, syncStatus: 'ok' });
+          localStorage.setItem('nitta_v5', JSON.stringify(parsed));
+          this.showToast('スプレッドシートから読み込みました');
+        }
+      })
+      .catch(err => {
+        console.warn('Sheets fetch failed:', err.message);
+        this.loadLocal();
+        this.setState({ syncStatus: 'error' });
+        this.showToast('スプレッドシート接続失敗。ローカルデータを使用します');
+      });
+  }
+
+  saveOrgInfo() {
+    const inp = this.state.orgInfoInput||{};
+    this.setState(s=>({orgInfo:{...s.orgInfo,...inp},orgInfoInput:null}),()=>this.persist());
+    this.showToast('代表者情報を保存しました');
+  }
+
+  saveScriptUrl() {
+    const url = (this.state.scriptUrlInput||'').trim();
+    localStorage.setItem('nitta_script_url', url);
+    if (!url) {
+      this.setState({ scriptUrl: '', syncStatus: null });
+      this.showToast('連携を解除しました');
+      return;
+    }
+    this.setState({ scriptUrl: url, syncStatus: 'syncing', loading: true });
+    this.fetchSheets(url);
+  }
+
+  persist() {
+    const {page,modal,formData,toast,_tt,loading,syncStatus,scriptUrl,scriptUrlInput,orgInfoInput,gasUser,...d} = this.state;
+    try { localStorage.setItem('nitta_v5', JSON.stringify(d)); } catch(e){}
+    // GAS Web App モード
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      this.setState({ syncStatus: 'syncing' });
+      google.script.run
+        .withSuccessHandler(() => this.setState({ syncStatus: 'ok' }))
+        .withFailureHandler(() => this.setState({ syncStatus: 'error' }))
+        .saveData(JSON.stringify(d));
+      return;
+    }
+    // 通常ブラウザ + Sheets URL モード
+    if (scriptUrl) {
+      fetch(scriptUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(d),
+      })
+      .then(r => r.json())
+      .then(res => this.setState({ syncStatus: res.ok ? 'ok' : 'error' }))
+      .catch(() => this.setState({ syncStatus: 'error' }));
+    }
+  }
+
+  seed() {
+    const p38 = this.gen();
+    const p39 = this.gen();
+    const periods = [
+      {id:p38,name:'第38期',startDate:'2025-04-01',endDate:'2026-03-31'},
+      {id:p39,name:'第39期',startDate:'2026-04-01',endDate:'2027-03-31'},
+    ];
+    // 会員名簿（令和8年6月19日現在）25名 + 役員代理1名
+    const mb = [
+      {no:1,name:'安斎 義憲',store:'(株)アンザイ',fee:24000,phone:'048-941-8326'},
+      {no:2,name:'伊藤 浩',store:'ヘアーサロン ウイング',fee:24000,phone:'048-942-7993'},
+      {no:3,name:'山中 利彦',store:'(株)カワチ薬品',fee:24000,phone:'048-941-4183'},
+      {no:4,name:'奥住 公一',store:'(有)新田金寿司',fee:24000,phone:'048-942-5381'},
+      {no:5,name:'小島 岳洋',store:'小島測量・土地家屋調査士事務所',fee:24000,phone:'048-941-8857'},
+      {no:6,name:'横山 貞雄',store:'新田幼稚園',fee:24000,phone:'048-942-5516'},
+      {no:7,name:'指田 泰三',store:'スポーツランド',fee:24000,phone:'048-944-2662'},
+      {no:8,name:'岩波 秀一',store:'セブンイレブン草加金明通り店',fee:24000,phone:'048-944-2477'},
+      {no:9,name:'中村 義弘',store:'草加建設(株)',fee:24000,phone:'048-943-7900'},
+      {no:10,name:'高木 元一',store:'(株)高木商会',fee:24000,phone:'048-941-9941'},
+      {no:11,name:'青柳 健',store:'(株)筑波',fee:24000,phone:'048-931-5832'},
+      {no:12,name:'田中 一也',store:'ハートランドゴルフクラブ',fee:72000,phone:'048-942-7744'},
+      {no:13,name:'中村 諭史',store:'(有)クリーニングみわ',fee:24000,phone:'048-943-2370'},
+      {no:14,name:'広田 雅徳',store:'(株)広田',fee:24000,phone:'048-941-2165'},
+      {no:15,name:'河野 文寿',store:'(株)山香煎餅本舗',fee:24000,phone:'048-941-1000'},
+      {no:16,name:'青羽 吉治',store:'与志鮨',fee:24000,phone:'048-942-8144'},
+      {no:17,name:'児玉 広行',store:'パンとケーキのお店 Asahido',fee:24000,phone:'048-942-1104'},
+      {no:18,name:'(支店長)',store:'東京東信用金庫',fee:24000,phone:'048-931-1541'},
+      {no:19,name:'石丸 妙子',store:'ビューティースタジオ モコ',fee:24000,phone:'048-943-0560'},
+      {no:20,name:'小森 豊',store:'ざぼう',fee:24000,phone:'048-946-7278'},
+      {no:21,name:'髙橋 利幸',store:'シンコースポーツ(株)',fee:24000,phone:'048-942-8181'},
+      {no:22,name:'長沼 雅弘',store:'ドレミ薬局',fee:24000,phone:'048-931-5534'},
+      {no:23,name:'新井 浩介',store:'セブンイレブン草加新田店',fee:24000,phone:'048-932-2770'},
+      {no:24,name:'伊藤 博之',store:'広島お好み焼き 空島',fee:24000,phone:'048-944-7588'},
+      {no:25,name:'(店長)',store:'ピーアーク',fee:72000,phone:'048-943-0061'},
+      {no:26,name:'渡辺 強一',store:'草加建設(株)（役員代理）',type:'その他',fee:0,phone:'048-943-7900'},
+    ].map(m=>({id:this.gen(),type:'正会員',email:'',...m}));
+    const members = mb;
+
+    // 役員（会員IDを参照）
+    const od = [
+      {role:'会長',memberId:mb[7].id},   // 岩波 秀一
+      {role:'副会長',memberId:mb[10].id}, // 青柳 健（庶務）
+      {role:'副会長',memberId:mb[0].id},  // 安斎 義憲（渉外）
+      {role:'監事',memberId:mb[25].id},   // 渡辺 強一
+      {role:'監事',memberId:mb[1].id},    // 伊藤 浩
+      {role:'役員',memberId:mb[20].id},   // 髙橋 利幸
+      {role:'役員',memberId:mb[12].id},   // 中村 諭史（会計）
+      {role:'役員',memberId:mb[16].id},   // 児玉 広行
+      {role:'相談役',memberId:mb[5].id},  // 横山 貞雄
+    ];
+    const officers = [
+      ...od.map(o=>({id:this.gen(),periodId:p38,...o})),
+      ...od.map(o=>({id:this.gen(),periodId:p39,...o})),
+    ];
+
+    // 請求書（第38期：済み / 第39期：未払い）
+    const inv38 = mb.filter(m=>m.fee>0).map(m=>({
+      id:this.gen(),periodId:p38,memberId:m.id,memberName:m.name,memberStore:m.store,
+      type:'会費',amount:m.fee,status:'済み',issuedDate:'2025-04-01',paidDate:'2025-05-31',dueDate:'2025-04-30',
+    }));
+    const inv39 = mb.filter(m=>m.fee>0).map(m=>({
+      id:this.gen(),periodId:p39,memberId:m.id,memberName:m.name,memberStore:m.store,
+      type:'会費',amount:m.fee,status:'未払い',issuedDate:'2026-04-01',paidDate:null,dueDate:'2026-04-30',
+    }));
+
+    // 第38期 入出金（令和7年度 収支決算書より）
+    const tx38 = [
+      {id:this.gen(),periodId:p38,date:'2025-04-01',description:'前期繰越金',category:'繰越金',income:2175259,expense:0},
+      {id:this.gen(),periodId:p38,date:'2025-05-31',description:'会費収入（全会員）',category:'会費収入',income:696000,expense:0},
+      {id:this.gen(),periodId:p38,date:'2025-09-30',description:'草加市補助金・盆踊り手伝い・利息等',category:'雑収入',income:126270,expense:0},
+      {id:this.gen(),periodId:p38,date:'2025-04-15',description:'草加市商店連合協同組合費',category:'諸会費',income:0,expense:15500},
+      {id:this.gen(),periodId:p38,date:'2026-02-11',description:'シンサヤママーケット視察（研修）',category:'研修事業費',income:0,expense:62273},
+      {id:this.gen(),periodId:p38,date:'2026-02-06',description:'新年会（於：与志鮨）',category:'親睦事業費',income:0,expense:72380},
+      {id:this.gen(),periodId:p38,date:'2025-06-13',description:'定期総会費（於：ざぼう）',category:'総会費',income:0,expense:44080},
+      {id:this.gen(),periodId:p38,date:'2025-07-01',description:'役員会等 会議費',category:'会議費',income:0,expense:10756},
+      {id:this.gen(),periodId:p38,date:'2025-08-01',description:'切手代等 事務費',category:'事務費',income:0,expense:5040},
+      {id:this.gen(),periodId:p38,date:'2025-07-26',description:'盆踊り・運動会祝い金等',category:'交際費',income:0,expense:44000},
+      {id:this.gen(),periodId:p38,date:'2025-04-01',description:'レンタル倉庫賃料（通年）',category:'トランクルーム倉庫費',income:0,expense:123250},
+      {id:this.gen(),periodId:p38,date:'2025-12-01',description:'証明手数料・振込手数料等',category:'雑費',income:0,expense:3655},
+      {id:this.gen(),periodId:p38,date:'2025-11-23',description:'新田村TGF2025秋（地域活性化事業）',category:'地域活性化事業費',income:0,expense:350294},
+    ];
+    const tx39 = [
+      {id:this.gen(),periodId:p39,date:'2026-04-01',description:'前期繰越金（第38期より）',category:'繰越金',income:2271301,expense:0},
+    ];
+
+    // 予算（第38期：令和7年度予算 / 第39期：令和8年度予算）
+    const bg38 = [
+      {id:this.gen(),periodId:p38,type:'収入',category:'繰越金',amount:2175259},
+      {id:this.gen(),periodId:p38,type:'収入',category:'会費収入',amount:696000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'諸会費',amount:19500},
+      {id:this.gen(),periodId:p38,type:'支出',category:'研修事業費',amount:20000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'親睦事業費',amount:50000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'会議費',amount:50000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'総会費',amount:80000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'事務費',amount:5000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'交際費',amount:40000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'慶弔費',amount:50000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'トランクルーム倉庫費',amount:123250},
+      {id:this.gen(),periodId:p38,type:'支出',category:'雑費',amount:10000},
+      {id:this.gen(),periodId:p38,type:'支出',category:'地域活性化事業費',amount:600000},
+    ];
+    const bg39 = [
+      {id:this.gen(),periodId:p39,type:'収入',category:'会費収入',amount:696000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'諸会費',amount:71500},
+      {id:this.gen(),periodId:p39,type:'支出',category:'研修事業費',amount:150000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'親睦事業費',amount:25000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'会議費',amount:20000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'総会費',amount:80000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'事務費',amount:5000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'交際費',amount:50000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'慶弔費',amount:50000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'レンタル倉庫',amount:123250},
+      {id:this.gen(),periodId:p39,type:'支出',category:'雑費',amount:10000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'地域活性化事業費',amount:700000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'info.ボード準備金',amount:452183},
+      {id:this.gen(),periodId:p39,type:'支出',category:'備品購入',amount:200000},
+      {id:this.gen(),periodId:p39,type:'支出',category:'予備費',amount:535798},
+    ];
+
+    // 事業記録（第38期：令和7年度事業報告 / 第39期：令和8年度事業計画）
+    const ev38 = [
+      {id:this.gen(),periodId:p38,name:'草加市補助金制度説明会',type:'総会・会議',date:'2025-04-15',endDate:'',participants:'中村・岩波',notes:'草加市補助金制度の説明会に出席。'},
+      {id:this.gen(),periodId:p38,name:'草加市商連総会',type:'総会・会議',date:'2025-05-22',endDate:'',participants:'横山・岩波',notes:'草加市商店連合協同組合総会に出席。'},
+      {id:this.gen(),periodId:p38,name:'第38回定期総会',type:'総会・会議',date:'2025-06-13',endDate:'',participants:'全役員',notes:'於：ざぼう。令和6年度決算・令和7年度予算承認。'},
+      {id:this.gen(),periodId:p38,name:'金明町夏祭りお手伝い',type:'お祭り・縁日',date:'2025-07-25',endDate:'2025-07-26',participants:'役員複数名',notes:'金明町夏祭りのお手伝い。'},
+      {id:this.gen(),periodId:p38,name:'新田村TGF2025秋',type:'文化・交流',date:'2025-11-23',endDate:'',participants:'一般来場者多数',notes:'計5回の実行委員会を経て開催。12/4 西口反省会（於：アンザイ）。'},
+      {id:this.gen(),periodId:p38,name:'新年会',type:'その他',date:'2026-02-06',endDate:'',participants:'役員',notes:'於：与志鮨。'},
+      {id:this.gen(),periodId:p38,name:'シンサヤママーケット視察',type:'研修事業',date:'2026-02-11',endDate:'',participants:'役員',notes:'研修事業として視察を実施。'},
+    ];
+    const ev39 = [
+      {id:this.gen(),periodId:p39,name:'SOKA新田村TGF2026春',type:'文化・交流',date:'2026-04-29',endDate:'',participants:'',notes:'於：新田幼稚園。3/30出店者説明会実施済み。'},
+      {id:this.gen(),periodId:p39,name:'草加市商連総会',type:'総会・会議',date:'2026-05-25',endDate:'',participants:'横山・岩波',notes:'草加市商連総会に出席。'},
+      {id:this.gen(),periodId:p39,name:'第39回定期総会',type:'総会・会議',date:'2026-06-19',endDate:'',participants:'',notes:'於：金寿司。'},
+      {id:this.gen(),periodId:p39,name:'金明町夏祭りお手伝い',type:'お祭り・縁日',date:'2026-07-01',endDate:'',participants:'',notes:'日程未定。'},
+      {id:this.gen(),periodId:p39,name:'研修・視察事業（第2回）',type:'研修事業',date:'2026-08-01',endDate:'',participants:'',notes:'日程・内容未定。'},
+      {id:this.gen(),periodId:p39,name:'SOKA新田村TGF2026秋',type:'文化・交流',date:'2026-11-23',endDate:'',participants:'',notes:'於：新田幼稚園。6〜11月に準備会合を開催予定。'},
+      {id:this.gen(),periodId:p39,name:'新年会',type:'その他',date:'2027-02-01',endDate:'',participants:'',notes:'会場未定。'},
+      {id:this.gen(),periodId:p39,name:'研修・視察事業（第3回）',type:'研修事業',date:'2027-02-15',endDate:'',participants:'',notes:'日程・内容未定。'},
+    ];
+
+    this.setState({
+      periods, currentPeriodId:p39,
+      officers, members,
+      invoices:[...inv38,...inv39],
+      transactions:[...tx38,...tx39],
+      budgetItems:[...bg38,...bg39],
+      events:[...ev38,...ev39],
+    }, ()=>this.persist());
+  }
+
+  nav(p) { this.setState({page:p,modal:{show:false,type:null,editId:null}}); }
+  openModal(type,editId=null,fd={}) { this.setState({modal:{show:true,type,editId},formData:{...fd}}); }
+  closeModal() { this.setState({modal:{show:false,type:null,editId:null},formData:{}}); }
+  setField(k,v) { this.setState(s=>({formData:{...s.formData,[k]:v}})); }
+  onInput(e) { this.setField(e.target.dataset.field, e.target.value); }
+
+  showToast(msg) {
+    if (this.state._tt) clearTimeout(this.state._tt);
+    const t = setTimeout(()=>this.setState({toast:null,_tt:null}),3000);
+    this.setState({toast:msg,_tt:t});
+  }
+
+  saveOfficer() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {role:f.role||'理事',memberId:f.memberId||'',periodId:pid};
+    if (m.editId) this.setState(s=>({officers:s.officers.map(o=>o.id===m.editId?{...o,...rec}:o)}),()=>this.persist());
+    else this.setState(s=>({officers:[...s.officers,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal();
+  }
+  delOfficer(id) {
+    if (!confirm('この役員を削除しますか？')) return;
+    this.setState(s=>({officers:s.officers.filter(o=>o.id!==id)}),()=>this.persist());
+  }
+
+  saveMember() {
+    const {formData:f,modal:m,members} = this.state;
+    const autoFee = f.type==='大型店正会員'?72000:24000;
+    const rec = {name:f.name||'',store:f.store||'',type:f.type||'正会員',fee:parseInt(f.fee)||autoFee,phone:f.phone||'',fax:f.fax||'',email:f.email||'',address:f.address||'',joinDate:f.joinDate||''};
+    const now = new Date().toISOString();
+    const FL = {name:'氏名',store:'店舗名',type:'種別',fee:'年会費',phone:'電話',fax:'FAX',address:'住所',email:'メール'};
+    if (m.editId) {
+      const old = members.find(mb=>mb.id===m.editId)||{};
+      const changes = Object.keys(rec).filter(k=>FL[k]&&String(old[k]||'')!==String(rec[k]||'')).map(k=>`${FL[k]}: ${old[k]||'—'}→${rec[k]||'—'}`);
+      this.setState(s=>({
+        members:s.members.map(mb=>mb.id===m.editId?{...mb,...rec}:mb),
+        ...(changes.length>0?{memberChangeLogs:[...(s.memberChangeLogs||[]),{id:this.gen(),memberId:m.editId,memberName:rec.name,timestamp:now,action:'情報変更',detail:changes.join(' / ')}]}:{}),
+      }),()=>this.persist());
+    } else {
+      const no=Math.max(0,...this.state.members.map(mb=>mb.no||0))+1;
+      const newM={id:this.gen(),no,status:'在籍',statusDate:null,statusNote:'',...rec};
+      this.setState(s=>({
+        members:[...s.members,newM],
+        memberChangeLogs:[...(s.memberChangeLogs||[]),{id:this.gen(),memberId:newM.id,memberName:rec.name,timestamp:now,action:'新規入会',detail:rec.joinDate?`入会: ${rec.joinDate}`:''}],
+      }),()=>this.persist());
+    }
+    this.closeModal();
+  }
+  recordMemberStatus(id,name) {
+    this.openModal('memberStatus',id,{memberId:id,memberName:name,statusType:'退会',statusDate:new Date().toISOString().slice(0,10),statusNote:''});
+  }
+  saveStatusChange() {
+    const {formData:f,modal:m} = this.state;
+    const now = new Date().toISOString();
+    this.setState(s=>({
+      members:s.members.map(mb=>mb.id===m.editId?{...mb,status:f.statusType,statusDate:f.statusDate,statusNote:f.statusNote||''}:mb),
+      memberChangeLogs:[...(s.memberChangeLogs||[]),{id:this.gen(),memberId:m.editId,memberName:f.memberName,timestamp:now,action:f.statusType,detail:f.statusNote||''}],
+    }),()=>this.persist());
+    this.closeModal();
+    this.showToast(f.statusType+'を記録しました');
+  }
+
+  generateInvoices() {
+    const {currentPeriodId:pid,members,invoices} = this.state;
+    const existing = new Set(invoices.filter(i=>i.periodId===pid).map(i=>i.memberId));
+    const newOnes = members.filter(m=>!existing.has(m.id)).map(m=>({
+      id:this.gen(),periodId:pid,memberId:m.id,memberName:m.name,memberStore:m.store,
+      type:'会費',amount:m.fee,status:'未払い',
+      issuedDate:new Date().toISOString().slice(0,10),paidDate:null,dueDate:'',
+    }));
+    if (!newOnes.length) { alert('全会員の請求書が既に発行済みです'); return; }
+    this.setState(s=>({invoices:[...s.invoices,...newOnes]}),()=>this.persist());
+    this.showToast(newOnes.length+'件の請求書を発行しました');
+  }
+  saveInvoice() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {...f,periodId:pid,amount:parseInt(f.amount)||0,paidDate:f.status==='済み'?(f.paidDate||new Date().toISOString().slice(0,10)):null};
+    if (m.editId) this.setState(s=>({invoices:s.invoices.map(i=>i.id===m.editId?{...i,...rec}:i)}),()=>this.persist());
+    else this.setState(s=>({invoices:[...s.invoices,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal(); this.showToast('保存しました');
+  }
+  markPaid(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const date = prompt('入金日を入力（例: 2026-04-15）', new Date().toISOString().slice(0,10));
+    if (!date) return;
+    const method = prompt('入金方法を入力（現金 / 振込 / 口座振替）', inv.paymentMethod||'現金');
+    const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:inv.memberStore,action:'入金登録',amount:inv.amount,detail:`${method||'—'}　入金日: ${this.fmtD(date)}`};
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>i.id===id?{...i,status:'済み',paidDate:date,paymentMethod:method||''}:i),
+      invoiceLogs:[...(s.invoiceLogs||[]),log],
+    }),()=>this.persist());
+    this.showToast('入金を登録しました');
+  }
+
+  printInvoice(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    this.setState({printDoc:{...inv,docType:'invoice'},hankoUnlocked:false,hankoPwdInput:''});
+  }
+
+  printReceipt(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    this.setState({printDoc:{...inv,docType:'receipt'},hankoUnlocked:false,hankoPwdInput:''});
+  }
+
+  openInstallmentModal(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const inst = inv.installment||{};
+    this.setState({
+      installmentModal:true,
+      installmentInvoiceId:id,
+      installmentCount:inst.count||12,
+      installmentDebitDay:inst.debitDay||27,
+      installmentStartMonth:inst.startMonth||new Date().toISOString().slice(0,7),
+    });
+  }
+
+  saveInstallment() {
+    const {installmentInvoiceId:id,installmentCount:cnt,installmentDebitDay:day,installmentStartMonth:start} = this.state;
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const total = inv.amount||0;
+    const perAmt = Math.floor(total/cnt);
+    const lastAmt = total - perAmt*(cnt-1);
+    const payments = Array.from({length:cnt},(_,i)=>{
+      const [y,m] = start.split('-').map(Number);
+      const date = new Date(y, m-1+i, day);
+      // 月末補正
+      const maxDay = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+      const actualDay = Math.min(day,maxDay);
+      const dueDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(actualDay).padStart(2,'0')}`;
+      const existing = (inv.installment&&inv.installment.payments&&inv.installment.payments[i])||{};
+      return {seq:i+1,dueDate,amount:i===cnt-1?lastAmt:perAmt,status:existing.status||'未払い',paidDate:existing.paidDate||null};
+    });
+    const installment = {enabled:true,count:cnt,debitDay:day,startMonth:start,payments};
+    const paidAll = payments.every(p=>p.status==='済み');
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>i.id===id?{...i,installment,status:paidAll?'済み':'未払い'}:i),
+      installmentModal:false,
+    }),()=>this.persist());
+    this.showToast('分割払いを設定しました');
+  }
+
+  markInstallmentPaid(invoiceId, seq) {
+    const date = prompt('入金日を入力', new Date().toISOString().slice(0,10));
+    if (!date) return;
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>{
+        if (i.id!==invoiceId||!i.installment) return i;
+        const payments = i.installment.payments.map(p=>p.seq===seq?{...p,status:'済み',paidDate:date}:p);
+        const paidAll = payments.every(p=>p.status==='済み');
+        const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:i.memberStore,action:'入金登録',amount:i.installment.payments.find(p=>p.seq===seq)?.amount||0,detail:`分割 第${seq}回　${this.fmtD(date)}`};
+        this.setState(s2=>({invoiceLogs:[...(s2.invoiceLogs||[]),log]}));
+        return {...i,installment:{...i.installment,payments},status:paidAll?'済み':'未払い',paidDate:paidAll?date:i.paidDate};
+      }),
+    }),()=>this.persist());
+    this.showToast(`第${seq}回の入金を登録しました`);
+  }
+
+  cancelInvoice(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    if (!confirm(`「${inv.memberStore}」の請求を取消しますか？`)) return;
+    const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:inv.memberStore,action:'取消',amount:inv.amount,detail:`種別: ${inv.type}`};
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>i.id===id?{...i,status:'取消'}:i),
+      invoiceLogs:[...(s.invoiceLogs||[]),log],
+    }),()=>this.persist());
+    this.showToast('請求を取消しました');
+  }
+
+  calcFiscalYear(dateStr) {
+    const d = dateStr ? new Date(dateStr) : new Date();
+    const y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear()-1; // 4月以降が新年度
+    const reiwa = y - 2018;
+    return `令和${reiwa}年度`;
+  }
+
+  openBulkModal() {
+    const today = new Date().toISOString().slice(0,10);
+    const existing = new Set(this.state.invoices.filter(i=>i.periodId===this.state.currentPeriodId).map(i=>i.memberId));
+    const allIds = this.state.members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>m.id);
+    this.setState({
+      bulkModal:true,
+      bulkIssuedDate:today,
+      bulkType:'会費',
+      bulkDescription:`${this.calcFiscalYear(today)}商店会会費として`,
+      bulkSelectedIds:allIds.filter(id=>!existing.has(id)),
+    });
+  }
+
+  generateBulkInvoices() {
+    const {currentPeriodId:pid,members,invoices,bulkSelectedIds,bulkIssuedDate,bulkType,bulkDescription} = this.state;
+    const targets = members.filter(m=>bulkSelectedIds.includes(m.id));
+    if (!targets.length) { alert('対象会員が選択されていません'); return; }
+    const newInvs = targets.map(m=>({
+      id:this.gen(),periodId:pid,memberId:m.id,memberName:m.name,memberStore:m.store,
+      type:bulkType||'会費',description:bulkDescription||'',amount:m.fee,status:'未払い',
+      issuedDate:bulkIssuedDate||new Date().toISOString().slice(0,10),
+      paidDate:null,dueDate:'',paymentMethod:'',reminderNote:'',
+    }));
+    const logs = newInvs.map(i=>({id:this.gen(),timestamp:new Date().toISOString(),memberStore:i.memberStore,action:'一括発行',amount:i.amount,detail:`${i.type} / ${i.description||'—'}`}));
+    this.setState(s=>({invoices:[...s.invoices,...newInvs],invoiceLogs:[...(s.invoiceLogs||[]),...logs],bulkModal:false}),()=>this.persist());
+    this.showToast(`${newInvs.length}件の請求書を発行しました`);
+  }
+
+  saveTx() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const amt = parseFloat(f.amount)||0;
+    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
+    if (m.editId) this.setState(s=>({transactions:s.transactions.map(t=>t.id===m.editId?{...t,...rec}:t)}),()=>this.persist());
+    else this.setState(s=>({transactions:[...s.transactions,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal();
+  }
+  delTx(id) {
+    if (!confirm('この取引を削除しますか？')) return;
+    this.setState(s=>({transactions:s.transactions.filter(t=>t.id!==id)}),()=>this.persist());
+  }
+
+  saveTransfer() {
+    const {transferDate:d,transferAmount:a,transferFrom:fr,transferTo:to,transferDesc:desc,currentPeriodId:pid} = this.state;
+    const amt = parseFloat(a)||0;
+    if (!amt) { alert('金額を入力してください'); return; }
+    const gid = this.gen();
+    const t1 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:0,expense:amt,accountType:fr,groupId:gid,groupType:'振替'};
+    const t2 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:amt,expense:0,accountType:to,groupId:gid,groupType:'振替'};
+    this.setState(s=>({transactions:[...s.transactions,t1,t2],transferModal:false}),()=>this.persist());
+    this.showToast(`振替を記録しました（${this.fmt(amt)}）`);
+  }
+
+  saveComposite() {
+    const {compositeDate:d,compositeGroupName:gn,compositeLines:lines,currentPeriodId:pid} = this.state;
+    const valid = lines.filter(l=>parseFloat(l.amount)>0);
+    if (!valid.length) { alert('明細を1件以上入力してください'); return; }
+    const gid = this.gen();
+    const txs = valid.map(l=>({
+      id:this.gen(),periodId:pid,date:d,
+      description:`【複合】${gn||'複合処理'}${l.description?'_'+l.description:''}`,
+      category:l.category||'',income:l.txType==='収入'?parseFloat(l.amount)||0:0,
+      expense:l.txType==='支出'?parseFloat(l.amount)||0:0,
+      accountType:l.accountType||'口座',groupId:gid,groupType:'複合',
+    }));
+    this.setState(s=>({transactions:[...s.transactions,...txs],compositeModal:false,compositeLines:[]}),()=>this.persist());
+    this.showToast(`${txs.length}件の複合処理を記録しました`);
+  }
+
+  addCompositeLine() {
+    const line = {id:this.gen(),txType:'収入',category:'',description:'',amount:0,accountType:'口座'};
+    this.setState(s=>({compositeLines:[...s.compositeLines,line]}));
+  }
+
+  updateCompositeLine(id,field,value) {
+    this.setState(s=>({compositeLines:s.compositeLines.map(l=>l.id===id?{...l,[field]:value}:l)}));
+  }
+
+  delCompositeLine(id) {
+    this.setState(s=>({compositeLines:s.compositeLines.filter(l=>l.id!==id)}));
+  }
+
+  openBudgetDraft() {
+    const {currentPeriodId,budgetItems,transactions,periods} = this.state;
+    const cp = periods.find(p=>p.id===currentPeriodId)||{};
+    // Find or create next period
+    const nextPeriod = periods.find(p=>p.id!==currentPeriodId&&p.startDate>cp.startDate)||null;
+    const targetPeriodId = nextPeriod?nextPeriod.id:null;
+    const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
+    const pTx = transactions.filter(t=>t.periodId===currentPeriodId);
+    const calcActual = (cat,type)=>pTx.reduce((s,t)=>s+(t.category===cat?(type==='収入'?t.income:t.expense)||0:0),0);
+    // Load existing draft or build from current period
+    const existing = this.state.budgetDraft;
+    const existingItems = (existing&&existing.targetPeriodId===targetPeriodId)?existing.items:null;
+    const items = existingItems || pBudget.map(b=>({
+      id:this.gen(), category:b.category, type:b.type,
+      currentBudget:b.amount, currentActual:calcActual(b.category,b.type),
+      nextAmount:b.amount, remark:'',
+    }));
+    this.setState({budgetDraftModal:true, budgetDraft:{targetPeriodId, items, savedAt:existing?.savedAt||null}});
+  }
+
+  updateDraftItem(id, field, value) {
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      const items = draft.items.map(item=>item.id===id?{...item,[field]:value}:item);
+      return {budgetDraft:{...draft,items,savedAt:new Date().toISOString()}};
+    },()=>this.persist());
+  }
+
+  addDraftItem(type) {
+    const cat = prompt(`新しい科目名を入力（${type}）`,'');
+    if (!cat) return;
+    const item = {id:this.gen(),category:cat,type,currentBudget:0,currentActual:0,nextAmount:0,remark:''};
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      return {budgetDraft:{...draft,items:[...draft.items,item],savedAt:new Date().toISOString()}};
+    },()=>this.persist());
+  }
+
+  delDraftItem(id) {
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      return {budgetDraft:{...draft,items:draft.items.filter(i=>i.id!==id)}};
+    },()=>this.persist());
+  }
+
+  confirmBudgetDraft() {
+    const {budgetDraft,periods,currentPeriodId} = this.state;
+    if (!budgetDraft) return;
+    const {targetPeriodId,items} = budgetDraft;
+    if (!targetPeriodId) {
+      alert('翌期が設定されていません。先に設定ページで翌期を追加してください。');
+      return;
+    }
+    if (!confirm(`翌期（${periods.find(p=>p.id===targetPeriodId)?.name||'翌期'}）の予算として確定しますか？\n既存の予算は上書きされます。`)) return;
+    const newItems = items.map(item=>({
+      id:this.gen(), periodId:targetPeriodId, type:item.type,
+      category:item.category, amount:parseInt(item.nextAmount)||0, remark:item.remark||'',
+    }));
+    this.setState(s=>({
+      budgetItems:[...s.budgetItems.filter(b=>b.periodId!==targetPeriodId),...newItems],
+      budgetDraftModal:false,
+    }),()=>this.persist());
+    this.showToast('翌年度予算を確定しました');
+  }
+
+  saveBudget() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {type:f.type||'収入',category:f.category||'',amount:parseInt(f.amount)||0,periodId:pid};
+    if (m.editId) this.setState(s=>({budgetItems:s.budgetItems.map(b=>b.id===m.editId?{...b,...rec}:b)}),()=>this.persist());
+    else this.setState(s=>({budgetItems:[...s.budgetItems,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal();
+  }
+  delBudget(id) {
+    if (!confirm('この科目を削除しますか？')) return;
+    this.setState(s=>({budgetItems:s.budgetItems.filter(b=>b.id!==id)}),()=>this.persist());
+  }
+
+  saveEvent() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {...f,periodId:pid};
+    if (m.editId) this.setState(s=>({events:s.events.map(e=>e.id===m.editId?{...e,...rec}:e)}),()=>this.persist());
+    else this.setState(s=>({events:[...s.events,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal();
+  }
+  delEvent(id) {
+    if (!confirm('この事業記録を削除しますか？')) return;
+    this.setState(s=>({events:s.events.filter(e=>e.id!==id)}),()=>this.persist());
+  }
+
+  savePeriod() {
+    const {formData:f,events,currentPeriodId} = this.state;
+    const newPid = this.gen();
+    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
+    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
+    const today = new Date().toISOString().slice(0,10);
+    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
+    const periodEnd = cp.endDate||'9999-12-31';
+    const carryOver = events
+      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
+      .map(e=>({...e, id:this.gen(), periodId:newPid}));
+    this.setState(s=>({
+      periods:[...s.periods,p],
+      currentPeriodId:newPid,
+      events:[...s.events,...carryOver],
+    }),()=>this.persist());
+    this.closeModal();
+    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
+  }
+
+  renderVals() {
+    const {page,periods,currentPeriodId,officers,members,invoices,transactions,budgetItems,events,modal,formData,toast} = this.state;
+    const cp = periods.find(p=>p.id===currentPeriodId)||{name:'—',startDate:'',endDate:''};
+
+    const pOfficers = officers.filter(o=>o.periodId===currentPeriodId);
+    const pInvoices = invoices.filter(i=>i.periodId===currentPeriodId);
+    const pTx = transactions.filter(t=>t.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
+    const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
+    const pEvents = events.filter(e=>e.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
+
+    const totalIncome = pTx.reduce((s,t)=>s+(t.income||0),0);
+    const totalExpense = pTx.reduce((s,t)=>s+(t.expense||0),0);
+    const unpaidCount = pInvoices.filter(i=>i.status==='未払い').length;
+    const today = new Date().toISOString().slice(0,10);
+
+    // Badge helper
+    const bBase = {padding:'2px 9px',borderRadius:'20px',fontSize:'11px',fontFamily:'-apple-system,sans-serif',whiteSpace:'nowrap',display:'inline-block',fontWeight:'500'};
+    const rolePalette = {'会長':['#fff3cd','#9c6b00'],'副会長':['#dbeafe','#1d4ed8'],'会計':['#dcfce7','#166534'],'書記':['#f3e8ff','#7e22ce'],'監査':['#ffedd5','#c2410c'],'理事':['#f1f5f9','#475569']};
+    const etPalette = {'お祭り・縁日':['#fef9c3','#854d0e'],'総会・会議':['#dbeafe','#1d4ed8'],'研修事業':['#dcfce7','#166534'],'文化・交流':['#f3e8ff','#7e22ce'],'その他':['#f1f5f9','#475569']};
+    const badge = (p) => p ? {...bBase,background:p[0],color:p[1]} : {...bBase,background:'#f1f5f9',color:'#555'};
+
+    // Ledger: year/month/account filters
+    const txFilter = this.state.txFilter||'全て';
+    const txMonth = this.state.txMonth||'全月';
+
+    // Determine display year (fiscal year = 4月start). Default to current period's year
+    const periodStartYear = cp.startDate?parseInt(cp.startDate.slice(0,4)):new Date().getFullYear();
+    const txYear = this.state.txYear||periodStartYear;
+
+    // Year navigation
+    const REIWA_BASE = 2018;
+    // Period tabs: 前期・当期・翌期
+    const prevPeriodYear = periodStartYear - 1;
+    const nextPeriodYear = periodStartYear + 1;
+    const periodTabData = [
+      {label:'前期', year:prevPeriodYear},
+      {label:'当期', year:periodStartYear},
+      {label:'翌期', year:nextPeriodYear},
+    ];
+    const txPeriodTabs = periodTabData.map(tab=>({
+      ...tab,
+      onClick:()=>this.setState({txYear:tab.year,txMonth:'全月'}),
+      style:{border:'none',padding:'6px 18px',borderRadius:'20px',fontSize:'12px',fontWeight:'600',cursor:'pointer',
+        background:txYear===tab.year?'#1d1d1f':'rgba(0,0,0,0.05)',
+        color:txYear===tab.year?'#fff':'#1d1d1f'},
+    }));
+    const txYearLabel = `${txYear}年度`;
+    const onTxPrevYear = ()=>this.setState({txYear:txYear-1,txMonth:'全月'});
+    const onTxNextYear = ()=>this.setState({txYear:txYear+1,txMonth:'全月'});
+
+    // Month tabs (4月〜3月)
+    const MONTHS = ['全月','4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+    const btnTabStyle = (active)=>({border:'none',padding:'5px 11px',borderRadius:'16px',fontSize:'11px',fontWeight:'500',cursor:'pointer',background:active?'#1d1d1f':'rgba(0,0,0,0.04)',color:active?'#fff':'#6e6e73'});
+    const txMonthTabs = MONTHS.map(m=>({
+      label:m, onClick:()=>this.setState({txMonth:m}),
+      style:btnTabStyle(txMonth===m),
+    }));
+
+    // Filter pTx by year (fiscal), month, account
+    const monthToNum = {'4月':4,'5月':5,'6月':6,'7月':7,'8月':8,'9月':9,'10月':10,'11月':11,'12月':12,'1月':1,'2月':2,'3月':3};
+    const yearFiltered = pTx.filter(t=>{
+      if (!t.date) return false;
+      const d = new Date(t.date);
+      const y = d.getMonth()>=3 ? d.getFullYear() : d.getFullYear()-1;
+      return y===txYear;
+    });
+    const monthFiltered = txMonth==='全月'?yearFiltered:yearFiltered.filter(t=>{
+      const mn = monthToNum[txMonth];
+      return t.date && parseInt(t.date.slice(5,7))===mn;
+    });
+    const filteredTx = txFilter==='全て'?monthFiltered:monthFiltered.filter(t=>(t.accountType||'口座')===txFilter);
+
+    // Account filter
+    const TX_FILTERS = ['全て','口座','現金'];
+    const txFilters = TX_FILTERS.map(f=>({
+      label:f, onClick:()=>this.setState({txFilter:f}),
+      style:{border:'none',padding:'6px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:'500',cursor:'pointer',
+        background:txFilter===f?'#1d1d1f':'rgba(0,0,0,0.05)',
+        color:txFilter===f?'#fff':'#1d1d1f'},
+    }));
+
+    // KPI always from full period
+    let bal=0;
+    pTx.forEach(t=>{bal+=(t.income||0)-(t.expense||0);});
+    const cashBal = pTx.filter(t=>(t.accountType||'口座')==='現金').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+    const bankBal = pTx.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+
+    // Running balance for filtered view
+    let filtBal=0;
+    const txSortedFiltered = [...filteredTx].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{filtBal+=(t.income||0)-(t.expense||0);return{...t,_fbal:filtBal};});
+    const bBase3={padding:'1px 6px',borderRadius:'8px',fontSize:'10px',fontWeight:'500',display:'inline-block'};
+    const txRows = [...txSortedFiltered].reverse().map(t=>({
+      ...t,
+      dateStr:this.fmtD(t.date),
+      incStr:t.income>0?this.fmt(t.income):'—',
+      expStr:t.expense>0?this.fmt(t.expense):'—',
+      balStr:this.fmt(t._fbal),
+      accountType:t.accountType||'口座',
+      accountBadge:{...bBase3,background:(t.accountType||'口座')==='現金'?'#fff3cd':'#dbeafe',color:(t.accountType||'口座')==='現金'?'#856404':'#1d4ed8'},
+      incStyle:{width:'88px',textAlign:'right',fontSize:'12px',fontWeight:t.income>0?'600':'400',color:t.income>0?'#34c759':'#aeaeb2'},
+      expStyle:{width:'88px',textAlign:'right',fontSize:'12px',fontWeight:t.expense>0?'600':'400',color:t.expense>0?'#ff3b30':'#aeaeb2'},
+      isTransfer:t.groupType==='振替',
+      isComposite:t.groupType==='複合',
+      onEdit:()=>this.openModal('transaction',t.id,{...t,txType:t.income>0?'収入':'支出',amount:t.income||t.expense,accountType:t.accountType||'口座'}),
+      onDel:()=>this.delTx(t.id),
+    }));
+
+    // Budget category options split by type
+    const budgetCategoryOptions = pBudget.map(b=>({value:b.category,label:`[${b.type}] ${b.category}`}));
+    const budgetIncomeCats = pBudget.filter(b=>b.type==='収入').map(b=>({value:b.category,label:b.category}));
+    const budgetExpenseCats = pBudget.filter(b=>b.type==='支出').map(b=>({value:b.category,label:b.category}));
+    const txTypeIsIncome = (formData.txType||'収入')==='収入';
+    const txTypeIsExpense = (formData.txType||'収入')==='支出';
+
+    // Budget rows
+    const calcActual = (cat,type) => pTx.reduce((s,t)=>s+(t.category===cat?(type==='収入'?t.income:t.expense)||0:0),0);
+    const mkBRow = b => {
+      const actual=calcActual(b.category,b.type);
+      const pct=b.amount>0?Math.min(Math.round(actual/b.amount*100),999):0;
+      const diff=actual-b.amount;
+      const isGood=b.type==='収入'?diff>=0:diff<=0;
+      return {
+        ...b,
+        budgetStr:this.fmt(b.amount), actualStr:this.fmt(actual),
+        diffStr2:(diff>=0?'+':'-')+this.fmt(Math.abs(diff)),
+        diffStyle:{width:'80px',textAlign:'right',fontSize:'12px',fontWeight:'600',color:isGood?'#34c759':'#ff3b30'},
+        barStyle:{background:isGood?'#34c759':'#ff3b30',width:Math.min(pct,100)+'%',height:'100%',borderRadius:'3px'},
+        pctStr:pct+'%',
+        onEdit:()=>this.openModal('budget',b.id,{...b}),
+        onDel:()=>this.delBudget(b.id),
+      };
+    };
+    const incomeBudget=pBudget.filter(b=>b.type==='収入').map(mkBRow);
+    const expenseBudget=pBudget.filter(b=>b.type==='支出').map(mkBRow);
+
+    // Officer rows — look up member data by memberId
+    const officerRows = pOfficers.map(o=>{
+      const mb = members.find(m=>m.id===o.memberId)||{};
+      return {
+        ...o,
+        name: mb.name || o.name || '（未設定）',
+        store: mb.store || o.store || '',
+        phone: mb.phone || o.phone || '',
+        badgeStyle: badge(rolePalette[o.role]),
+        onEdit: ()=>this.openModal('officer',o.id,{role:o.role,memberId:o.memberId||''}),
+        onDel: ()=>this.delOfficer(o.id),
+      };
+    });
+
+    // Member rows
+    // Member rows with pagination & new fields
+    const PAGE_SIZE = 10;
+    const memberPage = this.state.memberPage||0;
+    const bsStatus = {
+      '在籍':{...bBase,background:'#dcfce7',color:'#166534'},
+      '退会':{...bBase,background:'#fee2e2',color:'#991b1b'},
+      '訂正その他':{...bBase,background:'#fff3cd',color:'#92400e'},
+    };
+    const otherMemberRows = members.filter(m=>m.type==='その他').map(m=>({
+      ...m,
+      onEdit:()=>this.openModal('member',m.id,{type:m.type||'その他',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
+      onDel:()=>{ if(!confirm(`「${m.name}」を削除しますか？`)) return; this.setState(s=>({members:s.members.filter(mb=>mb.id!==m.id)}),()=>this.persist()); this.showToast('削除しました'); },
+    }));
+    const allMemberRows = members.filter(m=>m.type!=='その他').map(m=>({
+      ...m, feeStr:this.fmt(m.fee),
+      faxStr:m.fax?`FAX: ${m.fax}`:'',
+      address:m.address||'',
+      typeBadge:badge(m.type==='大型店正会員'?['#ede9fe','#4c1d95']:['#dbeafe','#1d4ed8']),
+      statusLabel:m.status||'在籍',
+      statusBadge:bsStatus[m.status||'在籍']||bsStatus['在籍'],
+      rowBg:m.status==='退会'?'background:rgba(0,0,0,0.015);':'',
+      onEdit:()=>this.openModal('member',m.id,{type:m.type||'正会員',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
+      onStatus:()=>this.recordMemberStatus(m.id,m.name),
+    }));
+    const totalMemberPages = Math.max(1,Math.ceil(allMemberRows.length/PAGE_SIZE));
+    const memberRows = allMemberRows.slice(memberPage*PAGE_SIZE,(memberPage+1)*PAGE_SIZE);
+    const btnPage = {padding:'6px 14px',borderRadius:'7px',fontSize:'12px',fontWeight:'500',border:'1px solid rgba(0,0,0,0.1)'};
+    const clStyle = {
+      '新規入会':{...bBase,background:'#dcfce7',color:'#166534'},
+      '情報変更':{...bBase,background:'#dbeafe',color:'#1d4ed8'},
+      '退会':{...bBase,background:'#fee2e2',color:'#991b1b'},
+      '訂正その他':{...bBase,background:'#fff3cd',color:'#92400e'},
+    };
+    const memberChangeLogs = [...(this.state.memberChangeLogs||[])].reverse().slice(0,30).map(log=>({
+      ...log,
+      timeStr:log.timestamp?(this.fmtD(log.timestamp.slice(0,10))+' '+log.timestamp.slice(11,16)):'',
+      actionBadge:clStyle[log.action]||{...bBase,background:'#f1f5f9',color:'#475569'},
+      onDel:()=>this.setState(s=>({memberChangeLogs:(s.memberChangeLogs||[]).filter(l=>l.id!==log.id)}),()=>this.persist()),
+    }));
+
+    // Invoice rows with filter
+    const invoiceFilter = this.state.invoiceFilter||'全て';
+    const FILTERS = ['全て','未払い','済み'];
+    const invoiceFilters = FILTERS.map(f=>({
+      label:f+(f==='未払い'?` (${unpaidCount})`:''),
+      onClick:()=>this.setState({invoiceFilter:f}),
+      style:{border:'none',padding:'6px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:'500',cursor:'pointer',
+        background:invoiceFilter===f?'#1d1d1f':'rgba(0,0,0,0.05)',
+        color:invoiceFilter===f?'#fff':'#1d1d1f'},
+    }));
+    const filteredInvoices = invoiceFilter==='全て'?pInvoices:pInvoices.filter(i=>i.status===invoiceFilter);
+    const btnPay = {border:'none',background:'rgba(52,199,89,0.12)',color:'#34c759',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'};
+    const btnPayDone = {border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'default'};
+    const invoiceRows = filteredInvoices.map((i,idx)=>({
+      ...i,
+      amountStr:this.fmt(i.amount),
+      issuedStr:this.fmtD(i.issuedDate),
+      paidStr:this.fmtD(i.paidDate),
+      paymentMethodStr:i.paymentMethod||'—',
+      statusBadge:badge(i.status==='済み'?['#dcfce7','#166534']:['#fee2e2','#b91c1c']),
+      rowBg:i.status==='未払い'?'background:#fffafa;':'',
+      markPaidStyle:i.status==='未払い'?btnPay:btnPayDone,
+      onMarkPaid:i.status==='未払い'?()=>this.markPaid(i.id):()=>{},
+      onEdit:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
+      onPrintInvoice:()=>this.printInvoice(i.id),
+      onPrintReceipt:i.status==='済み'?()=>this.printReceipt(i.id):()=>{},
+      receiptStyle:i.status==='済み'?{border:'none',background:'rgba(52,199,89,0.08)',color:'#34c759',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'},
+      cancelStyle:i.status==='取消'?{border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'}:{border:'none',background:'rgba(255,59,48,0.08)',color:'#ff3b30',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'},
+      onCancel:i.status!=='取消'?()=>this.cancelInvoice(i.id):()=>{},
+      onInstallment:()=>this.openInstallmentModal(i.id),
+      hasReminder:!!(i.reminderNote),
+      noReminder:!(i.reminderNote),
+      onReminder:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
+    }));
+
+    // Event rows
+    const periodEnd = cp.endDate||'9999-12-31';
+    const evtCardBg = {'お祭り・縁日':{background:'#fefce8',borderLeft:'3px solid #facc15'},'総会・会議':{background:'#eff6ff',borderLeft:'3px solid #60a5fa'},'研修事業':{background:'#f0fdf4',borderLeft:'3px solid #4ade80'},'文化・交流':{background:'#faf5ff',borderLeft:'3px solid #c084fc'}};
+    const eventRows = pEvents.map(e=>({
+      ...e, typeBadge:badge(etPalette[e.type]),
+      dateStr:this.fmtD(e.date)+(e.endDate?'〜'+this.fmtD(e.endDate):''),
+      isScheduled: e.date >= today,
+      isBeyondPeriod: e.date > periodEnd,
+      cardStyle:{...(evtCardBg[e.type]||{background:'#f9fafb',borderLeft:'3px solid #d1d5db'}),padding:'10px 13px',borderRadius:'8px',marginBottom:'10px'},
+      onEdit:()=>this.openModal('event',e.id,{...e}),
+      onDel:()=>this.delEvent(e.id),
+    }));
+
+    // Nav
+    const NAV=[
+      {id:'dashboard',label:'ダッシュボード'},{id:'officers',label:'役員名簿'},
+      {id:'members',label:'会員管理'},{id:'invoices',label:'請求書管理'},
+      {id:'ledger',label:'入出金管理'},{id:'budget',label:'予算管理'},
+      {id:'statements',label:'決算書'},{id:'events',label:'事業記録'},
+      {id:'assembly',label:'総会資料'},{id:'settings',label:'設定'},
+    ];
+    const navItems = NAV.map(n=>({
+      ...n, onClick:()=>this.nav(n.id),
+      navStyle: n.id===page
+        ? {display:'block',padding:'7px 12px',fontSize:'13px',fontWeight:'500',color:'#0071e3',background:'rgba(0,113,227,0.08)',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'}
+        : {display:'block',padding:'7px 12px',fontSize:'13px',color:'#1d1d1f',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'},
+    }));
+
+    // Dashboard recent
+    const recentTx = [...pTx].reverse().slice(0,5).map(t=>({
+      ...t, dateStr:this.fmtD(t.date),
+      amtStr:t.income>0?'+'+this.fmt(t.income):'−'+this.fmt(t.expense),
+      amtStyle:{width:'72px',textAlign:'right',fontSize:'12px',fontWeight:'600',color:t.income>0?'#34c759':'#ff3b30'},
+    }));
+    const upcomingEvts = pEvents.filter(e=>e.date>=today).slice(0,4).map(e=>({
+      ...e, dateStr:this.fmtD(e.date),
+      cardStyle:{...(evtCardBg[e.type]||{background:'#f9fafb',borderLeft:'3px solid #d1d5db'}),padding:'10px 13px',borderRadius:'8px',marginBottom:'10px'},
+    }));
+
+    // Financial statement
+    const incMap={},expMap={};
+    pTx.forEach(t=>{
+      if(t.income>0) incMap[t.category]=(incMap[t.category]||0)+t.income;
+      if(t.expense>0) expMap[t.category]=(expMap[t.category]||0)+t.expense;
+    });
+    const stmtIncomeRows=Object.entries(incMap).map(([cat,amt])=>({cat,amtStr:this.fmt(amt)}));
+    const stmtExpenseRows=Object.entries(expMap).map(([cat,amt])=>({cat,amtStr:this.fmt(amt)}));
+
+    // Period options
+    const periodOptions = periods.map(p=>({...p}));
+    const periodRows = periods.map(p=>({
+      ...p,
+      startStr:this.fmtD(p.startDate), endStr:this.fmtD(p.endDate),
+      activeLabel:p.id===currentPeriodId?'現在の期':'',
+      activeBadge:p.id===currentPeriodId?{...bBase,background:'#dcfce7',color:'#166534'}:{...bBase,background:'transparent',color:'transparent'},
+      onSelect:()=>this.setState({currentPeriodId:p.id}),
+    }));
+
+    // Modal
+    const TITLES={officer:modal.editId?'役員を編集':'役員を追加',member:modal.editId?'会員情報を編集':'新規会員登録',memberStatus:'退会・訂正の記録',invoice:modal.editId?'請求書を編集':'請求書を追加',transaction:modal.editId?'取引を編集':'取引を追加',budget:modal.editId?'予算科目を編集':'予算科目を追加',event:modal.editId?'事業を編集':'事業を追加',period:'新しい期を追加'};
+    const SAVES={officer:()=>this.saveOfficer(),member:()=>this.saveMember(),memberStatus:()=>this.saveStatusChange(),invoice:()=>this.saveInvoice(),transaction:()=>this.saveTx(),budget:()=>this.saveBudget(),event:()=>this.saveEvent(),period:()=>this.savePeriod()};
+
+    return {
+      p:{dashboard:page==='dashboard',officers:page==='officers',members:page==='members',invoices:page==='invoices',ledger:page==='ledger',budget:page==='budget',statements:page==='statements',events:page==='events',assembly:page==='assembly',settings:page==='settings',printInvoice:!!(this.state.printDoc)},
+      navItems, periodOptions, currentPeriodId,
+      onChangePeriod:(e)=>this.setState({currentPeriodId:e.target.value}),
+      currentPeriodName:cp.name,
+      periodName:cp.name, periodStart:this.fmtD(cp.startDate), periodEnd:this.fmtD(cp.endDate),
+      prevPeriodName:cp.name,
+      kpi:{income:this.fmt(totalIncome),expense:this.fmt(totalExpense),balance:this.fmt(totalIncome-totalExpense),unpaid:unpaidCount+'社'},
+      recentTx, upcomingEvts,
+      officerRows,
+      memberOptions: members.map(m=>({id:m.id, label:`${m.name}（${m.store}）`})),
+      onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:''}),
+      onPrint:()=>window.print(),
+      memberRows,
+      memberCount:members.filter(m=>m.type!=='その他').length,
+      activeMemberCount:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).length,
+      memberPageInfo:`全${allMemberRows.length}件中 ${memberPage*PAGE_SIZE+1}〜${Math.min((memberPage+1)*PAGE_SIZE,allMemberRows.length)}件`,
+      onMemberPrev:memberPage>0?()=>this.setState({memberPage:memberPage-1}):()=>{},
+      onMemberNext:memberPage<totalMemberPages-1?()=>this.setState({memberPage:memberPage+1}):()=>{},
+      memberPrevStyle:{...btnPage,background:memberPage>0?'#fff':'#f9f9f9',color:memberPage>0?'#1d1d1f':'#aeaeb2',cursor:memberPage>0?'pointer':'not-allowed'},
+      memberNextStyle:{...btnPage,background:memberPage<totalMemberPages-1?'#fff':'#f9f9f9',color:memberPage<totalMemberPages-1?'#1d1d1f':'#aeaeb2',cursor:memberPage<totalMemberPages-1?'pointer':'not-allowed'},
+      otherMemberRows,
+      memberChangeLogs, hasNoChangeLogs:memberChangeLogs.length===0,
+      onMemberTypeChange:(e)=>{this.setField('type',e.target.value);this.setField('fee',e.target.value==='大型店正会員'?72000:e.target.value==='その他'?0:24000);},
+      onAddMember:()=>this.openModal('member',null,{type:'正会員',fee:24000,name:'',store:'',phone:'',fax:'',email:'',address:'',joinDate:''}),
+      invoiceRows, invoiceFilters,
+      paidCount:pInvoices.filter(i=>i.status==='済み').length,
+      unpaidCount,
+      totalInvoiceAmt:this.fmt(pInvoices.reduce((s,i)=>s+i.amount,0)),
+      onGenerateInvoices:()=>this.generateInvoices(),
+      onOpenBulk:()=>this.openBulkModal(),
+      onAddInvoice:()=>this.openModal('invoice',null,{type:'会費',status:'未払い',issuedDate:new Date().toISOString().slice(0,10),paidDate:'',amount:0,memberStore:'',memberName:'',memberId:'',paymentMethod:'',reminderNote:''}),
+      onInvoiceMemberSelect:(e)=>{
+        const mb = members.find(m=>m.id===e.target.value);
+        if (mb) {
+          const autoFill = confirm(`${mb.store} の年会費 ${this.fmt(mb.fee)} を自動入力しますか？\n（キャンセルで金額は手入力できます）`);
+          this.setState(s=>({formData:{...s.formData,memberId:mb.id,memberStore:mb.store,memberName:mb.name,...(autoFill?{amount:mb.fee}:{})}}));
+        } else {
+          this.setState(s=>({formData:{...s.formData,memberId:''}}));
+        }
+      },
+      // Invoice logs
+      invoiceLogRows:[...(this.state.invoiceLogs||[])].reverse().slice(0,50).map(log=>({
+        ...log,
+        timeStr:log.timestamp?(this.fmtD(log.timestamp.slice(0,10))+' '+log.timestamp.slice(11,16)):'',
+        amountStr:this.fmt(log.amount||0),
+        actionBadge:{padding:'2px 8px',borderRadius:'20px',fontSize:'10px',fontWeight:'500',display:'inline-block',whiteSpace:'nowrap',
+          background:({'一括発行':'#dbeafe','発行':'#dbeafe','入金登録':'#dcfce7','取消':'#fee2e2'})[log.action]||'#f1f5f9',
+          color:({'一括発行':'#1d4ed8','発行':'#1d4ed8','入金登録':'#166534','取消':'#991b1b'})[log.action]||'#475569'},
+        onDel:()=>this.setState(s=>({invoiceLogs:(s.invoiceLogs||[]).filter(l=>l.id!==log.id)}),()=>this.persist()),
+      })),
+      hasNoInvoiceLogs:!(this.state.invoiceLogs&&this.state.invoiceLogs.length),
+      // Bulk modal
+      showBulkModal:this.state.bulkModal||false,
+      onCloseBulk:()=>this.setState({bulkModal:false}),
+      bulkIssuedDate:this.state.bulkIssuedDate||new Date().toISOString().slice(0,10),
+      bulkType:this.state.bulkType||'会費',
+      bulkDescription:this.state.bulkDescription||'',
+      onBulkDateChange:(e)=>{
+        const d = e.target.value;
+        this.setState(s=>({bulkIssuedDate:d,bulkDescription:`${this.calcFiscalYear(d)}商店会会費として`}));
+      },
+      onBulkTypeChange:(e)=>this.setState({bulkType:e.target.value}),
+      onBulkDescChange:(e)=>this.setState({bulkDescription:e.target.value}),
+      onBulkSelectAll:()=>{
+        const existing = new Set(invoices.filter(i=>i.periodId===currentPeriodId).map(i=>i.memberId));
+        this.setState({bulkSelectedIds:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>m.id)});
+      },
+      onBulkClearAll:()=>this.setState({bulkSelectedIds:[]}),
+      onBulkGenerate:()=>this.generateBulkInvoices(),
+      bulkSelectedCount:(this.state.bulkSelectedIds||[]).length,
+      bulkMemberList:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>{
+        const sel=(this.state.bulkSelectedIds||[]).includes(m.id);
+        const hasInv=pInvoices.some(i=>i.memberId===m.id&&i.status!=='取消');
+        return {
+          ...m,feeStr:this.fmt(m.fee),
+          rowStyle:sel?'background:#eff6ff;':'',
+          checkStyle:{width:'18px',height:'18px',borderRadius:'5px',border:sel?'none':'1.5px solid #d1d5db',background:sel?'#0071e3':'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0},
+          checkMark:sel?'✓':'',
+          existsLabel:hasInv?'発行済':'',
+          existsBadge:hasInv?{fontSize:'10px',color:'#6e6e73',background:'#f1f5f9',padding:'1px 6px',borderRadius:'8px'}:{display:'none'},
+          onToggle:()=>{
+            const ids=this.state.bulkSelectedIds||[];
+            this.setState({bulkSelectedIds:ids.includes(m.id)?ids.filter(id=>id!==m.id):[...ids,m.id]});
+          },
+        };
+      }),
+      // Installment modal
+      showInstallmentModal:this.state.installmentModal||false,
+      onCloseInstallment:()=>this.setState({installmentModal:false}),
+      onSaveInstallment:()=>this.saveInstallment(),
+      onInstallmentCountChange:(e)=>this.setState({installmentCount:parseInt(e.target.value)||12}),
+      onInstallmentDebitDayChange:(e)=>this.setState({installmentDebitDay:parseInt(e.target.value)||27}),
+      onInstallmentStartChange:(e)=>this.setState({installmentStartMonth:e.target.value}),
+      installmentCount:String(this.state.installmentCount||12),
+      installmentDebitDay:String(this.state.installmentDebitDay||27),
+      installmentStartMonth:this.state.installmentStartMonth||new Date().toISOString().slice(0,7),
+      ...(() => {
+        const invId = this.state.installmentInvoiceId;
+        const inv = invId ? (this.state.invoices||[]).find(i=>i.id===invId) : null;
+        if (!inv) return {installmentInvoiceStore:'',installmentTotalStr:'',installmentPerStr:'',installmentPaidCount:0,installmentRemainingStr:'',installmentSchedule:[]};
+        const cnt = this.state.installmentCount||12;
+        const day = this.state.installmentDebitDay||27;
+        const start = this.state.installmentStartMonth||new Date().toISOString().slice(0,7);
+        const total = inv.amount||0;
+        const perAmt = Math.floor(total/cnt);
+        const lastAmt = total - perAmt*(cnt-1);
+        const existPmts = (inv.installment&&inv.installment.payments)||[];
+        const bBase2 = {padding:'2px 7px',borderRadius:'20px',fontSize:'10px',fontWeight:'500',display:'inline-block'};
+        const schedule = Array.from({length:cnt},(_,i)=>{
+          const [y,m] = start.split('-').map(Number);
+          const date = new Date(y,m-1+i,1);
+          const maxDay = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+          const actualDay = Math.min(day,maxDay);
+          const dueDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(actualDay).padStart(2,'0')}`;
+          const existing = existPmts.find(p=>p.seq===i+1)||{};
+          const amt = i===cnt-1?lastAmt:perAmt;
+          const status = existing.status||'未払い';
+          return {
+            seq:i+1,
+            dueDateStr:this.fmtD(dueDate),
+            amountStr:this.fmt(amt),
+            status,
+            statusBadge:{...bBase2,background:status==='済み'?'#dcfce7':'#fee2e2',color:status==='済み'?'#166534':'#991b1b'},
+            markPaidStyle:status==='未払い'?{border:'none',background:'rgba(52,199,89,0.12)',color:'#34c759',padding:'3px 8px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#aeaeb2',padding:'3px 8px',borderRadius:'5px',fontSize:'10px',cursor:'default'},
+            onMarkPaid:status==='未払い'?()=>this.markInstallmentPaid(invId,i+1):()=>{},
+          };
+        });
+        const paidCount = schedule.filter(s=>s.status==='済み').length;
+        const paidAmt = existPmts.filter(p=>p.status==='済み').reduce((s,p)=>s+(p.amount||0),0);
+        return {
+          installmentInvoiceStore:inv.memberStore||'',
+          installmentTotalStr:`合計 ${this.fmt(total)}`,
+          installmentPerStr:`${this.fmt(perAmt)}（最終回 ${this.fmt(lastAmt)}）`,
+          installmentPaidCount:paidCount,
+          installmentRemainingStr:this.fmt(total-paidAmt),
+          installmentSchedule:schedule,
+        };
+      })(),
+
+      // Hanko
+      hankoUnlocked:this.state.hankoUnlocked||false,
+      hankoPwdInput:this.state.hankoPwdInput||'',
+      onHankoPwdInput:(e)=>this.setState({hankoPwdInput:e.target.value}),
+      onHankoUnlock:()=>{
+        if(this.state.hankoPwdInput==='2490'){this.setState({hankoUnlocked:true});this.showToast('印鑑を押しました');}
+        else{this.setState({hankoUnlocked:false});this.showToast('パスワードが違います');}
+      },
+      hankoStatusMsg:this.state.hankoUnlocked?'✓ 印鑑あり':'—',
+      hankoStatusColor:this.state.hankoUnlocked?'#34c759':'#aeaeb2',
+      txRows, txFilters, budgetCategoryOptions, budgetIncomeCats, budgetExpenseCats,
+      txTypeIsIncome, txTypeIsExpense,
+      txYearLabel, txMonthTabs, txPeriodTabs, onTxPrevYear, onTxNextYear,
+      totalIncome:this.fmt(totalIncome), totalExpense:this.fmt(totalExpense), netBalance:this.fmt(totalIncome-totalExpense),
+      cashBalance:this.fmt(cashBal), bankBalance:this.fmt(bankBal),
+      onAddTx:()=>this.openModal('transaction',null,{txType:'収入',date:new Date().toISOString().slice(0,10),description:'',category:'',amount:0,accountType:'口座'}),
+
+      // Transfer modal
+      showTransferModal:this.state.transferModal||false,
+      onAddTransfer:()=>this.setState({transferModal:true,transferDate:new Date().toISOString().slice(0,10),transferAmount:0,transferFrom:'口座',transferTo:'現金',transferDesc:''}),
+      onCloseTransfer:()=>this.setState({transferModal:false}),
+      onSaveTransfer:()=>this.saveTransfer(),
+      transferDate:this.state.transferDate||new Date().toISOString().slice(0,10),
+      transferAmount:String(this.state.transferAmount||0),
+      transferFrom:this.state.transferFrom||'口座',
+      transferTo:this.state.transferTo||'現金',
+      transferDesc:this.state.transferDesc||'',
+      transferAmountStr:this.fmt(parseFloat(this.state.transferAmount)||0),
+      onTransferDateChange:(e)=>this.setState({transferDate:e.target.value}),
+      onTransferAmountChange:(e)=>this.setState({transferAmount:e.target.value}),
+      onTransferFromChange:(e)=>this.setState({transferFrom:e.target.value}),
+      onTransferToChange:(e)=>this.setState({transferTo:e.target.value}),
+      onTransferDescChange:(e)=>this.setState({transferDesc:e.target.value}),
+
+      // Composite modal
+      showCompositeModal:this.state.compositeModal||false,
+      onAddComposite:()=>this.setState({compositeModal:true,compositeDate:new Date().toISOString().slice(0,10),compositeGroupName:'',compositeLines:[{id:this.gen(),txType:'収入',category:'',description:'',amount:0,accountType:'口座'},{id:this.gen(),txType:'支出',category:'',description:'',amount:0,accountType:'口座'}]}),
+      onCloseComposite:()=>this.setState({compositeModal:false}),
+      onSaveComposite:()=>this.saveComposite(),
+      onAddCompositeLine:()=>this.addCompositeLine(),
+      compositeDate:this.state.compositeDate||new Date().toISOString().slice(0,10),
+      compositeGroupName:this.state.compositeGroupName||'',
+      onCompositeDateChange:(e)=>this.setState({compositeDate:e.target.value}),
+      onCompositeGroupChange:(e)=>this.setState({compositeGroupName:e.target.value}),
+      compositeLines:(this.state.compositeLines||[]).map(l=>({
+        ...l,
+        amount:String(l.amount||0),
+        onTypeChange:(e)=>this.updateCompositeLine(l.id,'txType',e.target.value),
+        onCatChange:(e)=>this.updateCompositeLine(l.id,'category',e.target.value),
+        onDescChange:(e)=>this.updateCompositeLine(l.id,'description',e.target.value),
+        onAccChange:(e)=>this.updateCompositeLine(l.id,'accountType',e.target.value),
+        onAmtChange:(e)=>this.updateCompositeLine(l.id,'amount',e.target.value),
+        onDel:()=>this.delCompositeLine(l.id),
+      })),
+      compositeTotalIncome:this.fmt((this.state.compositeLines||[]).filter(l=>l.txType==='収入').reduce((s,l)=>s+(parseFloat(l.amount)||0),0)),
+      compositeTotalExpense:this.fmt((this.state.compositeLines||[]).filter(l=>l.txType==='支出').reduce((s,l)=>s+(parseFloat(l.amount)||0),0)),
+      compositeNet:this.fmt((this.state.compositeLines||[]).reduce((s,l)=>s+(l.txType==='収入'?1:-1)*(parseFloat(l.amount)||0),0)),
+      incomeBudget, expenseBudget,
+      totalBudgetI:this.fmt(pBudget.filter(b=>b.type==='収入').reduce((s,b)=>s+b.amount,0)),
+      totalBudgetE:this.fmt(pBudget.filter(b=>b.type==='支出').reduce((s,b)=>s+b.amount,0)),
+      totalActualI:this.fmt(totalIncome), totalActualE:this.fmt(totalExpense),
+      onAddIncomeBudget:()=>this.openModal('budget',null,{type:'収入',category:'',amount:0}),
+      onAddExpenseBudget:()=>this.openModal('budget',null,{type:'支出',category:'',amount:0}),
+      onOpenBudgetDraft:()=>this.openBudgetDraft(),
+      // Budget draft modal
+      showBudgetDraftModal:this.state.budgetDraftModal||false,
+      onCloseBudgetDraft:()=>this.setState({budgetDraftModal:false}),
+      onConfirmBudgetDraft:()=>this.confirmBudgetDraft(),
+      onAddDraftIncome:()=>this.addDraftItem('収入'),
+      onAddDraftExpense:()=>this.addDraftItem('支出'),
+      ...(() => {
+        const draft = this.state.budgetDraft;
+        if (!draft) return {
+          draftIncomeRows:[],draftExpenseRows:[],
+          draftIncomeTotalStr:'¥0',draftExpenseTotalStr:'¥0',
+          budgetDraftTargetName:'翌期',
+          budgetDraftSavedLabel:'未保存',budgetDraftSavedColor:'#aeaeb2',
+        };
+        const nextPeriod = periods.find(p=>p.id===draft.targetPeriodId);
+        const mkDraftRow = item => ({
+          ...item,
+          currentBudgetStr:this.fmt(item.currentBudget||0),
+          currentActualStr:this.fmt(item.currentActual||0),
+          nextAmountStr:String(item.nextAmount||0),
+          remark:item.remark||'',
+          onAmountChange:(e)=>this.updateDraftItem(item.id,'nextAmount',parseInt(e.target.value)||0),
+          onRemarkChange:(e)=>this.updateDraftItem(item.id,'remark',e.target.value),
+          onDel:()=>this.delDraftItem(item.id),
+        });
+        const draftIncomeRows = draft.items.filter(i=>i.type==='収入').map(mkDraftRow);
+        const draftExpenseRows = draft.items.filter(i=>i.type==='支出').map(mkDraftRow);
+        const draftIncomeTotal = draft.items.filter(i=>i.type==='収入').reduce((s,i)=>s+(parseInt(i.nextAmount)||0),0);
+        const draftExpenseTotal = draft.items.filter(i=>i.type==='支出').reduce((s,i)=>s+(parseInt(i.nextAmount)||0),0);
+        return {
+          draftIncomeRows, draftExpenseRows,
+          draftIncomeTotalStr:this.fmt(draftIncomeTotal),
+          draftExpenseTotalStr:this.fmt(draftExpenseTotal),
+          budgetDraftTargetName:nextPeriod?`${nextPeriod.name}予算`:'翌期予算',
+          budgetDraftSavedLabel:draft.savedAt?('自動保存 '+this.fmtD(draft.savedAt.slice(0,10))+' '+draft.savedAt.slice(11,16)):'未保存',
+          budgetDraftSavedColor:draft.savedAt?'#34c759':'#aeaeb2',
+        };
+      })(),
+      stmtIncomeRows, stmtExpenseRows,
+      stmtTotalI:this.fmt(totalIncome), stmtTotalE:this.fmt(totalExpense), stmtNet:this.fmt(totalIncome-totalExpense),
+      eventRows,
+      onAddEvent:()=>this.openModal('event',null,{name:'',type:'総会・会議',date:new Date().toISOString().slice(0,10),endDate:'',participants:'',notes:''}),
+      assemblyOfficers:officerRows,
+      assemblyIncome:this.fmt(totalIncome), assemblyExpense:this.fmt(totalExpense), assemblyBalance:this.fmt(totalIncome-totalExpense),
+      assemblyEvents:eventRows.filter(e=>!e.isBeyondPeriod&&!e.isScheduled),
+      periodRows,
+      onAddPeriod:()=>this.openModal('period',null,{name:`第${periods.length+1}期`,startDate:'',endDate:''}),
+      modal, formData, modalShow:modal.show,
+      modalTitle:TITLES[modal.type]||'',
+      modalSaveLabel:modal.editId?'更新':'追加',
+      onSave:SAVES[modal.type]||(()=>{}),
+      onClose:()=>this.closeModal(),
+      onInput:(e)=>this.setField(e.target.dataset.field,e.target.value),
+      onModalBgClick:(e)=>{ if(e.target===e.currentTarget) this.closeModal(); },
+      stopProp:(e)=>e.stopPropagation(),
+      isOfficer:modal.type==='officer', isMember:modal.type==='member', isMemberStatus:modal.type==='memberStatus',
+      isInvoice:modal.type==='invoice', isTx:modal.type==='transaction',
+      isBudget:modal.type==='budget', isEvent:modal.type==='event', isPeriod:modal.type==='period',
+      toast, showToast:!!toast,
+
+      // Print doc
+      ...(() => {
+        const pd = this.state.printDoc;
+        if (!pd) return {printIsInvoice:false,printIsReceipt:false,printStore:'',printName:'',printNo:'',printIssuedStr:'',printPaidStr:'',printDueStr:'',printAmountStr:'',printItemName:'',printPaymentMethod:'',printDocTitle:'',onClosePrint:()=>{},onPrint:()=>{},stopProp:(e)=>e.stopPropagation()};
+        return {
+          printIsInvoice:pd.docType==='invoice',
+          printIsReceipt:pd.docType==='receipt',
+          printStore:pd.memberStore||'',
+          printName:pd.memberName||'',
+          printNo:'INV-'+pd.id.slice(-6).toUpperCase(),
+          printIssuedStr:this.fmtD(pd.issuedDate),
+          printPaidStr:this.fmtD(pd.paidDate),
+          printDueStr:this.fmtD(pd.dueDate||pd.issuedDate),
+          printAmountStr:Math.abs(pd.amount||0).toLocaleString('ja-JP'),
+          printItemName:pd.type||'会費',
+          printDescription:pd.description||'',
+          printPaymentMethod:pd.paymentMethod||'—',
+          printOrgName:(this.state.orgInfo||{}).name||'新田西口商店会',
+          printOrgRepName:(this.state.orgInfo||{}).repName||'',
+          printOrgAddress:(this.state.orgInfo||{}).address||'',
+          printOrgPhone:(this.state.orgInfo||{}).phone||'',
+          printHasBankInfo:!!((this.state.orgInfo||{}).bankName),
+          printBankName:(this.state.orgInfo||{}).bankName||'',
+          printBankBranch:(this.state.orgInfo||{}).bankBranch||'',
+          printBankType:(this.state.orgInfo||{}).bankType||'普通',
+          printBankAccount:(this.state.orgInfo||{}).bankAccount||'',
+          printBankHolder:(this.state.orgInfo||{}).bankHolder||'',
+          printDocTitle:pd.docType==='invoice'?'請求書':'領収書',
+          onClosePrint:()=>this.setState({printDoc:null}),
+          onPrint:()=>window.print(),
+          stopProp:(e)=>e.stopPropagation(),
+        };
+      })(),
+
+      // Org info settings
+      orgInfo: {...{name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},...(this.state.orgInfo||{}),...(this.state.orgInfoInput||{})},
+      onOrgInput:(e)=>this.setState(s=>({orgInfoInput:{...(s.orgInfoInput||s.orgInfo||{}), [e.target.dataset.field]:e.target.value}})),
+      onSaveOrgInfo:()=>this.saveOrgInfo(),
+
+      scriptUrl:this.state.scriptUrl||'',
+      scriptUrlInput:this.state.scriptUrlInput||'',
+      loading:this.state.loading||false,
+      syncStatusLabel:({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
+      syncStatusColor:({null:'#aeaeb2',syncing:'#f59e0b',ok:'#34c759',error:'#ff3b30'})[String(this.state.syncStatus)]||'#aeaeb2',
+      gasUserEmail:(this.state.gasUser||{}).email||'',
+      gasLogoutUrl:'https://accounts.google.com/logout',
+      onScriptUrlInput:(e)=>this.setState({scriptUrlInput:e.target.value}),
+      onSaveScriptUrl:()=>this.saveScriptUrl(),
+    };
+  }
+}
 
 </script>
 </body>
