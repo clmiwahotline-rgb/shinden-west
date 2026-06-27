@@ -3858,7 +3858,19 @@ class Component extends DCLogic {
       .then(r => r.text())
       .then(text => {
         console.log('GAS raw response (first 300 chars):', text.slice(0,300));
-        return JSON.parse(text);
+        // 先頭文字のcharCodeを確認（BOMや不可視文字の検出）
+        console.log('First 5 charCodes:', [...text.slice(0,5)].map(c=>c.charCodeAt(0)));
+        // trimしてから試す
+        const trimmed = text.trim().replace(/^\uFEFF/,''); // BOM除去
+        try {
+          return JSON.parse(trimmed);
+        } catch(e) {
+          // エラー位置の前後100文字を表示
+          const pos = parseInt((e.message.match(/position (\d+)/)||[])[1]||0);
+          console.error('JSON parse error at pos', pos, ':', trimmed.slice(Math.max(0,pos-20),pos+50));
+          console.error('Full response length:', text.length);
+          throw e;
+        }
       })
       .then(d => {
         if (d.error) throw new Error(d.error);
