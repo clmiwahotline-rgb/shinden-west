@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>新田西口商店会 管理ポータル</title>
@@ -22,118 +21,46 @@
     ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
   </style>
 
-
-
-  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async></script>
   <style>
-    #gas-auth-overlay {
-      position:fixed;inset:0;z-index:9999;
-      background:linear-gradient(135deg,#f5f5f7 0%,#e8e8ed 100%);
-      display:flex;align-items:center;justify-content:center;
-      font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;
-    }
-    #gas-auth-overlay.hidden { display:none; }
-    .auth-card {
-      background:#fff;border-radius:20px;
-      box-shadow:0 8px 40px rgba(0,0,0,0.12);
-      padding:48px 52px;text-align:center;width:360px;
-    }
-    .auth-title { font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px; }
-    .auth-sub { font-size:13px;color:#6e6e73;margin-bottom:32px;line-height:1.6; }
-    .auth-error { font-size:12px;color:#ff3b30;margin-top:16px;display:none; }
+    #gas-auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#f5f5f7 0%,#e8e8ed 100%);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;}
+    #gas-auth-overlay.hidden{display:none;}
+    .auth-card{background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:48px 52px;text-align:center;width:360px;}
+    .auth-title{font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px;}
+    .auth-sub{font-size:13px;color:#6e6e73;margin-bottom:32px;line-height:1.6;}
+    .auth-error{font-size:12px;color:#ff3b30;margin-top:16px;display:none;}
   </style>
 </head>
-
 <body>
-
   <div id="gas-auth-overlay">
     <div class="auth-card">
       <div style="font-size:36px;margin-bottom:14px;">🏪</div>
       <div class="auth-title">新田西口商店会</div>
       <div class="auth-sub">管理ポータルへようこそ<br>Googleアカウントでログインしてください</div>
-      <div id="g_id_onload"
-        data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com"
-        data-callback="handleGoogleLogin"
-        data-auto_prompt="false">
-      </div>
-      <div class="g_id_signin"
-        data-type="standard"
-        data-size="large"
-        data-theme="outline"
-        data-text="signin_with"
-        data-shape="rectangular"
-        data-logo_alignment="left"
-        data-locale="ja">
-      </div>
+      <div id="g_id_onload" data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
+      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-locale="ja"></div>
       <div class="auth-error" id="auth-error"></div>
     </div>
   </div>
-
   <script>
-    const ALLOWED_EMAILS = ['clmiwa.hotline@gmail.com'];
-
-    function parseJWT(token) {
-      try {
-        // base64url → base64 変換（JWT標準）
-        const base64 = token.split('.')[1]
-          .replace(/-/g, '+')
-          .replace(/_/g, '/')
-          .padEnd(Math.ceil(token.split('.')[1].length / 4) * 4, '=');
-        return JSON.parse(atob(base64));
-      } catch(e) { return null; }
-    }
-
-    function handleGoogleLogin(response) {
-      const payload = parseJWT(response.credential);
-      if (!payload) {
-        showAuthError('認証情報の解析に失敗しました。再試行してください。');
-        return;
-      }
-      const email = payload.email;
-      const name = payload.name || email;
-
-      if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {
-        showAuthError(email + ' はアクセスが許可されていません。');
-        return;
-      }
-
-      // セッションに保存（タブを閉じると消える）
-      sessionStorage.setItem('nitta_auth', JSON.stringify({ email, name, exp: payload.exp }));
-
-      window.__GAS_USER__ = { email, name };
-      window.__GAS_MODE__ = false;
+    const ALLOWED_EMAILS=['clmiwa.hotline@gmail.com'];
+    function parseJWT(t){try{const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(t.split('.')[1].length/4)*4,'=');return JSON.parse(atob(b));}catch(e){return null;}}
+    function handleGoogleLogin(r){
+      const p=parseJWT(r.credential);
+      if(!p){showAuthError('認証情報の解析に失敗しました。');return;}
+      const email=p.email,name=p.name||email;
+      if(ALLOWED_EMAILS.length>0&&!ALLOWED_EMAILS.includes(email)){showAuthError(email+' はアクセスが許可されていません。');return;}
+      sessionStorage.setItem('nitta_auth',JSON.stringify({email,name,exp:p.exp}));
+      window.__GAS_USER__={email,name};window.__GAS_MODE__=false;
       document.getElementById('gas-auth-overlay').classList.add('hidden');
-      if (window.__initPortal) window.__initPortal({ email, name });
+      if(window.__initPortal)window.__initPortal({email,name});
     }
-
-    function showAuthError(msg) {
-      const el = document.getElementById('auth-error');
-      el.textContent = msg;
-      el.style.display = 'block';
-    }
-
-    // リロード時のセッション復元
-    window.addEventListener('DOMContentLoaded', function() {
-      const saved = sessionStorage.getItem('nitta_auth');
-      if (saved) {
-        try {
-          const u = JSON.parse(saved);
-          if (u.exp && Math.floor(Date.now() / 1000) < u.exp) {
-            window.__GAS_USER__ = { email: u.email, name: u.name };
-            window.__GAS_MODE__ = false;
-            document.getElementById('gas-auth-overlay').classList.add('hidden');
-            if (window.__initPortal) window.__initPortal(u);
-            return;
-          }
-        } catch(e) {}
-      }
+    function showAuthError(m){const e=document.getElementById('auth-error');e.textContent=m;e.style.display='block';}
+    window.addEventListener('DOMContentLoaded',function(){
+      const s=sessionStorage.getItem('nitta_auth');
+      if(s){try{const u=JSON.parse(s);if(u.exp&&Math.floor(Date.now()/1000)<u.exp){window.__GAS_USER__={email:u.email,name:u.name};window.__GAS_MODE__=false;document.getElementById('gas-auth-overlay').classList.add('hidden');if(window.__initPortal)window.__initPortal(u);return;}}catch(e){}}
     });
-
-    window.__logout = function() {
-      sessionStorage.removeItem('nitta_auth');
-      location.reload();
-    };
+    window.__logout=function(){sessionStorage.removeItem('nitta_auth');location.reload();};
   </script>
 <x-dc>
 <helmet>
@@ -205,9 +132,10 @@
             <div style="fontSize:11px;fontWeight:600;color:#6e6e73;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">収支残高</div>
             <div style="fontSize:24px;fontWeight:700;color:#0071e3;letterSpacing:-0.02em;">{{ kpi.balance }}</div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 1px 4px rgba(0,0,0,0.06);cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(255,59,48,0.15);">
             <div style="fontSize:11px;fontWeight:600;color:#6e6e73;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">未払い会員</div>
             <div style="fontSize:24px;fontWeight:700;color:#ff3b30;letterSpacing:-0.02em;">{{ kpi.unpaid }}</div>
+            <div style="fontSize:10px;color:#aeaeb2;marginTop:6px;">クリックで確認 →</div>
           </div>
         </div>
         <div style="display:grid;gridTemplateColumns:1.5fr 1fr;gap:16px;">
@@ -255,7 +183,8 @@
             <span style="width:76px;">役職</span>
             <span style="width:100px;">氏名</span>
             <span style="flex:1;">店舗名</span>
-            <span style="width:160px;">電話番号</span>
+            <span style="width:140px;">電話番号</span>
+            <span style="flex:1;">メモ</span>
             <span style="width:84px;" data-noprint></span>
           </div>
           <sc-for list="{{ officerRows }}" as="row" hint-placeholder-count="5">
@@ -263,7 +192,8 @@
               <span style="width:76px;"><span style="{{ row.badgeStyle }}">{{ row.role }}</span></span>
               <span style="width:100px;fontSize:13px;color:#1d1d1f;fontWeight:500;">{{ row.name }}</span>
               <span style="flex:1;fontSize:13px;color:#6e6e73;">{{ row.store }}</span>
-              <span style="width:160px;fontSize:12px;color:#6e6e73;">{{ row.phone }}</span>
+              <span style="width:140px;fontSize:12px;color:#6e6e73;">{{ row.phone }}</span>
+              <span style="flex:1;fontSize:11px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ row.memo }}</span>
               <span style="width:84px;display:flex;gap:6px;" data-noprint>
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.1);color:#ff3b30;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">削除</button>
@@ -282,6 +212,7 @@
             <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">会員管理</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">在籍 {{ activeMemberCount }} 名 ／ 全 {{ memberCount }} 件</div>
           </div>
+          <button onClick="{{ onExportMembersCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint>CSV</button>
           <button onClick="{{ onAddMember }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint>＋ 新規会員登録</button>
         </div>
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;marginBottom:12px;">
@@ -370,6 +301,8 @@
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">入金済 {{ paidCount }}件 ／ 未払い {{ unpaidCount }}件 ／ 合計 {{ totalInvoiceAmt }}</div>
           </div>
           <div style="display:flex;gap:8px;" data-noprint>
+            <button onClick="{{ onExportInvoicesCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
+            <button onClick="{{ onBulkPrintAll }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">🖨 全員印刷</button>
             <button onClick="{{ onOpenBulk }}" style="border:1px solid #0071e3;background:transparent;color:#0071e3;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
             <button onClick="{{ onAddInvoice }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
           </div>
@@ -929,12 +862,69 @@
       </div>
     </sc-if>
 
+    <!-- BULK PRINT ALL MODAL -->
+    <sc-if value="{{ showBulkPrintModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.55);zIndex:310;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;padding:24px 0;" onClick="{{ onCloseBulkPrint }}">
+        <div style="background:#f5f5f7;borderRadius:14px;width:720px;boxShadow:0 24px 80px rgba(0,0,0,0.3);" onClick="{{ stopProp }}">
+          <!-- Controls -->
+          <div style="display:flex;justify-content:space-between;alignItems:center;padding:16px 22px;background:#fff;borderRadius:14px 14px 0 0;borderBottom:1px solid rgba(0,0,0,0.08);" data-noprint>
+            <div>
+              <div style="fontSize:15px;fontWeight:700;color:#1d1d1f;">全会員 一括請求書印刷</div>
+              <div style="fontSize:12px;color:#6e6e73;marginTop:2px;">{{ bulkPrintCount }}件 ／ 印刷後に各ページに1枚ずつ出力されます</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onDoBulkPrint }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">🖨 印刷 / PDF保存</button>
+              <button onClick="{{ onCloseBulkPrint }}" style="border:none;background:rgba(0,0,0,0.07);color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;">閉じる</button>
+            </div>
+          </div>
+          <!-- Invoice list preview -->
+          <div id="bulk-print-content" style="padding:16px;display:flex;flexDirection:column;gap:12px;">
+            <sc-for list="{{ bulkPrintRows }}" as="bp" hint-placeholder-count="5">
+              <div style="background:#fff;borderRadius:10px;padding:36px 40px;boxShadow:0 1px 4px rgba(0,0,0,0.06);">
+                <div style="textAlign:center;fontSize:18px;fontWeight:700;letterSpacing:0.1em;marginBottom:20px;color:#1d1d1f;">請　求　書</div>
+                <div style="display:flex;justify-content:space-between;marginBottom:18px;">
+                  <div>
+                    <div style="fontSize:14px;fontWeight:700;color:#1d1d1f;">{{ bp.memberStore }}</div>
+                    <div style="fontSize:12px;color:#1d1d1f;">{{ bp.memberName }}　御中</div>
+                  </div>
+                  <div style="textAlign:right;fontSize:11px;color:#6e6e73;lineHeight:1.9;">
+                    <div>発行日：{{ bp.issuedStr }}</div>
+                    <div>請求番号：{{ bp.no }}</div>
+                    <div style="marginTop:6px;fontWeight:700;color:#1d1d1f;">{{ stmtOrgName }}</div>
+                    <div style="fontSize:10px;">{{ stmtRepLabel }}</div>
+                  </div>
+                </div>
+                <div style="background:#f5f5f7;borderRadius:7px;padding:12px 16px;marginBottom:16px;display:flex;justify-content:space-between;alignItems:center;">
+                  <div style="fontSize:12px;color:#6e6e73;">ご請求金額</div>
+                  <div style="fontSize:22px;fontWeight:700;color:#1d1d1f;">{{ bp.amountStr }}　円</div>
+                </div>
+                <table style="width:100%;borderCollapse:collapse;marginBottom:14px;fontSize:12px;">
+                  <tr style="background:#f9f9f9;borderBottom:2px solid #e5e7eb;">
+                    <td style="padding:7px 10px;fontWeight:600;color:#6e6e73;">件名</td>
+                    <td style="padding:7px 10px;fontWeight:600;color:#6e6e73;textAlign:right;">金額</td>
+                  </tr>
+                  <tr style="borderBottom:1px solid #f0f0f0;">
+                    <td style="padding:9px 10px;color:#1d1d1f;">{{ bp.itemName }}</td>
+                    <td style="padding:9px 10px;textAlign:right;fontWeight:600;color:#1d1d1f;">{{ bp.amountStr }}　円</td>
+                  </tr>
+                </table>
+                <div style="fontSize:11px;color:#6e6e73;lineHeight:1.9;borderTop:1px solid #e5e7eb;paddingTop:12px;">
+                  <div>お支払期限：{{ bp.dueStr }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
     <!-- ⑤ LEDGER -->
     <sc-if value="{{ p.ledger }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:1080px;">
         <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:20px;">
           <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">入出金管理</div>
           <div style="display:flex;gap:8px;" data-noprint>
+            <button onClick="{{ onExportTxCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
             <button onClick="{{ onAddTransfer }}" style="border:1px solid #6e6e73;background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⇄ 振替</button>
             <button onClick="{{ onAddComposite }}" style="border:1px solid #6e6e73;background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⊞ 複合処理</button>
             <button onClick="{{ onAddTx }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 取引追加</button>
@@ -1116,7 +1106,8 @@
           <div style="textAlign:center;marginBottom:32px;">
             <div style="fontSize:20px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.01em;">収　支　報　告　書</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:8px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
-            <div style="fontSize:12px;color:#aeaeb2;marginTop:3px;">新田西口商店会</div>
+            <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;marginTop:6px;">{{ stmtOrgName }}</div>
+            <div style="fontSize:12px;color:#6e6e73;marginTop:2px;">{{ stmtRepLabel }}</div>
           </div>
           <div style="marginBottom:24px;">
             <div style="fontSize:12px;fontWeight:700;color:#34c759;borderBottom:2px solid #34c759;paddingBottom:7px;marginBottom:12px;letterSpacing:0.02em;">【収入の部】</div>
@@ -1205,7 +1196,8 @@
         <div style="background:#fff;borderRadius:16px;boxShadow:0 1px 6px rgba(0,0,0,0.08);padding:40px 48px;">
           <div style="textAlign:center;marginBottom:36px;">
             <div style="fontSize:20px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.01em;">{{ periodName }} 定期総会　議案書</div>
-            <div style="fontSize:12px;color:#aeaeb2;marginTop:8px;">新田西口商店会</div>
+            <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;marginTop:8px;">{{ stmtOrgName }}</div>
+            <div style="fontSize:12px;color:#6e6e73;marginTop:2px;">{{ stmtRepLabel }}</div>
           </div>
           <div style="marginBottom:28px;">
             <div style="fontSize:13px;fontWeight:700;color:#1d1d1f;borderBottom:1px solid rgba(0,0,0,0.08);paddingBottom:8px;marginBottom:14px;">第1号議案　{{ prevPeriodName }}活動報告</div>
@@ -1260,10 +1252,17 @@
             <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">Google スプレッドシート連携</div>
             <span style="fontSize:12px;fontWeight:600;color:{{ syncStatusColor }};">{{ syncStatusLabel }}</span>
           </div>
-          <div style="fontSize:12px;color:#6e6e73;lineHeight:1.7;marginBottom:14px;">Apps Script をデプロイして取得したURLを貼り付けてください。データが自動的に同期されます。</div>
-          <div style="display:flex;gap:8px;">
-            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec" />
-            <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#0071e3;color:#fff;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
+          <div style="fontSize:12px;color:#6e6e73;lineHeight:1.7;marginBottom:14px;">
+            Apps Script をデプロイして取得したURLとAPIキーを入力してください。<br>
+            ⚠️ デプロイ時「アクセスできるユーザー：<b>全員（匿名ユーザーを含む）</b>」を選択してください。<br>
+            APIキーはGASの「プロジェクトの設定→スクリプトプロパティ→API_KEY」で確認できます。
+          </div>
+          <div style="display:flex;flexDirection:column;gap:8px;">
+            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec" />
+            <div style="display:flex;gap:8px;">
+              <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）" />
+              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#0071e3;color:#fff;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
+            </div>
           </div>
         </div>
         <!-- 代表者情報 -->
@@ -1358,6 +1357,9 @@
               </sc-for>
             </select>
             <div style="fontSize:11px;color:#aeaeb2;marginTop:5px;">選択すると氏名・店舗・電話が自動で反映されます</div>
+          </div>
+          <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">メモ・備考</label>
+            <textarea data-field="memo" value="{{ formData.memo }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="2" placeholder="担当業務、連絡事項など"></textarea>
           </div>
         </div>
       </sc-if>
@@ -1745,7 +1747,15 @@
           entry.subs.delete(sub);
         };
       }, []);
-      return h(Root, entry.propOverrides || null);
+      const defaults = React.useMemo(() => {
+        const d = {};
+        for (const k in entry.propsMeta || {}) {
+          const v = entry.propsMeta?.[k]?.default;
+          if (v !== void 0) d[k] = v;
+        }
+        return d;
+      }, [entry.propsMeta]);
+      return h(Root, { ...defaults, ...entry.propOverrides || {} });
     }
     const ReactDOM = getReactDOM();
     if (ReactDOM.createRoot)
@@ -3162,8 +3172,7 @@
 })();
 
 </script>
-<script data-dc-script>
-
+<script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
     page: 'dashboard',
@@ -3174,7 +3183,7 @@ class Component extends DCLogic {
     modal: { show: false, type: null, editId: null },
     formData: {},
     toast: null, _tt: null,
-    scriptUrl: '', scriptUrlInput: '',
+    scriptUrl: '', scriptUrlInput: '', scriptApiKey: '',
     syncStatus: null, loading: false,
     orgInfo: {name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},
     orgInfoInput: null,
@@ -3191,6 +3200,8 @@ class Component extends DCLogic {
     budgetDraftModal: false,
     budgetDraft: null, // {targetPeriodId, items:[{id,category,type,nextAmount,remark}], savedAt}
     invoiceFilter: '全て',
+    bulkPrintModal: false,
+    bulkPrintDocs: [],
     txFilter: '全て',
     txYear: null,
     txMonth: '全月',
@@ -3247,9 +3258,10 @@ class Component extends DCLogic {
     }
     // 通常ブラウザモード (localStorage + optional Sheets URL)
     const url = localStorage.getItem('nitta_script_url') || '';
-    if (url) {
-      this.setState({ scriptUrl: url, scriptUrlInput: url, loading: true });
-      this.fetchSheets(url);
+    const apiKey = localStorage.getItem('nitta_api_key') || '';
+    if (url && apiKey) {
+      this.setState({ scriptUrl: url, scriptUrlInput: url, scriptApiKey: apiKey, loading: true });
+      this.fetchSheets(url, apiKey);
     } else {
       this.loadLocal();
     }
@@ -3326,34 +3338,29 @@ class Component extends DCLogic {
 
   saveScriptUrl() {
     const url = (this.state.scriptUrlInput||'').trim();
+    const apiKey = (this.state.scriptApiKey||'').trim();
     localStorage.setItem('nitta_script_url', url);
-    if (!url) {
+    localStorage.setItem('nitta_api_key', apiKey);
+    if (!url || !apiKey) {
       this.setState({ scriptUrl: '', syncStatus: null });
-      this.showToast('連携を解除しました');
+      this.showToast((!url && !apiKey) ? '連携を解除しました' : 'URLとAPIキーの両方を入力してください');
       return;
     }
-    this.setState({ scriptUrl: url, syncStatus: 'syncing', loading: true });
-    this.fetchSheets(url);
+    this.setState({ scriptUrl: url, scriptApiKey: apiKey, syncStatus: 'syncing', loading: true });
+    this.fetchSheets(url, apiKey);
   }
 
   persist() {
-    const {page,modal,formData,toast,_tt,loading,syncStatus,scriptUrl,scriptUrlInput,orgInfoInput,gasUser,...d} = this.state;
+    const {page,modal,formData,toast,_tt,loading,syncStatus,scriptUrl,scriptUrlInput,scriptApiKey,orgInfoInput,gasUser,...d} = this.state;
     try { localStorage.setItem('nitta_v5', JSON.stringify(d)); } catch(e){}
-    // GAS Web App モード
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
+    const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
+    const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
+    if (url && apiKey) {
       this.setState({ syncStatus: 'syncing' });
-      google.script.run
-        .withSuccessHandler(() => this.setState({ syncStatus: 'ok' }))
-        .withFailureHandler(() => this.setState({ syncStatus: 'error' }))
-        .saveData(JSON.stringify(d));
-      return;
-    }
-    // 通常ブラウザ + Sheets URL モード
-    if (scriptUrl) {
-      fetch(scriptUrl, {
+      fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify(d),
+        body: JSON.stringify({ action: 'save', key: apiKey, data: d }),
       })
       .then(r => r.json())
       .then(res => this.setState({ syncStatus: res.ok ? 'ok' : 'error' }))
@@ -3591,6 +3598,82 @@ class Component extends DCLogic {
     else this.setState(s=>({invoices:[...s.invoices,{id:this.gen(),...rec}]}),()=>this.persist());
     this.closeModal(); this.showToast('保存しました');
   }
+  // ===== CSV Export =====
+  exportCSV(filename, headers, rows) {
+    const bom = '\uFEFF';
+    const lines = [headers].concat(rows).map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(','));
+    const blob = new Blob([bom+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    this.showToast(filename+'をダウンロードしました');
+  }
+
+  bulkPrintAll() {
+    const pid = this.state.currentPeriodId;
+    const docs = this.state.invoices.filter(i=>i.periodId===pid);
+    this.setState({bulkPrintModal:true, bulkPrintDocs:docs});
+  }
+
+  doBulkPrint() {
+    // Open new window with all invoices for clean print
+    const orgInfo = this.state.orgInfo||{};
+    const orgName = orgInfo.name||'新田西口商店会';
+    const repName = orgInfo.repName?`会長　${orgInfo.repName}`:'';
+    const docs = this.state.bulkPrintDocs||[];
+    const rows = docs.map((inv,i)=>`
+      <div class="page" style="${i<docs.length-1?'page-break-after:always;':''}padding:48px 52px;font-family:-apple-system,Hiragino Sans,Yu Gothic,Meiryo,sans-serif;">
+        <div style="text-align:center;font-size:22px;font-weight:700;letter-spacing:0.1em;margin-bottom:28px;">請　求　書</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:22px;">
+          <div><div style="font-size:15px;font-weight:700;">${inv.memberStore||''}</div><div style="font-size:13px;">${inv.memberName||''}　御中</div></div>
+          <div style="text-align:right;font-size:12px;color:#666;line-height:1.9;">
+            <div>発行日：${inv.issuedDate||''}</div><div>請求番号：INV-${(inv.id||'').slice(-6).toUpperCase()}</div>
+            <div style="margin-top:8px;font-weight:700;color:#000;">${orgName}</div><div style="font-size:11px;">${repName}</div>
+          </div>
+        </div>
+        <div style="background:#f5f5f7;border-radius:8px;padding:16px 20px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;color:#666;">ご請求金額</div>
+          <div style="font-size:26px;font-weight:700;">${(inv.amount||0).toLocaleString('ja-JP')}　円</div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:22px;font-size:13px;">
+          <tr style="background:#f9f9f9;border-bottom:2px solid #e5e7eb;"><td style="padding:9px 12px;font-weight:600;color:#666;">件名</td><td style="padding:9px 12px;font-weight:600;color:#666;text-align:right;">金額</td></tr>
+          <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:11px 12px;">${inv.type||'会費'}${inv.description?'（'+inv.description+'）':''}</td><td style="padding:11px 12px;text-align:right;font-weight:600;">${(inv.amount||0).toLocaleString('ja-JP')}　円</td></tr>
+        </table>
+        <div style="font-size:12px;color:#666;border-top:1px solid #e5e7eb;padding-top:14px;">お支払期限：${inv.dueDate||inv.issuedDate||''}</div>
+      </div>`).join('');
+    const w = window.open('','_blank','width=780,height=900');
+    w.document.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>請求書一括印刷</title>
+      <style>@media print{@page{size:A4;margin:0}body{margin:0}.page{page-break-after:always}}</style></head>
+      <body>${rows}</body></html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(()=>w.print(),500);
+  }
+
+  exportInvoicesCSV() {
+    const pid = this.state.currentPeriodId;
+    const rows = this.state.invoices.filter(i=>i.periodId===pid).map(i=>[
+      i.memberStore||'',i.memberName||'',i.type||'',i.description||'',
+      i.amount||0,i.status||'',i.paymentMethod||'',i.issuedDate||'',i.paidDate||'',i.reminderNote||''
+    ]);
+    this.exportCSV('請求書一覧.csv',['店舗名','氏名','種別','摘要','金額','状態','入金方法','発行日','入金日','督促メモ'],rows);
+  }
+
+  exportTxCSV() {
+    const pid = this.state.currentPeriodId;
+    const rows = this.state.transactions.filter(t=>t.periodId===pid).sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[
+      t.date||'',t.description||'',t.category||'',t.income||0,t.expense||0,t.accountType||'口座',t.notes||''
+    ]);
+    this.exportCSV('入出金一覧.csv',['日付','摘要','科目','収入','支出','口座種別','備考'],rows);
+  }
+
+  exportMembersCSV() {
+    const rows = this.state.members.filter(m=>m.type!=='その他').map(m=>[
+      m.name||'',m.store||'',m.type||'',m.fee||0,m.phone||'',m.fax||'',m.address||'',m.joinDate||'',m.status||'在籍'
+    ]);
+    this.exportCSV('会員名簿.csv',['氏名','店舗名','種別','年会費','電話番号','FAX','住所','入会年月','状態'],rows);
+  }
+
   markPaid(id) {
     const inv = this.state.invoices.find(i=>i.id===id);
     if (!inv) return;
@@ -4027,8 +4110,9 @@ class Component extends DCLogic {
         name: mb.name || o.name || '（未設定）',
         store: mb.store || o.store || '',
         phone: mb.phone || o.phone || '',
+        memo: o.memo || '',
         badgeStyle: badge(rolePalette[o.role]),
-        onEdit: ()=>this.openModal('officer',o.id,{role:o.role,memberId:o.memberId||''}),
+        onEdit: ()=>this.openModal('officer',o.id,{role:o.role,memberId:o.memberId||'',memo:o.memo||''}),
         onDel: ()=>this.delOfficer(o.id),
       };
     });
@@ -4182,7 +4266,8 @@ class Component extends DCLogic {
       recentTx, upcomingEvts,
       officerRows,
       memberOptions: members.map(m=>({id:m.id, label:`${m.name}（${m.store}）`})),
-      onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:''}),
+      onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:'',memo:''}),
+      onGotoUnpaid:()=>this.setState({page:'invoices',invoiceFilter:'未払い'}),
       onPrint:()=>window.print(),
       memberRows,
       memberCount:members.filter(m=>m.type!=='その他').length,
@@ -4327,6 +4412,24 @@ class Component extends DCLogic {
       totalIncome:this.fmt(totalIncome), totalExpense:this.fmt(totalExpense), netBalance:this.fmt(totalIncome-totalExpense),
       cashBalance:this.fmt(cashBal), bankBalance:this.fmt(bankBal),
       onAddTx:()=>this.openModal('transaction',null,{txType:'収入',date:new Date().toISOString().slice(0,10),description:'',category:'',amount:0,accountType:'口座'}),
+      onExportTxCSV:()=>this.exportTxCSV(),
+      onExportInvoicesCSV:()=>this.exportInvoicesCSV(),
+      onExportMembersCSV:()=>this.exportMembersCSV(),
+      onBulkPrintAll:()=>this.bulkPrintAll(),
+      showBulkPrintModal:this.state.bulkPrintModal||false,
+      onCloseBulkPrint:()=>this.setState({bulkPrintModal:false}),
+      onDoBulkPrint:()=>this.doBulkPrint(),
+      bulkPrintCount:(this.state.bulkPrintDocs||[]).length,
+      bulkPrintRows:(this.state.bulkPrintDocs||[]).map(inv=>({
+        ...inv,
+        memberStore:inv.memberStore||'',
+        memberName:inv.memberName||'',
+        issuedStr:this.fmtD(inv.issuedDate),
+        dueStr:this.fmtD(inv.dueDate||inv.issuedDate),
+        no:'INV-'+(inv.id||'').slice(-6).toUpperCase(),
+        amountStr:(inv.amount||0).toLocaleString('ja-JP'),
+        itemName:`${inv.type||'会費'}${inv.description?'（'+inv.description+'）':''}`,
+      })),
 
       // Transfer modal
       showTransferModal:this.state.transferModal||false,
@@ -4419,6 +4522,8 @@ class Component extends DCLogic {
       onAddEvent:()=>this.openModal('event',null,{name:'',type:'総会・会議',date:new Date().toISOString().slice(0,10),endDate:'',participants:'',notes:''}),
       assemblyOfficers:officerRows,
       assemblyIncome:this.fmt(totalIncome), assemblyExpense:this.fmt(totalExpense), assemblyBalance:this.fmt(totalIncome-totalExpense),
+      stmtOrgName:(this.state.orgInfo||{}).name||'新田西口商店会',
+      stmtRepLabel:(()=>{ const o=this.state.orgInfo||{}; return o.repName?`会長　${o.repName}`:''; })(),
       assemblyEvents:eventRows.filter(e=>!e.isBeyondPeriod&&!e.isScheduled),
       periodRows,
       onAddPeriod:()=>this.openModal('period',null,{name:`第${periods.length+1}期`,startDate:'',endDate:''}),
@@ -4476,6 +4581,8 @@ class Component extends DCLogic {
 
       scriptUrl:this.state.scriptUrl||'',
       scriptUrlInput:this.state.scriptUrlInput||'',
+      scriptApiKey:this.state.scriptApiKey||'',
+      onApiKeyInput:(e)=>this.setState({scriptApiKey:e.target.value}),
       loading:this.state.loading||false,
       syncStatusLabel:({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
       syncStatusColor:({null:'#aeaeb2',syncing:'#f59e0b',ok:'#34c759',error:'#ff3b30'})[String(this.state.syncStatus)]||'#aeaeb2',
@@ -4486,7 +4593,6 @@ class Component extends DCLogic {
     };
   }
 }
-
 </script>
 </body>
 </html>
