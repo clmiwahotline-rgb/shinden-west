@@ -3831,11 +3831,10 @@ class Component extends DCLogic {
         if (d.error) throw new Error(d.error);
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length === 0) {
+          // SSが空または旧データ → ローカルを使い、SSへの自動書き込みはしない
           this.loadLocal();
-          this.setState({ syncStatus: 'ok' }, () => {
-            this.persist();
-            this.showToast('データをスプレッドシートに初回保存しました');
-          });
+          this.setState({ syncStatus: 'ok', loading: false });
+          this.showToast('SSにデータが見つかりません。ローカルデータを使用中（SS未書込）');
         } else {
           this.setState({ ...parsed, loading: false, syncStatus: 'ok' });
           localStorage.setItem('nitta_v5', JSON.stringify(parsed));
