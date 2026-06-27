@@ -106,6 +106,10 @@
     </div>
   </div>
   <script>
+    // ===== GAS接続情報（組み込み済み） =====
+    window.__GAS_URL__ = 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
+    window.__GAS_KEY__ = 'nishiguchi2490';
+
     const ALLOWED_EMAILS=['clmiwa.hotline@gmail.com'];
     const AUTO_LOGIN_KEY='nitta_auto_login';
     const SESSION_KEY='nitta_auth';
@@ -127,6 +131,13 @@
     function showAuthError(m){const e=document.getElementById('auth-error');e.textContent=m;e.style.display='block';}
     window.__logout=function(){sessionStorage.removeItem(SESSION_KEY);localStorage.removeItem(AUTO_LOGIN_KEY);location.reload();};
     window.addEventListener('DOMContentLoaded',function(){
+      // GAS接続情報を自動設定
+      if(window.__GAS_URL__&&!localStorage.getItem('nitta_script_url')){
+        localStorage.setItem('nitta_script_url',window.__GAS_URL__);
+      }
+      if(window.__GAS_KEY__&&!localStorage.getItem('nitta_api_key')){
+        localStorage.setItem('nitta_api_key',window.__GAS_KEY__);
+      }
       const autoSaved=localStorage.getItem(AUTO_LOGIN_KEY);
       const chk=document.getElementById('auto-login-chk');
       if(autoSaved&&chk)chk.checked=true;
@@ -3765,6 +3776,15 @@ class Component extends DCLogic {
     }, 60 * 1000); // 1分ごとにチェック
 
     // 通常ブラウザモード (localStorage + optional Sheets URL)
+    // 組み込みデフォルト値（他端末でも自動接続）
+    const DEFAULT_URL = window.__GAS_URL__ || '';
+    const DEFAULT_KEY = window.__GAS_KEY__ || '';
+    if (DEFAULT_URL && !localStorage.getItem('nitta_script_url')) {
+      localStorage.setItem('nitta_script_url', DEFAULT_URL);
+    }
+    if (DEFAULT_KEY && !localStorage.getItem('nitta_api_key')) {
+      localStorage.setItem('nitta_api_key', DEFAULT_KEY);
+    }
     const url = localStorage.getItem('nitta_script_url') || '';
     const apiKey = localStorage.getItem('nitta_api_key') || '';
     if (url && apiKey) {
@@ -3824,8 +3844,9 @@ class Component extends DCLogic {
     };
   }
 
-  fetchSheets(url) {
-    fetch(url + '?t=' + Date.now())
+  fetchSheets(url, apiKey) {
+    const key = apiKey || this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
+    fetch(`${url}?action=load&key=${encodeURIComponent(key)}&t=${Date.now()}`)
       .then(r => r.json())
       .then(d => {
         if (d.error) throw new Error(d.error);
