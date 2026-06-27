@@ -3653,7 +3653,7 @@ class Component extends DCLogic {
     formData: {},
     toast: null, _tt: null,
     scriptUrl: '', scriptUrlInput: '', scriptApiKey: '',
-    syncStatus: null, loading: false, syncPaused: false,
+    syncStatus: null, loading: false, syncPaused: false, ssReady: false,
     orgInfo: {name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},
     orgInfoInput: null,
     transferModal: false,
@@ -3836,7 +3836,7 @@ class Component extends DCLogic {
           this.setState({ syncStatus: 'ok', loading: false });
           this.showToast('SSにデータが見つかりません。ローカルデータを使用中（SS未書込）');
         } else {
-          this.setState({ ...parsed, loading: false, syncStatus: 'ok' });
+          this.setState({ ...parsed, loading: false, syncStatus: 'ok', ssReady: true });
           localStorage.setItem('nitta_v5', JSON.stringify(parsed));
           this.showToast('スプレッドシートから読み込みました');
         }
@@ -3911,7 +3911,7 @@ class Component extends DCLogic {
     try { localStorage.setItem('nitta_v5', JSON.stringify(d)); } catch(e){}
     const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
     const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
-    if (url && apiKey) {
+    if (url && apiKey && this.state.ssReady) {
       this.setState({ syncStatus: 'syncing' });
       fetch(url, {
         method: 'POST',
