@@ -95,7 +95,7 @@
     <div class="auth-card">
       <div style="font-size:36px;margin-bottom:14px;">&#x1F3EA;</div>
       <div class="auth-title">&#x65B0;&#x7530;&#x897F;&#x53E3;&#x5546;&#x5E97;&#x4F1A;</div>
-      <div class="auth-sub">&#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;&#x3078;&#x3088;&#x3046;&#x3053;&#x305D;<br>Google&#x30A2;&#x30AB;&#x30A6;&#x30F3;&#x30C8;&#x3067;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#x3057;&#x3066;&#x304F;&#x3060;&#x3055;&#x3044;</div>
+      <div class="auth-sub">&#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;&#x3078;&#x3088;&#x3046;&#x3053;&#x305D;<br>Google&#x30A2;&#x30AB;&#x30A6;&#x30F3;&#x30C8;&#x3067;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#x3057;&#x3066;&#x304;&#x5393;&#x3044;</div>
       <div id="g_id_onload" data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-locale="ja"></div>
       <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px;">
@@ -3769,15 +3769,11 @@ class Component extends DCLogic {
     }, 60 * 1000); // 1分ごとにチェック
 
     // 通常ブラウザモード (localStorage + optional Sheets URL)
-    // 組み込みデフォルト値（他端末でも自動接続）
-    const DEFAULT_URL = window.__GAS_URL__ || '';
-    const DEFAULT_KEY = window.__GAS_KEY__ || '';
-    if (DEFAULT_URL && !localStorage.getItem('nitta_script_url')) {
-      localStorage.setItem('nitta_script_url', DEFAULT_URL);
-    }
-    if (DEFAULT_KEY && !localStorage.getItem('nitta_api_key')) {
-      localStorage.setItem('nitta_api_key', DEFAULT_KEY);
-    }
+    // GAS接続情報を常に上書き（全端末・リロード後も自動接続）
+    const DEFAULT_URL = window.__GAS_URL__ || 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
+    const DEFAULT_KEY = window.__GAS_KEY__ || 'nishiguchi2490';
+    localStorage.setItem('nitta_script_url', DEFAULT_URL);
+    localStorage.setItem('nitta_api_key', DEFAULT_KEY);
     const url = localStorage.getItem('nitta_script_url') || '';
     const apiKey = localStorage.getItem('nitta_api_key') || '';
     if (url && apiKey) {
