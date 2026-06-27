@@ -21,8 +21,112 @@
     ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
   </style>
 
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <style>
+    #gas-auth-overlay {
+      position:fixed;inset:0;z-index:9999;
+      background:linear-gradient(135deg,#f5f5f7 0%,#e8e8ed 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;
+    }
+    #gas-auth-overlay.hidden { display:none; }
+    .auth-card {
+      background:#fff;border-radius:20px;
+      box-shadow:0 8px 40px rgba(0,0,0,0.12);
+      padding:48px 52px;text-align:center;width:360px;
+    }
+    .auth-title { font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px; }
+    .auth-sub { font-size:13px;color:#6e6e73;margin-bottom:32px; }
+    .auth-error { font-size:12px;color:#ff3b30;margin-top:16px;display:none; }
+  </style>
 </head>
 <body>
+
+  <div id="gas-auth-overlay">
+    <div class="auth-card">
+      <div style="font-size:32px;margin-bottom:12px;">🏪</div>
+      <div class="auth-title">新田西口商店会</div>
+      <div class="auth-sub">管理ポータルへようこそ<br>Googleアカウントでログインしてください</div>
+      <div id="g_id_onload"
+        data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com"
+        data-callback="handleGoogleLogin"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="signin_with"
+        data-shape="rectangular"
+        data-logo_alignment="left"
+        data-locale="ja">
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+    </div>
+  </div>
+
+  <script>
+    // 許可するGoogleアカウント（空配列=全員許可）
+    const ALLOWED_EMAILS = [];
+
+    function handleGoogleLogin(response) {
+      try {
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        const email = payload.email;
+        const name = payload.name || email;
+
+        if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {
+          document.getElementById('auth-error').style.display = 'block';
+          document.getElementById('auth-error').textContent =
+            email + ' はアクセスが許可されていません。';
+          return;
+        }
+
+        // ログイン成功: ユーザー情報をセット
+        window.__GAS_USER__ = { email, name };
+        window.__GAS_MODE__ = false; // GitHub Pages なのでGASは不使用
+        window.__AUTH_TOKEN__ = response.credential;
+
+        // セッションに保存（タブを閉じると消える）
+        sessionStorage.setItem('nitta_auth', JSON.stringify({ email, name, exp: payload.exp }));
+
+        // オーバーレイを非表示
+        document.getElementById('gas-auth-overlay').classList.add('hidden');
+
+        // ポータルを初期化
+        if (window.__initPortal) window.__initPortal({ email, name });
+
+      } catch(e) {
+        document.getElementById('auth-error').style.display = 'block';
+        document.getElementById('auth-error').textContent = 'ログインに失敗しました。再試行してください。';
+      }
+    }
+
+    // セッション復元（リロード時に再ログイン不要）
+    window.addEventListener('DOMContentLoaded', function() {
+      const saved = sessionStorage.getItem('nitta_auth');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          if (u.exp && Date.now() / 1000 < u.exp) {
+            window.__GAS_USER__ = { email: u.email, name: u.name };
+            window.__GAS_MODE__ = false;
+            document.getElementById('gas-auth-overlay').classList.add('hidden');
+            if (window.__initPortal) window.__initPortal(u);
+            return;
+          }
+        } catch(e) {}
+      }
+    });
+
+    // ログアウト
+    window.__logout = function() {
+      sessionStorage.removeItem('nitta_auth');
+      location.reload();
+    };
+  </script>
 <x-dc>
 <helmet>
   <style>
@@ -65,7 +169,7 @@
       <div style="fontSize:10px;color:{{ syncStatusColor }};marginBottom:3px;">{{ syncStatusLabel }}</div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
-        <a href="{{ gasLogoutUrl }}" style="fontSize:10px;color:#aeaeb2;textDecoration:none;">ログアウト</a>
+        <a onClick="window.__logout && window.__logout()" style="fontSize:10px;color:#aeaeb2;textDecoration:none;">ログアウト</a>
       </sc-if>
     </div>
   </div>
