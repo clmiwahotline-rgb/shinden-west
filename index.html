@@ -3832,22 +3832,29 @@ class Component extends DCLogic {
       periods:       d.periods||[],
       members:       (d.members||[]).map(m=>({...m, fee:n(m.fee), no:n(m.no)})),
       officers:      d.officers||[],
-      invoices:      (d.invoices||[]).map(i=>({...i, amount:n(i.amount),
-        installment: typeof i.installment==='string'?JSON.parse(i.installment||'null'):(i.installment||null),
-      })),
+      invoices:      (d.invoices||[]).map(i=>{
+        let inst=null;
+        try{inst=typeof i.installment==='string'?JSON.parse(i.installment||'null'):(i.installment||null);}
+        catch(e){console.warn('installment parse error:',e.message);inst=null;}
+        return {...i,amount:n(i.amount),installment:inst};
+      }),
       transactions:  (d.transactions||[]).map(t=>({...t, income:n(t.income), expense:n(t.expense)})),
       budgetItems:   (d.budgetItems||[]).map(b=>({...b, amount:n(b.amount)})),
       events:        d.events||[],
       memberChangeLogs: d.memberChangeLogs||[],
       invoiceLogs:   (d.invoiceLogs||[]).map(l=>({...l})),
       balanceLogs:   (d.balanceLogs||[]).map(l=>({...l})),
-      settlements:   (d.settlements||[]).map(s=>({...s,
-        categories: typeof s.categories==='string'?JSON.parse(s.categories||'[]'):(s.categories||[]),
-        audit: typeof s.audit==='string'?JSON.parse(s.audit||'null'):(s.audit||null),
-      })),
+      settlements:   (d.settlements||[]).map(s=>{
+        let cats=[],aud=null;
+        try{cats=typeof s.categories==='string'?JSON.parse(s.categories||'[]'):(s.categories||[]);}
+        catch(e){console.warn('categories parse error:',s.categories,e.message);cats=[];}
+        try{aud=typeof s.audit==='string'?JSON.parse(s.audit||'null'):(s.audit||null);}
+        catch(e){console.warn('audit parse error:',s.audit,e.message);aud=null;}
+        return {...s,categories:cats,audit:aud};
+      }),
       authEmails:    d.authEmails||[],
       orgInfo:       (Array.isArray(d.orgInfo)?d.orgInfo[0]:d.orgInfo)||{},
-      budgetDraft:   typeof d.budgetDraft==='string'?JSON.parse(d.budgetDraft||'null'):(d.budgetDraft||null),
+      budgetDraft:   (()=>{try{return typeof d.budgetDraft==='string'?JSON.parse(d.budgetDraft||'null'):(d.budgetDraft||null);}catch(e){return null;}})(),
       currentPeriodId: d.currentPeriodId||null,
     };
   }
