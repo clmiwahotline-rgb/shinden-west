@@ -106,10 +106,8 @@
     </div>
   </div>
   <script>
-    // ===== GAS接続情報（組み込み済み） =====
     window.__GAS_URL__ = 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
     window.__GAS_KEY__ = 'nishiguchi2490';
-
     const ALLOWED_EMAILS=['clmiwa.hotline@gmail.com'];
     const AUTO_LOGIN_KEY='nitta_auto_login';
     const SESSION_KEY='nitta_auth';
@@ -131,13 +129,8 @@
     function showAuthError(m){const e=document.getElementById('auth-error');e.textContent=m;e.style.display='block';}
     window.__logout=function(){sessionStorage.removeItem(SESSION_KEY);localStorage.removeItem(AUTO_LOGIN_KEY);location.reload();};
     window.addEventListener('DOMContentLoaded',function(){
-      // GAS接続情報を自動設定
-      if(window.__GAS_URL__&&!localStorage.getItem('nitta_script_url')){
-        localStorage.setItem('nitta_script_url',window.__GAS_URL__);
-      }
-      if(window.__GAS_KEY__&&!localStorage.getItem('nitta_api_key')){
-        localStorage.setItem('nitta_api_key',window.__GAS_KEY__);
-      }
+      if(window.__GAS_URL__&&!localStorage.getItem('nitta_script_url'))localStorage.setItem('nitta_script_url',window.__GAS_URL__);
+      if(window.__GAS_KEY__&&!localStorage.getItem('nitta_api_key'))localStorage.setItem('nitta_api_key',window.__GAS_KEY__);
       const autoSaved=localStorage.getItem(AUTO_LOGIN_KEY);
       const chk=document.getElementById('auto-login-chk');
       if(autoSaved&&chk)chk.checked=true;
@@ -3807,8 +3800,18 @@ class Component extends DCLogic {
     const members = (d.members||[]).map(m=>({...memberDefaults,...m}));
     // 全請求書に不足フィールドを補完
     const invoiceDefaults = {description:'',paymentMethod:'',reminderNote:'',installment:null};
-    const invoices = (d.invoices||[]).map(i=>({...invoiceDefaults,...i}));
-    return {...d, members, invoices};
+    const invoices = (d.invoices||[]).map(i=>({
+      ...invoiceDefaults,...i,
+      installment: typeof i.installment==='string'?JSON.parse(i.installment||'null'):(i.installment||null),
+    }));
+    // settlementsのcategoriesとauditをJSON解析
+    const settlements = (d.settlements||[]).map(s=>({
+      ...s,
+      categories: Array.isArray(s.categories)?s.categories:
+        (typeof s.categories==='string'?(() => { try{return JSON.parse(s.categories);}catch(e){return [];} })():[]),
+      audit: s.audit&&typeof s.audit==='string'?(() => { try{return JSON.parse(s.audit);}catch(e){return null;} })():(s.audit||null),
+    }));
+    return {...d, members, invoices, settlements};
   }
 
   loadLocal() {
@@ -3829,17 +3832,22 @@ class Component extends DCLogic {
       periods:       d.periods||[],
       members:       (d.members||[]).map(m=>({...m, fee:n(m.fee), no:n(m.no)})),
       officers:      d.officers||[],
-      invoices:      (d.invoices||[]).map(i=>({...i, amount:n(i.amount)})),
+      invoices:      (d.invoices||[]).map(i=>({...i, amount:n(i.amount),
+        installment: typeof i.installment==='string'?JSON.parse(i.installment||'null'):(i.installment||null),
+      })),
       transactions:  (d.transactions||[]).map(t=>({...t, income:n(t.income), expense:n(t.expense)})),
       budgetItems:   (d.budgetItems||[]).map(b=>({...b, amount:n(b.amount)})),
       events:        d.events||[],
       memberChangeLogs: d.memberChangeLogs||[],
-      invoiceLogs:   d.invoiceLogs||[],
-      balanceLogs:   d.balanceLogs||[],
-      settlements:   d.settlements||[],
+      invoiceLogs:   (d.invoiceLogs||[]).map(l=>({...l})),
+      balanceLogs:   (d.balanceLogs||[]).map(l=>({...l})),
+      settlements:   (d.settlements||[]).map(s=>({...s,
+        categories: typeof s.categories==='string'?JSON.parse(s.categories||'[]'):(s.categories||[]),
+        audit: typeof s.audit==='string'?JSON.parse(s.audit||'null'):(s.audit||null),
+      })),
       authEmails:    d.authEmails||[],
       orgInfo:       (Array.isArray(d.orgInfo)?d.orgInfo[0]:d.orgInfo)||{},
-      budgetDraft:   d.budgetDraft||null,
+      budgetDraft:   typeof d.budgetDraft==='string'?JSON.parse(d.budgetDraft||'null'):(d.budgetDraft||null),
       currentPeriodId: d.currentPeriodId||null,
     };
   }
