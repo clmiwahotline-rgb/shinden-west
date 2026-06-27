@@ -21,7 +21,7 @@
     }
     #sync-progress-bar {
       position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
-      background:rgba(0,113,227,0.12);
+      background:rgba(217,178,76,0.12);
       overflow:hidden;
       transition:opacity 0.3s;
     }
@@ -29,7 +29,7 @@
     #sync-progress-bar::after {
       content:'';
       position:absolute;top:0;left:0;right:0;bottom:0;
-      background:linear-gradient(90deg,#0071e3,#34aadc,#0071e3);
+      background:linear-gradient(90deg,#D9B24C,#E8CE84,#D9B24C);
       animation:progress-indeterminate 1.4s ease-in-out infinite;
     }
     @media print {
@@ -105,25 +105,25 @@
 
 <script src="https://accounts.google.com/gsi/client" async></script>
   <style>
-    #gas-auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#f5f5f7 0%,#e8e8ed 100%);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;}
+    #gas-auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#faf6ea 0%,#f0e6cc 100%);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;}
     #gas-auth-overlay.hidden{display:none;}
-    .auth-card{background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:48px 52px;text-align:center;width:360px;}
-    .auth-title{font-size:20px;font-weight:700;color:#1d1d1f;margin-bottom:6px;}
-    .auth-sub{font-size:13px;color:#6e6e73;margin-bottom:32px;line-height:1.6;}
+    .auth-card{background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:44px 52px 40px;text-align:center;width:360px;}
+    .auth-title{font-size:18px;font-weight:700;color:#1d1d1f;margin-bottom:4px;letter-spacing:0.02em;}
+    .auth-sub{font-size:13px;color:#6e6e73;margin-bottom:28px;line-height:1.6;}
     .auth-error{font-size:12px;color:#ff3b30;margin-top:16px;display:none;}
   </style>
 </head>
 <body>
 <div id="gas-auth-overlay">
     <div class="auth-card">
-      <div style="font-size:36px;margin-bottom:14px;">&#x1F3EA;</div>
+      <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:96px;height:96px;border-radius:20px;display:block;margin:0 auto 18px;box-shadow:0 4px 16px rgba(217,178,76,0.35);" />
       <div class="auth-title">&#x65B0;&#x7530;&#x897F;&#x53E3;&#x5546;&#x5E97;&#x4F1A;</div>
       <div class="auth-sub">&#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;&#x3078;&#x3088;&#x3046;&#x3053;&#x305D;<br>Google&#x30A2;&#x30AB;&#x30A6;&#x30F3;&#x30C8;&#x3067;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#x3057;&#x3066;&#x304F;&#x3060;&#x3055;&#x3044;</div>
       <div id="g_id_onload" data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-locale="ja"></div>
       <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px;">
-        <input type="checkbox" id="auto-login-chk" style="width:14px;height:14px;cursor:pointer;">
-        <label for="auto-login-chk" style="font-size:12px;color:#6e6e73;cursor:pointer;">&#x6B21;&#x56DE;&#x304B;&#x3089;&#x81EA;&#x52D5;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#xFF0830&#x65E5;&#x9593;&#xFF09;</label>
+        <input type="checkbox" id="auto-login-chk" style="width:14px;height:14px;cursor:pointer;accent-color:#D9B24C;">
+        <label for="auto-login-chk" style="font-size:12px;color:#6e6e73;cursor:pointer;">&#x6B21;&#x56DE;&#x304B;&#x3089;&#x81EA;&#x52D5;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#xFF08;30&#x65E5;&#x9593;&#xFF09;</label>
       </div>
       <div class="auth-error" id="auth-error"></div>
     </div>
@@ -180,7 +180,7 @@
     }
     #sync-progress-bar {
       position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
-      background:rgba(0,113,227,0.12);
+      background:rgba(217,178,76,0.12);
       overflow:hidden;
       transition:opacity 0.3s;
     }
@@ -188,7 +188,7 @@
     #sync-progress-bar::after {
       content:'';
       position:absolute;top:0;left:0;right:0;bottom:0;
-      background:linear-gradient(90deg,#0071e3,#34aadc,#0071e3);
+      background:linear-gradient(90deg,#D9B24C,#E8CE84,#D9B24C);
       animation:progress-indeterminate 1.4s ease-in-out infinite;
     }
     @media print {
@@ -267,8 +267,8 @@
 
   <!-- ===== SIDEBAR ===== -->
   <div id="nav-sidebar" style="width:220px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(0,0,0,0.07);zIndex:10;">
-    <div style="padding:20px 16px 14px;">
-      <div style="fontSize:14px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.01em;">新田西口商店会</div>
+    <div style="padding:18px 16px 14px;">
+      <img src="uploads/logo-horizontal-clean.png" alt="新田西口商店会" style="width:100%;height:auto;display:block;marginBottom:4px;" />
       <div style="marginTop:10px;">
         <select value="{{ currentPeriodId }}" onChange="{{ onChangePeriod }}" style="width:100%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.1);color:#1d1d1f;fontSize:12px;padding:5px 8px;borderRadius:7px;appearance:none;-webkit-appearance:none;">
           <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="1">
@@ -285,7 +285,7 @@
     <div style="padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
-        <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(0,113,227,0.08);color:#0071e3;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(0,113,227,0.16);">↻ 更新</button>
+        <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(217,178,76,0.08);color:#B0892C;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(217,178,76,0.16);">↻ 更新</button>
       </div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
@@ -318,7 +318,7 @@
           </div>
           <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="fontSize:11px;fontWeight:600;color:#6e6e73;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">収支残高</div>
-            <div style="fontSize:24px;fontWeight:700;color:#0071e3;letterSpacing:-0.02em;">{{ kpi.balance }}</div>
+            <div style="fontSize:24px;fontWeight:700;color:#B0892C;letterSpacing:-0.02em;">{{ kpi.balance }}</div>
           </div>
           <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 1px 4px rgba(0,0,0,0.06);cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(255,59,48,0.15);">
             <div style="fontSize:11px;fontWeight:600;color:#6e6e73;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">未払い会員</div>
@@ -361,9 +361,9 @@
             <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">役員名簿</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">{{ currentPeriodName }}</div>
           </div>
-          <div style="display:flex;gap:8px;" data-noprint>
+          <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
-            <button onClick="{{ onAddOfficer }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 役員追加</button>
+            <button onClick="{{ onAddOfficer }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 役員追加</button>
           </div>
         </div>
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
@@ -373,7 +373,7 @@
             <span style="flex:1;">店舗名</span>
             <span style="width:140px;">電話番号</span>
             <span style="flex:1;">メモ</span>
-            <span style="width:84px;" data-noprint></span>
+            <span style="width:84px;" data-noprint=""></span>
           </div>
           <sc-for list="{{ officerRows }}" as="row" hint-placeholder-count="5">
             <div style="display:flex;padding:13px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -382,7 +382,7 @@
               <span style="flex:1;fontSize:13px;color:#6e6e73;">{{ row.store }}</span>
               <span style="width:140px;fontSize:12px;color:#6e6e73;">{{ row.phone }}</span>
               <span style="flex:1;fontSize:11px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ row.memo }}</span>
-              <span style="width:84px;display:flex;gap:6px;" data-noprint>
+              <span style="width:84px;display:flex;gap:6px;" data-noprint="">
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.1);color:#ff3b30;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">削除</button>
               </span>
@@ -400,8 +400,8 @@
             <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">会員管理</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">在籍 {{ activeMemberCount }} 名 ／ 全 {{ memberCount }} 件</div>
           </div>
-          <button onClick="{{ onExportMembersCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint>CSV</button>
-          <button onClick="{{ onAddMember }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint>＋ 新規会員登録</button>
+          <button onClick="{{ onExportMembersCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">CSV</button>
+          <button onClick="{{ onAddMember }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">＋ 新規会員登録</button>
         </div>
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;marginBottom:12px;">
           <div style="display:flex;background:#f9f9f9;borderBottom:1px solid rgba(0,0,0,0.06);padding:11px 18px;fontSize:11px;fontWeight:600;color:#6e6e73;letterSpacing:0.04em;">
@@ -412,7 +412,7 @@
             <span style="width:120px;whiteSpace:nowrap;">電話 / FAX</span>
             <span style="width:68px;textAlign:right;whiteSpace:nowrap;">年会費</span>
             <span style="width:44px;textAlign:center;whiteSpace:nowrap;">状態</span>
-            <span style="width:100px;" data-noprint></span>
+            <span style="width:100px;" data-noprint=""></span>
           </div>
           <sc-for list="{{ memberRows }}" as="row" hint-placeholder-count="10">
             <div style="{{ row.rowBg }}display:flex;padding:11px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -429,14 +429,14 @@
               </span>
               <span style="width:68px;textAlign:right;flexShrink:0;fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ row.feeStr }}</span>
               <span style="width:44px;textAlign:center;flexShrink:0;"><span style="{{ row.statusBadge }}">{{ row.statusLabel }}</span></span>
-              <span style="width:100px;display:flex;gap:4px;flexShrink:0;" data-noprint>
+              <span style="width:100px;display:flex;gap:4px;flexShrink:0;" data-noprint="">
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:4px 8px;borderRadius:6px;fontSize:11px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onStatus }}" style="border:none;background:rgba(255,59,48,0.08);color:#ff3b30;padding:4px 8px;borderRadius:6px;fontSize:11px;fontWeight:500;">退会</button>
               </span>
             </div>
           </sc-for>
         </div>
-        <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:22px;" data-noprint>
+        <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:22px;" data-noprint="">
           <div style="fontSize:13px;color:#6e6e73;">{{ memberPageInfo }}</div>
           <div style="display:flex;gap:8px;">
             <button onClick="{{ onMemberPrev }}" style="{{ memberPrevStyle }}">← 前へ</button>
@@ -452,7 +452,7 @@
                 <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ row.name }}</div>
                 <div style="fontSize:12px;color:#6e6e73;">{{ row.store }}</div>
                 <div style="fontSize:11px;color:#aeaeb2;">{{ row.phone }}</div>
-                <div style="display:flex;gap:5px;marginTop:6px;" data-noprint>
+                <div style="display:flex;gap:5px;marginTop:6px;" data-noprint="">
                   <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:3px 9px;borderRadius:5px;fontSize:11px;fontWeight:500;">編集</button>
                   <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.08);color:#ff3b30;padding:3px 9px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
                 </div>
@@ -472,7 +472,7 @@
               <span style="width:86px;fontSize:12px;color:#1d1d1f;fontWeight:500;">{{ log.memberName }}</span>
               <span style="{{ log.actionBadge }}">{{ log.action }}</span>
               <span style="flex:1;fontSize:12px;color:#6e6e73;">{{ log.detail }}</span>
-              <button onClick="{{ log.onDel }}" data-noprint style="border:none;background:none;color:#aeaeb2;fontSize:14px;padding:0 4px;cursor:pointer;flexShrink:0;">×</button>
+              <button onClick="{{ log.onDel }}" data-noprint="" style="border:none;background:none;color:#aeaeb2;fontSize:14px;padding:0 4px;cursor:pointer;flexShrink:0;">×</button>
             </div>
           </sc-for>
         </div>
@@ -488,11 +488,11 @@
             <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">請求書管理・入金確認</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">入金済 {{ paidCount }}件 ／ 未払い {{ unpaidCount }}件 ／ 合計 {{ totalInvoiceAmt }}</div>
           </div>
-          <div style="display:flex;gap:8px;" data-noprint>
+          <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onExportInvoicesCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
             <button onClick="{{ onBulkPrintAll }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">🖨 まとめて印刷</button>
-            <button onClick="{{ onOpenBulk }}" style="border:1px solid #0071e3;background:transparent;color:#0071e3;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
-            <button onClick="{{ onAddInvoice }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
+            <button onClick="{{ onOpenBulk }}" style="border:1px solid #B0892C;background:transparent;color:#B0892C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
+            <button onClick="{{ onAddInvoice }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
           </div>
         </div>
         <!-- Year nav + Month tabs -->
@@ -514,7 +514,7 @@
           </div>
         </div>
         <!-- Status Filter bar -->
-        <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint>
+        <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint="">
           <sc-for list="{{ invoiceFilters }}" as="f" hint-placeholder-count="4">
             <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
           </sc-for>
@@ -530,7 +530,7 @@
             <span style="width:70px;textAlign:center;">入金日</span>
             <span style="width:70px;textAlign:center;">入金方法</span>
             <span style="width:70px;textAlign:center;">督促メモ</span>
-            <span style="width:210px;textAlign:center;" data-noprint>操作</span>
+            <span style="width:210px;textAlign:center;" data-noprint="">操作</span>
           </div>
           <sc-for list="{{ invoiceRows }}" as="row" hint-placeholder-count="8">
             <div style="{{ row.rowBg }}display:flex;padding:11px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -546,13 +546,13 @@
                   <span style="fontSize:10px;color:#f59e0b;cursor:pointer;" onClick="{{ row.onReminder }}">📝</span>
                 </sc-if>
                 <sc-if value="{{ row.noReminder }}" hint-placeholder-val="{{ false }}">
-                  <span style="fontSize:10px;color:#aeaeb2;cursor:pointer;" onClick="{{ row.onReminder }}" data-noprint>＋</span>
+                  <span style="fontSize:10px;color:#aeaeb2;cursor:pointer;" onClick="{{ row.onReminder }}" data-noprint="">＋</span>
                 </sc-if>
               </span>
-              <span style="width:210px;display:flex;gap:3px;flexWrap:wrap;" data-noprint>
+              <span style="width:210px;display:flex;gap:3px;flexWrap:wrap;" data-noprint="">
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onMarkPaid }}" style="{{ row.markPaidStyle }}">入金</button>
-                <button onClick="{{ row.onPrintInvoice }}" style="border:none;background:rgba(0,113,227,0.08);color:#0071e3;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">請求書</button>
+                <button onClick="{{ row.onPrintInvoice }}" style="border:none;background:rgba(217,178,76,0.08);color:#B0892C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">請求書</button>
                 <button onClick="{{ row.onPrintReceipt }}" style="{{ row.receiptStyle }}">領収書</button>
                 <button onClick="{{ row.onInstallment }}" style="border:none;background:rgba(255,149,0,0.1);color:#ff9500;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">分割</button>
                 <button onClick="{{ row.onCancel }}" style="{{ row.cancelStyle }}">取消</button>
@@ -575,7 +575,7 @@
               <span style="{{ log.actionBadge }}">{{ log.action }}</span>
               <span style="width:80px;fontSize:12px;color:#333;textAlign:right;flexShrink:0;">{{ log.amountStr }}</span>
               <span style="flex:1;fontSize:12px;color:#6e6e73;">{{ log.detail }}</span>
-              <button onClick="{{ log.onDel }}" style="border:none;background:none;color:#aeaeb2;fontSize:14px;padding:0 4px;cursor:pointer;" data-noprint>×</button>
+              <button onClick="{{ log.onDel }}" style="border:none;background:none;color:#aeaeb2;fontSize:14px;padding:0 4px;cursor:pointer;" data-noprint="">×</button>
             </div>
           </sc-for>
         </div>
@@ -596,9 +596,9 @@
           <div style="display:flex;flexDirection:column;gap:14px;">
             <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
               <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">日付</label>
-                <input value="{{ transferDate }}" onChange="{{ onTransferDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+                <input value="{{ transferDate }}" onChange="{{ onTransferDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
               <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">金額（円）</label>
-                <input value="{{ transferAmount }}" onChange="{{ onTransferAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" placeholder="0" /></div>
+                <input value="{{ transferAmount }}" onChange="{{ onTransferAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" placeholder="0"></div>
             </div>
             <div style="display:grid;gridTemplateColumns:1fr auto 1fr;gap:8px;alignItems:center;">
               <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">振替元（減少）</label>
@@ -614,7 +614,7 @@
                 </select></div>
             </div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">摘要</label>
-              <input value="{{ transferDesc }}" onChange="{{ onTransferDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 現金引き出し" /></div>
+              <input value="{{ transferDesc }}" onChange="{{ onTransferDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 現金引き出し"></div>
             <div style="background:#f5f5f7;borderRadius:8px;padding:12px 14px;fontSize:12px;color:#6e6e73;lineHeight:1.8;">
               <div>{{ transferFrom }} から <strong>{{ transferAmountStr }}</strong> を支出</div>
               <div>{{ transferTo }} へ <strong>{{ transferAmountStr }}</strong> を収入</div>
@@ -643,9 +643,9 @@
           <div style="padding:20px 28px;">
             <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:12px;marginBottom:16px;">
               <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">日付</label>
-                <input value="{{ compositeDate }}" onChange="{{ onCompositeDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" type="date" /></div>
+                <input value="{{ compositeDate }}" onChange="{{ onCompositeDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" type="date"></div>
               <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">グループ名（まとめ摘要）</label>
-                <input value="{{ compositeGroupName }}" onChange="{{ onCompositeGroupChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" placeholder="例: 夏祭り2026 収支" /></div>
+                <input value="{{ compositeGroupName }}" onChange="{{ onCompositeGroupChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" placeholder="例: 夏祭り2026 収支"></div>
             </div>
             <!-- Lines table -->
             <div style="background:#fff;borderRadius:12px;overflow:hidden;boxShadow:0 1px 3px rgba(0,0,0,0.06);marginBottom:12px;">
@@ -666,10 +666,10 @@
                     </select>
                   </span>
                   <span style="width:130px;paddingLeft:6px;">
-                    <input value="{{ line.category }}" onChange="{{ line.onCatChange }}" style="width:118px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="科目" />
+                    <input value="{{ line.category }}" onChange="{{ line.onCatChange }}" style="width:118px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="科目">
                   </span>
                   <span style="flex:1;paddingLeft:6px;">
-                    <input value="{{ line.description }}" onChange="{{ line.onDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="摘要" />
+                    <input value="{{ line.description }}" onChange="{{ line.onDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="摘要">
                   </span>
                   <span style="width:60px;paddingLeft:6px;">
                     <select value="{{ line.accountType }}" onChange="{{ line.onAccChange }}" style="width:54px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 4px;fontSize:11px;background:#fff;">
@@ -678,7 +678,7 @@
                     </select>
                   </span>
                   <span style="width:100px;paddingLeft:6px;">
-                    <input value="{{ line.amount }}" onChange="{{ line.onAmtChange }}" style="width:90px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;textAlign:right;" type="number" placeholder="0" />
+                    <input value="{{ line.amount }}" onChange="{{ line.onAmtChange }}" style="width:90px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
                   </span>
                   <span style="width:36px;textAlign:center;">
                     <button onClick="{{ line.onDel }}" style="border:none;background:none;color:#aeaeb2;fontSize:14px;cursor:pointer;">×</button>
@@ -686,18 +686,18 @@
                 </div>
               </sc-for>
               <div style="padding:8px 14px;display:flex;justify-content:space-between;alignItems:center;borderTop:1px solid rgba(0,0,0,0.06);">
-                <button onClick="{{ onAddCompositeLine }}" style="border:none;background:rgba(0,113,227,0.08);color:#0071e3;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 明細追加</button>
+                <button onClick="{{ onAddCompositeLine }}" style="border:none;background:rgba(217,178,76,0.08);color:#B0892C;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 明細追加</button>
                 <div style="fontSize:12px;color:#6e6e73;display:flex;gap:16px;">
                   <span>収入計: <strong style="color:#34c759;">{{ compositeTotalIncome }}</strong></span>
                   <span>支出計: <strong style="color:#ff3b30;">{{ compositeTotalExpense }}</strong></span>
-                  <span>差引: <strong style="color:#0071e3;">{{ compositeNet }}</strong></span>
+                  <span>差引: <strong style="color:#B0892C;">{{ compositeNet }}</strong></span>
                 </div>
               </div>
             </div>
           </div>
           <div style="background:#fff;padding:14px 28px;borderTop:1px solid rgba(0,0,0,0.07);display:flex;justify-content:flex-end;gap:8px;">
             <button onClick="{{ onCloseComposite }}" style="border:none;background:rgba(0,0,0,0.06);color:#1d1d1f;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
-            <button onClick="{{ onSaveComposite }}" style="border:none;background:#0071e3;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">まとめて記録する</button>
+            <button onClick="{{ onSaveComposite }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">まとめて記録する</button>
           </div>
         </div>
       </div>
@@ -731,7 +731,7 @@
               </div>
               <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 1px 4px rgba(0,0,0,0.06);">
                 <div style="fontSize:11px;color:#6e6e73;marginBottom:4px;">収支差額</div>
-                <div style="fontSize:18px;fontWeight:700;color:#0071e3;">{{ settlementNet }}</div>
+                <div style="fontSize:18px;fontWeight:700;color:#B0892C;">{{ settlementNet }}</div>
               </div>
             </div>
           </div>
@@ -841,7 +841,7 @@
                   <span style="width:100px;textAlign:right;">今年度実績</span>
                   <span style="width:130px;textAlign:right;">翌年度予算</span>
                   <span style="flex:1;paddingLeft:12px;">備考・変更理由</span>
-                  <span style="width:36px;" data-noprint></span>
+                  <span style="width:36px;" data-noprint=""></span>
                 </div>
                 <sc-for list="{{ draftIncomeRows }}" as="row" hint-placeholder-count="4">
                   <div style="display:flex;padding:9px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;gap:0;">
@@ -849,12 +849,12 @@
                     <span style="width:100px;textAlign:right;fontSize:12px;color:#6e6e73;">{{ row.currentBudgetStr }}</span>
                     <span style="width:100px;textAlign:right;fontSize:12px;fontWeight:600;color:#34c759;">{{ row.currentActualStr }}</span>
                     <span style="width:130px;paddingLeft:10px;">
-                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0" />
+                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
                     </span>
                     <span style="flex:1;paddingLeft:8px;">
-                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考" />
+                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考">
                     </span>
-                    <span style="width:36px;textAlign:center;" data-noprint>
+                    <span style="width:36px;textAlign:center;" data-noprint="">
                       <button onClick="{{ row.onDel }}" style="border:none;background:none;color:#aeaeb2;fontSize:14px;cursor:pointer;">×</button>
                     </span>
                   </div>
@@ -875,7 +875,7 @@
                   <span style="width:100px;textAlign:right;">今年度実績</span>
                   <span style="width:130px;textAlign:right;">翌年度予算</span>
                   <span style="flex:1;paddingLeft:12px;">備考・変更理由</span>
-                  <span style="width:36px;" data-noprint></span>
+                  <span style="width:36px;" data-noprint=""></span>
                 </div>
                 <sc-for list="{{ draftExpenseRows }}" as="row" hint-placeholder-count="4">
                   <div style="display:flex;padding:9px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -883,12 +883,12 @@
                     <span style="width:100px;textAlign:right;fontSize:12px;color:#6e6e73;">{{ row.currentBudgetStr }}</span>
                     <span style="width:100px;textAlign:right;fontSize:12px;fontWeight:600;color:#ff3b30;">{{ row.currentActualStr }}</span>
                     <span style="width:130px;paddingLeft:10px;">
-                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0" />
+                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
                     </span>
                     <span style="flex:1;paddingLeft:8px;">
-                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考" />
+                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考">
                     </span>
-                    <span style="width:36px;textAlign:center;" data-noprint>
+                    <span style="width:36px;textAlign:center;" data-noprint="">
                       <button onClick="{{ row.onDel }}" style="border:none;background:none;color:#aeaeb2;fontSize:14px;cursor:pointer;">×</button>
                     </span>
                   </div>
@@ -941,7 +941,7 @@
             </div>
             <div>
               <label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:4px;">開始月</label>
-              <input value="{{ installmentStartMonth }}" onChange="{{ onInstallmentStartChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 9px;fontSize:13px;" type="month" />
+              <input value="{{ installmentStartMonth }}" onChange="{{ onInstallmentStartChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 9px;fontSize:13px;" type="month">
             </div>
           </div>
           <div style="background:#fff3cd;borderRadius:8px;padding:10px 14px;marginBottom:16px;fontSize:12px;color:#856404;">
@@ -954,7 +954,7 @@
               <span style="flex:1;">引き落とし予定日</span>
               <span style="width:90px;textAlign:right;">金額</span>
               <span style="width:60px;textAlign:center;">状態</span>
-              <span style="width:80px;textAlign:center;" data-noprint>操作</span>
+              <span style="width:80px;textAlign:center;" data-noprint="">操作</span>
             </div>
             <sc-for list="{{ installmentSchedule }}" as="row" hint-placeholder-count="12">
               <div style="display:flex;padding:9px 14px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -962,7 +962,7 @@
                 <span style="flex:1;fontSize:13px;color:#1d1d1f;">{{ row.dueDateStr }}</span>
                 <span style="width:90px;textAlign:right;fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ row.amountStr }}</span>
                 <span style="width:60px;textAlign:center;"><span style="{{ row.statusBadge }}">{{ row.status }}</span></span>
-                <span style="width:80px;textAlign:center;" data-noprint>
+                <span style="width:80px;textAlign:center;" data-noprint="">
                   <button onClick="{{ row.onMarkPaid }}" style="{{ row.markPaidStyle }}">入金済</button>
                 </span>
               </div>
@@ -990,7 +990,7 @@
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:12px;marginBottom:14px;">
             <div>
               <label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">発行日</label>
-              <input value="{{ bulkIssuedDate }}" onChange="{{ onBulkDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" type="date" />
+              <input value="{{ bulkIssuedDate }}" onChange="{{ onBulkDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" type="date">
             </div>
             <div>
               <label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">種別</label>
@@ -1004,7 +1004,7 @@
           </div>
           <div style="marginBottom:14px;">
             <label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">摘要</label>
-            <input value="{{ bulkDescription }}" onChange="{{ onBulkDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" placeholder="例: 令和8年度商店会会費として" />
+            <input value="{{ bulkDescription }}" onChange="{{ onBulkDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" placeholder="例: 令和8年度商店会会費として">
           </div>
           <div style="marginBottom:14px;display:flex;justify-content:space-between;alignItems:center;">
             <div style="fontSize:12px;fontWeight:600;color:#6e6e73;">発行対象会員を選択</div>
@@ -1030,7 +1030,7 @@
             <div style="fontSize:13px;color:#6e6e73;">選択中: {{ bulkSelectedCount }} 名</div>
             <div style="display:flex;gap:8px;">
               <button onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.06);color:#1d1d1f;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
-              <button onClick="{{ onBulkGenerate }}" style="border:none;background:#0071e3;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">発行する</button>
+              <button onClick="{{ onBulkGenerate }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">発行する</button>
             </div>
           </div>
         </div>
@@ -1042,17 +1042,17 @@
       <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);zIndex:300;display:flex;alignItems:center;justifyContent:center;" onClick="{{ onClosePrint }}">
         <div style="background:#fff;borderRadius:12px;width:680px;maxHeight:92vh;overflowY:auto;boxShadow:0 20px 60px rgba(0,0,0,0.3);" onClick="{{ stopProp }}">
           <!-- Print controls -->
-          <div style="padding:16px 20px;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint>
+          <div style="padding:16px 20px;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint="">
             <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
               <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">{{ printDocTitle }}</div>
               <div style="display:flex;gap:8px;">
-                <button onClick="{{ onPrint }}" style="border:none;background:#0071e3;color:#fff;padding:7px 16px;borderRadius:7px;fontSize:13px;fontWeight:500;">印刷 / PDF保存</button>
+                <button onClick="{{ onPrint }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:7px 16px;borderRadius:7px;fontSize:13px;fontWeight:500;">印刷 / PDF保存</button>
                 <button onClick="{{ onClosePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#1d1d1f;padding:7px 14px;borderRadius:7px;fontSize:13px;">閉じる</button>
               </div>
             </div>
             <div style="display:flex;alignItems:center;gap:10px;background:#f5f5f7;borderRadius:8px;padding:10px 14px;">
               <div style="fontSize:12px;color:#6e6e73;whiteSpace:nowrap;">🔏 印鑑を押す：</div>
-              <input value="{{ hankoPwdInput }}" onChange="{{ onHankoPwdInput }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 10px;fontSize:13px;width:110px;" type="password" placeholder="パスワード" />
+              <input value="{{ hankoPwdInput }}" onChange="{{ onHankoPwdInput }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 10px;fontSize:13px;width:110px;" type="password" placeholder="パスワード">
               <button onClick="{{ onHankoUnlock }}" style="border:none;background:#2d3142;color:#fff;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">確認</button>
               <div style="fontSize:12px;color:{{ hankoStatusColor }};">{{ hankoStatusMsg }}</div>
             </div>
@@ -1076,7 +1076,7 @@
                   <div style="fontWeight:600;color:#1d1d1f;">代表　{{ printOrgRepName }}</div>
                   <sc-if value="{{ hankoUnlocked }}" hint-placeholder-val="{{ false }}">
                     <div style="marginTop:6px;display:flex;justifyContent:flex-end;">
-                      <img src="uploads/西口商店会_角印.png" style="width:72px;height:72px;objectFit:contain;opacity:0.9;" alt="角印" />
+                      <img src="uploads/西口商店会_角印.png" style="width:72px;height:72px;objectFit:contain;opacity:0.9;" alt="角印">
                     </div>
                   </sc-if>
                 </div>
@@ -1124,7 +1124,7 @@
                   <div style="fontWeight:600;color:#1d1d1f;">代表　{{ printOrgRepName }}</div>
                   <sc-if value="{{ hankoUnlocked }}" hint-placeholder-val="{{ false }}">
                     <div style="marginTop:6px;display:flex;justifyContent:flex-end;">
-                      <img src="uploads/西口商店会_角印.png" style="width:72px;height:72px;objectFit:contain;opacity:0.9;" alt="角印" />
+                      <img src="uploads/西口商店会_角印.png" style="width:72px;height:72px;objectFit:contain;opacity:0.9;" alt="角印">
                     </div>
                   </sc-if>
                 </div>
@@ -1167,7 +1167,7 @@
             <div style="display:flex;gap:8px;">
               <button onClick="{{ onBulkCheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:7px 12px;borderRadius:8px;fontSize:12px;">全選択</button>
               <button onClick="{{ onBulkUncheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:7px 12px;borderRadius:8px;fontSize:12px;">全解除</button>
-              <button onClick="{{ onDoBulkPrint }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">🖨 印刷</button>
+              <button onClick="{{ onDoBulkPrint }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">🖨 印刷</button>
               <button onClick="{{ onCloseBulkPrint }}" style="border:none;background:rgba(0,0,0,0.07);color:#1d1d1f;padding:7px 12px;borderRadius:8px;fontSize:12px;">閉じる</button>
             </div>
           </div>
@@ -1185,7 +1185,7 @@
               <sc-for list="{{ bulkPrintRows }}" as="bp" hint-placeholder-count="8">
                 <div style="display:flex;padding:10px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;background:{{ bp.rowBg }};">
                   <span style="width:28px;">
-                    <input type="checkbox" checked="{{ bp.checked }}" onChange="{{ bp.onToggle }}" style="width:16px;height:16px;cursor:pointer;accentColor:#0071e3;" />
+                    <input type="checkbox" checked="{{ bp.checked }}" onChange="{{ bp.onToggle }}" style="width:16px;height:16px;cursor:pointer;accentColor:#B0892C;">
                   </span>
                   <span style="flex:1;">
                     <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ bp.memberStore }}</div>
@@ -1208,11 +1208,11 @@
       <div style="padding:32px 36px;maxWidth:1080px;">
         <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:20px;">
           <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">入出金管理</div>
-          <div style="display:flex;gap:8px;" data-noprint>
+          <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onExportTxCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
             <button onClick="{{ onAddTransfer }}" style="border:1px solid #6e6e73;background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⇄ 振替</button>
             <button onClick="{{ onAddComposite }}" style="border:1px solid #6e6e73;background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⊞ 複合処理</button>
-            <button onClick="{{ onAddTx }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 取引追加</button>
+            <button onClick="{{ onAddTx }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 取引追加</button>
           </div>
         </div>
         <!-- KPI cards -->
@@ -1226,8 +1226,8 @@
             <div style="fontSize:18px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">{{ totalExpense }}</div>
           </div>
           <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 1px 4px rgba(0,0,0,0.06);">
-            <div style="fontSize:10px;fontWeight:600;color:#0071e3;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">合計残高</div>
-            <div style="fontSize:18px;fontWeight:700;color:#0071e3;letterSpacing:-0.02em;">{{ netBalance }}</div>
+            <div style="fontSize:10px;fontWeight:600;color:#B0892C;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">合計残高</div>
+            <div style="fontSize:18px;fontWeight:700;color:#B0892C;letterSpacing:-0.02em;">{{ netBalance }}</div>
           </div>
           <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 1px 4px rgba(0,0,0,0.06);">
             <div style="fontSize:10px;fontWeight:600;color:#6e6e73;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">現金残高</div>
@@ -1257,7 +1257,7 @@
           </div>
         </div>
         <!-- Account filter bar -->
-        <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint>
+        <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint="">
           <sc-for list="{{ txFilters }}" as="f" hint-placeholder-count="3">
             <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
           </sc-for>
@@ -1272,7 +1272,7 @@
             <span style="width:88px;textAlign:right;">収入</span>
             <span style="width:88px;textAlign:right;">支出</span>
             <span style="width:96px;textAlign:right;">残高</span>
-            <span style="width:72px;" data-noprint></span>
+            <span style="width:72px;" data-noprint=""></span>
           </div>
           <sc-for list="{{ txRows }}" as="row" hint-placeholder-count="8">
             <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -1287,7 +1287,7 @@
               <span style="{{ row.incStyle }}">{{ row.incStr }}</span>
               <span style="{{ row.expStyle }}">{{ row.expStr }}</span>
               <span style="width:96px;textAlign:right;fontSize:12px;fontWeight:600;color:#1d1d1f;">{{ row.balStr }}</span>
-              <span style="width:72px;display:flex;gap:5px;" data-noprint>
+              <span style="width:72px;display:flex;gap:5px;" data-noprint="">
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.1);color:#ff3b30;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
               </span>
@@ -1299,7 +1299,7 @@
         <div style="marginTop:24px;">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
             <div style="fontSize:15px;fontWeight:700;color:#1d1d1f;">残高チェック</div>
-            <button onClick="{{ onOpenBalanceCheck }}" style="border:none;background:#0071e3;color:#fff;padding:7px 16px;borderRadius:8px;fontSize:12px;fontWeight:600;" data-noprint>＋ 残高確認を記録</button>
+            <button onClick="{{ onOpenBalanceCheck }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:7px 16px;borderRadius:8px;fontSize:12px;fontWeight:600;" data-noprint="">＋ 残高確認を記録</button>
           </div>
           <!-- 入力フォーム -->
           <sc-if value="{{ showBalanceCheckForm }}" hint-placeholder-val="{{ false }}">
@@ -1308,15 +1308,15 @@
               <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:12px;marginBottom:14px;">
                 <div>
                   <label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:4px;">確認日</label>
-                  <input type="date" value="{{ bcDate }}" onChange="{{ onBcDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" />
+                  <input type="date" value="{{ bcDate }}" onChange="{{ onBcDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;">
                 </div>
                 <div>
                   <label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:4px;">現金 実際残高（円）</label>
-                  <input type="number" value="{{ bcCashActual }}" onChange="{{ onBcCashActual }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" placeholder="0" />
+                  <input type="number" value="{{ bcCashActual }}" onChange="{{ onBcCashActual }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" placeholder="0">
                 </div>
                 <div>
                   <label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:4px;">口座 実際残高（円）</label>
-                  <input type="number" value="{{ bcBankActual }}" onChange="{{ onBcBankActual }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" placeholder="0" />
+                  <input type="number" value="{{ bcBankActual }}" onChange="{{ onBcBankActual }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" placeholder="0">
                 </div>
               </div>
               <div style="background:#f5f5f7;borderRadius:10px;padding:14px 16px;marginBottom:14px;display:grid;gridTemplateColumns:1fr 1fr;gap:12px;">
@@ -1337,7 +1337,7 @@
               </div>
               <div style="display:flex;gap:8px;justify-content:flex-end;">
                 <button onClick="{{ onCancelBalanceCheck }}" style="border:none;background:rgba(0,0,0,0.06);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;">キャンセル</button>
-                <button onClick="{{ onSaveBalanceCheck }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">記録する</button>
+                <button onClick="{{ onSaveBalanceCheck }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">記録する</button>
               </div>
             </div>
           </sc-if>
@@ -1350,7 +1350,7 @@
               <span style="width:110px;textAlign:right;">口座（実際）</span>
               <span style="width:80px;textAlign:right;">差異</span>
               <span style="flex:1;">メモ</span>
-              <span style="width:48px;" data-noprint></span>
+              <span style="width:48px;" data-noprint=""></span>
             </div>
             <sc-if value="{{ noBalanceLogs }}" hint-placeholder-val="{{ false }}">
               <div style="padding:24px;textAlign:center;fontSize:13px;color:#aeaeb2;">まだ残高確認の記録がありません</div>
@@ -1359,11 +1359,11 @@
               <div style="display:flex;padding:11px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
                 <span style="width:88px;fontSize:12px;color:#6e6e73;">{{ row.dateStr }}</span>
                 <span style="width:110px;textAlign:right;fontSize:12px;fontWeight:600;color:#1d1d1f;">{{ row.cashActualStr }}</span>
-                <span style="width:80px;textAlign:right;fontSize:11px;" style="{{ row.cashDiffStyle }}">{{ row.cashDiffStr }}</span>
+                <span style="width:80px;textAlign:right;fontSize:11px;">{{ row.cashDiffStr }}</span>
                 <span style="width:110px;textAlign:right;fontSize:12px;fontWeight:600;color:#1d1d1f;">{{ row.bankActualStr }}</span>
-                <span style="width:80px;textAlign:right;fontSize:11px;" style="{{ row.bankDiffStyle }}">{{ row.bankDiffStr }}</span>
+                <span style="width:80px;textAlign:right;fontSize:11px;">{{ row.bankDiffStr }}</span>
                 <span style="flex:1;fontSize:11px;color:#6e6e73;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;paddingLeft:8px;">{{ row.note }}</span>
-                <span style="width:48px;" data-noprint>
+                <span style="width:48px;" data-noprint="">
                   <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.1);color:#ff3b30;padding:3px 8px;borderRadius:5px;fontSize:11px;">削除</button>
                 </span>
               </div>
@@ -1379,19 +1379,19 @@
         <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:28px;">
           <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">予算管理</div>
           <div style="display:flex;gap:8px;">
-            <button onClick="{{ onOpenBudgetDraft }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint>翌年度予算を作る →</button>
-            <button onClick="{{ onOpenSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint>決算処理 →</button>
-            <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint>印刷</button>
+            <button onClick="{{ onOpenBudgetDraft }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">翌年度予算を作る →</button>
+            <button onClick="{{ onOpenSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">決算処理 →</button>
+            <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">印刷</button>
           </div>
         </div>
         <div style="marginBottom:28px;">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
             <div style="fontSize:14px;fontWeight:600;color:#34c759;">収入の部</div>
-            <button onClick="{{ onAddIncomeBudget }}" style="border:none;background:rgba(52,199,89,0.1);color:#34c759;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint>＋ 科目追加</button>
+            <button onClick="{{ onAddIncomeBudget }}" style="border:none;background:rgba(52,199,89,0.1);color:#34c759;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint="">＋ 科目追加</button>
           </div>
           <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
             <div style="display:flex;background:#f9f9f9;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6e6e73;letterSpacing:0.04em;">
-              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">達成率</span><span style="width:64px;" data-noprint></span>
+              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">達成率</span><span style="width:64px;" data-noprint=""></span>
             </div>
             <sc-for list="{{ incomeBudget }}" as="row" hint-placeholder-count="4">
               <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -1405,7 +1405,7 @@
                   </div>
                   <div style="fontSize:10px;color:#aeaeb2;textAlign:right;marginTop:3px;">{{ row.pctStr }}</div>
                 </span>
-                <span style="width:64px;display:flex;gap:4px;" data-noprint>
+                <span style="width:64px;display:flex;gap:4px;" data-noprint="">
                   <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
                   <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.1);color:#ff3b30;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">×</button>
                 </span>
@@ -1415,18 +1415,18 @@
               <span style="flex:1;color:#1d1d1f;">合計</span>
               <span style="width:92px;textAlign:right;color:#6e6e73;">{{ totalBudgetI }}</span>
               <span style="width:92px;textAlign:right;color:#34c759;">{{ totalActualI }}</span>
-              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint></span>
+              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint=""></span>
             </div>
           </div>
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
             <div style="fontSize:14px;fontWeight:600;color:#ff3b30;">支出の部</div>
-            <button onClick="{{ onAddExpenseBudget }}" style="border:none;background:rgba(255,59,48,0.08);color:#ff3b30;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint>＋ 科目追加</button>
+            <button onClick="{{ onAddExpenseBudget }}" style="border:none;background:rgba(255,59,48,0.08);color:#ff3b30;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint="">＋ 科目追加</button>
           </div>
           <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
             <div style="display:flex;background:#f9f9f9;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6e6e73;letterSpacing:0.04em;">
-              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">進捗</span><span style="width:64px;" data-noprint></span>
+              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">進捗</span><span style="width:64px;" data-noprint=""></span>
             </div>
             <sc-for list="{{ expenseBudget }}" as="row" hint-placeholder-count="4">
               <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
@@ -1440,7 +1440,7 @@
                   </div>
                   <div style="fontSize:10px;color:#aeaeb2;textAlign:right;marginTop:3px;">{{ row.pctStr }}</div>
                 </span>
-                <span style="width:64px;display:flex;gap:4px;" data-noprint>
+                <span style="width:64px;display:flex;gap:4px;" data-noprint="">
                   <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
                   <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.1);color:#ff3b30;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">×</button>
                 </span>
@@ -1450,7 +1450,7 @@
               <span style="flex:1;color:#1d1d1f;">合計</span>
               <span style="width:92px;textAlign:right;color:#6e6e73;">{{ totalBudgetE }}</span>
               <span style="width:92px;textAlign:right;color:#ff3b30;">{{ totalActualE }}</span>
-              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint></span>
+              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint=""></span>
             </div>
           </div>
         </div>
@@ -1461,7 +1461,7 @@
     <sc-if value="{{ p.statements }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:820px;">
         <!-- Header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;" data-noprint>
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;" data-noprint="">
           <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">決算書</div>
           <button onClick="{{ onGotoBudgetSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 14px;borderRadius:8px;fontSize:12px;fontWeight:600;">決算処理 →</button>
         </div>
@@ -1479,7 +1479,7 @@
         <sc-for list="{{ settlementDocList }}" as="doc" hint-placeholder-count="0">
           <div style="background:#fff;borderRadius:16px;boxShadow:0 1px 6px rgba(0,0,0,0.08);marginBottom:28px;overflow:hidden;">
             <!-- Doc header -->
-            <div style="display:flex;alignItems:center;gap:10px;padding:16px 24px;background:#f9f9f9;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint>
+            <div style="display:flex;alignItems:center;gap:10px;padding:16px 24px;background:#f9f9f9;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint="">
               <span style="background:#5856d6;color:#fff;fontSize:11px;fontWeight:700;padding:3px 10px;borderRadius:10px;">確定済み</span>
               <span style="fontSize:14px;fontWeight:700;color:#1d1d1f;flex:1;">{{ doc.periodName }}</span>
               <span style="fontSize:12px;color:#6e6e73;">{{ doc.confirmedAt }}確定</span>
@@ -1594,7 +1594,7 @@
             </div>
             <div>
               <label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">監査日</label>
-              <input type="date" value="{{ auditDate }}" onChange="{{ onAuditDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" />
+              <input type="date" value="{{ auditDate }}" onChange="{{ onAuditDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;">
             </div>
             <div>
               <label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">監査結果・特記事項</label>
@@ -1616,9 +1616,9 @@
             <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">事業記録</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">{{ currentPeriodName }}</div>
           </div>
-          <div style="display:flex;gap:8px;" data-noprint>
+          <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
-            <button onClick="{{ onAddEvent }}" style="border:none;background:#0071e3;color:#fff;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 事業追加</button>
+            <button onClick="{{ onAddEvent }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 事業追加</button>
           </div>
         </div>
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;">
@@ -1628,7 +1628,7 @@
             <span style="width:90px;">種別</span>
             <span style="width:100px;">参加者</span>
             <span style="flex:1.2;">備考・記録</span>
-            <span style="width:88px;" data-noprint></span>
+            <span style="width:88px;" data-noprint=""></span>
           </div>
           <sc-for list="{{ eventRows }}" as="row" hint-placeholder-count="5">
             <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:flex-start;">
@@ -1641,7 +1641,7 @@
               <span style="width:90px;flexShrink:0;"><span style="{{ row.typeBadge }}">{{ row.type }}</span></span>
               <span style="width:100px;fontSize:12px;color:#6e6e73;flexShrink:0;">{{ row.participants }}</span>
               <span style="flex:1.2;fontSize:12px;color:#aeaeb2;lineHeight:1.5;">{{ row.notes }}</span>
-              <span style="width:88px;display:flex;gap:5px;flexShrink:0;" data-noprint>
+              <span style="width:88px;display:flex;gap:5px;flexShrink:0;" data-noprint="">
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:4px 9px;borderRadius:6px;fontSize:11px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onDel }}" style="border:none;background:rgba(255,59,48,0.08);color:#ff3b30;padding:4px 9px;borderRadius:6px;fontSize:11px;fontWeight:500;">削除</button>
               </span>
@@ -1656,7 +1656,7 @@
       <div style="padding:32px 36px;maxWidth:760px;">
         <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;">
           <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">総会資料</div>
-          <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint>印刷</button>
+          <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">印刷</button>
         </div>
         <div style="background:#fff;borderRadius:16px;boxShadow:0 1px 6px rgba(0,0,0,0.08);padding:40px 48px;">
           <div style="textAlign:center;marginBottom:36px;">
@@ -1686,7 +1686,7 @@
               </div>
               <div style="padding:14px;background:#f5f5f7;borderRadius:10px;textAlign:center;">
                 <div style="fontSize:10px;color:#6e6e73;marginBottom:5px;fontWeight:600;textTransform:uppercase;letterSpacing:0.05em;">繰越金</div>
-                <div style="fontSize:17px;fontWeight:700;color:#0071e3;">{{ assemblyBalance }}</div>
+                <div style="fontSize:17px;fontWeight:700;color:#B0892C;">{{ assemblyBalance }}</div>
               </div>
             </div>
           </div>
@@ -1713,6 +1713,73 @@
         <div style="fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;marginBottom:28px;">設定</div>
         <!-- Google Sheets 連携 -->
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
+          
+          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:16px;">
+            <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">期の管理</div>
+            <button onClick="{{ onAddPeriod }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">＋ 新しい期を追加</button>
+          </div><div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
+              <div style="flex:1;">
+                <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ row.name }}</div>
+                <sc-if value="{{ row.isEditing }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:6px;marginTop:6px;alignItems:center;">
+                    <input type="date" value="{{ row.editStart }}" onChange="{{ row.onEditStart }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
+                    <span style="fontSize:11px;color:#6e6e73;">〜</span>
+                    <input type="date" value="{{ row.editEnd }}" onChange="{{ row.onEditEnd }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
+                    <button onClick="{{ row.onSaveEdit }}" style="border:none;background:#34c759;color:#fff;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:600;">保存</button>
+                    <button onClick="{{ row.onCancelEdit }}" style="border:none;background:rgba(0,0,0,0.06);color:#6e6e73;padding:4px 8px;borderRadius:6px;fontSize:11px;">取消</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ row.isNotEditing }}" hint-placeholder-val="{{ true }}">
+                  <div style="fontSize:11px;color:#aeaeb2;marginTop:2px;">{{ row.startStr }} 〜 {{ row.endStr }}</div>
+                </sc-if>
+              </div>
+              <span style="{{ row.activeBadge }}">{{ row.activeLabel }}</span>
+              <button onClick="{{ row.onEditDate }}" style="border:none;background:rgba(0,0,0,0.05);color:#6e6e73;padding:5px 10px;borderRadius:6px;fontSize:11px;" data-noprint="">日付修正</button>
+              <button onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
+            </div>
+          </sc-for>
+        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:16px;">
+            <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">代表者・団体情報</div>
+            <button onClick="{{ onSaveOrgInfo }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
+          </div>
+          <div style="display:flex;flexDirection:column;gap:12px;">
+            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">団体名</label>
+                <input value="{{ orgInfo.name }}" onChange="{{ onOrgInput }}" data-field="name" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田西口商店会"></div>
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">代表者名</label>
+                <input value="{{ orgInfo.repName }}" onChange="{{ onOrgInput }}" data-field="repName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="会長名"></div>
+            </div>
+            <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">住所</label>
+              <input value="{{ orgInfo.address }}" onChange="{{ onOrgInput }}" data-field="address" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="例: 埼玉県草加市金明町XX-XX"></div>
+            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">電話番号</label>
+                <input value="{{ orgInfo.phone }}" onChange="{{ onOrgInput }}" data-field="phone" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">FAX</label>
+                <input value="{{ orgInfo.fax }}" onChange="{{ onOrgInput }}" data-field="fax" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
+            </div>
+            <div style="borderTop:1px solid rgba(0,0,0,0.06);paddingTop:12px;">
+              <div style="fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:8px;">振込先（請求書に印刷されます）</div>
+              <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;marginBottom:10px;">
+                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">銀行名</label>
+                  <input value="{{ orgInfo.bankName }}" onChange="{{ onOrgInput }}" data-field="bankName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="東京東信用金庫"></div>
+                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">支店名</label>
+                  <input value="{{ orgInfo.bankBranch }}" onChange="{{ onOrgInput }}" data-field="bankBranch" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田支店"></div>
+              </div>
+              <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;">
+                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">口座種別</label>
+                  <select value="{{ orgInfo.bankType }}" onChange="{{ onOrgInput }}" data-field="bankType" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;background:#fff;">
+                    <option value="普通">普通</option><option value="当座">当座</option>
+                  </select></div>
+                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">口座番号</label>
+                  <input value="{{ orgInfo.bankAccount }}" onChange="{{ onOrgInput }}" data-field="bankAccount" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="0000000"></div>
+                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">口座名義</label>
+                  <input value="{{ orgInfo.bankHolder }}" onChange="{{ onOrgInput }}" data-field="bankHolder" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="ニッタニシグチ"></div>
+              </div>
+            </div>
+          </div>
+        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
             <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">Google スプレッドシート連携</div>
             <div style="display:flex;alignItems:center;gap:10px;">
@@ -1726,56 +1793,16 @@
             APIキーはGASの「プロジェクトの設定→スクリプトプロパティ→API_KEY」で確認できます。
           </div>
           <div style="display:flex;flexDirection:column;gap:8px;">
-            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec" />
+            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec">
             <div style="display:flex;gap:8px;">
-              <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）" />
+              <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）">
               <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
-              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#0071e3;color:#fff;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
+              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
             </div>
           </div>
         </div>
         <!-- 代表者情報 -->
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
-          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:16px;">
-            <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">代表者・団体情報</div>
-            <button onClick="{{ onSaveOrgInfo }}" style="border:none;background:#0071e3;color:#fff;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
-          </div>
-          <div style="display:flex;flexDirection:column;gap:12px;">
-            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">団体名</label>
-                <input value="{{ orgInfo.name }}" onChange="{{ onOrgInput }}" data-field="name" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田西口商店会" /></div>
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">代表者名</label>
-                <input value="{{ orgInfo.repName }}" onChange="{{ onOrgInput }}" data-field="repName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="会長名" /></div>
-            </div>
-            <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">住所</label>
-              <input value="{{ orgInfo.address }}" onChange="{{ onOrgInput }}" data-field="address" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="例: 埼玉県草加市金明町XX-XX" /></div>
-            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">電話番号</label>
-                <input value="{{ orgInfo.phone }}" onChange="{{ onOrgInput }}" data-field="phone" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000" /></div>
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:3px;">FAX</label>
-                <input value="{{ orgInfo.fax }}" onChange="{{ onOrgInput }}" data-field="fax" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000" /></div>
-            </div>
-            <div style="borderTop:1px solid rgba(0,0,0,0.06);paddingTop:12px;">
-              <div style="fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:8px;">振込先（請求書に印刷されます）</div>
-              <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;marginBottom:10px;">
-                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">銀行名</label>
-                  <input value="{{ orgInfo.bankName }}" onChange="{{ onOrgInput }}" data-field="bankName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="東京東信用金庫" /></div>
-                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">支店名</label>
-                  <input value="{{ orgInfo.bankBranch }}" onChange="{{ onOrgInput }}" data-field="bankBranch" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田支店" /></div>
-              </div>
-              <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;">
-                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">口座種別</label>
-                  <select value="{{ orgInfo.bankType }}" onChange="{{ onOrgInput }}" data-field="bankType" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;background:#fff;">
-                    <option value="普通">普通</option><option value="当座">当座</option>
-                  </select></div>
-                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">口座番号</label>
-                  <input value="{{ orgInfo.bankAccount }}" onChange="{{ onOrgInput }}" data-field="bankAccount" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="0000000" /></div>
-                <div><label style="display:block;fontSize:11px;color:#6e6e73;marginBottom:3px;">口座名義</label>
-                  <input value="{{ orgInfo.bankHolder }}" onChange="{{ onOrgInput }}" data-field="bankHolder" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="ニッタニシグチ" /></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
         <!-- Google認証設定 -->
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
           <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;marginBottom:4px;">Googleアカウント認証設定</div>
@@ -1799,9 +1826,9 @@
             </sc-for>
           </div>
           <div style="display:flex;gap:8px;marginBottom:6px;">
-            <input value="{{ authNameInput }}" onChange="{{ onAuthNameInput }}" style="width:120px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="氏名・役割" />
-            <input value="{{ authEmailInput }}" onChange="{{ onAuthEmailInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="example@gmail.com" type="email" />
-            <button onClick="{{ onAddAuthEmail }}" style="border:none;background:#0071e3;color:#fff;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
+            <input value="{{ authNameInput }}" onChange="{{ onAuthNameInput }}" style="width:120px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="氏名・役割">
+            <input value="{{ authEmailInput }}" onChange="{{ onAuthEmailInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="example@gmail.com" type="email">
+            <button onClick="{{ onAddAuthEmail }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
           </div>
           <div style="marginTop:10px;fontSize:11px;color:#aeaeb2;lineHeight:1.7;">
             ⚠️ 変更後は「index.htmlを更新して」とお伝えください。新しいindex.htmlをGitHubにアップすると反映されます。
@@ -1810,7 +1837,7 @@
             <div style="marginTop:12px;">
               <div style="fontSize:11px;fontWeight:600;color:#6e6e73;marginBottom:4px;">index.html用コード（このまま貼り替えてください）</div>
               <div style="position:relative;">
-                <textarea value="{{ authCopyCode }}" readOnly style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:11px;fontFamily:monospace;resize:none;background:#f9f9f9;color:#1d1d1f;" rows="2" onClick="{{ onSelectAuthCode }}"></textarea>
+                <textarea value="{{ authCopyCode }}" readonly="" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:11px;fontFamily:monospace;resize:none;background:#f9f9f9;color:#1d1d1f;" rows="2" onClick="{{ onSelectAuthCode }}"></textarea>
               </div>
               <div style="fontSize:10px;color:#aeaeb2;marginTop:4px;">テキストをクリックして全選択→コピーしてindex.html内のALLOWED_EMAILSと置き換えてください</div>
             </div>
@@ -1818,22 +1845,7 @@
         </div>
 
         <!-- 期の管理 -->
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:16px;">
-            <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">期の管理</div>
-            <button onClick="{{ onAddPeriod }}" style="border:none;background:#0071e3;color:#fff;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">＋ 新しい期を追加</button>
-          </div>
-          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
-            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
-              <div style="flex:1;">
-                <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ row.name }}</div>
-                <div style="fontSize:11px;color:#aeaeb2;marginTop:2px;">{{ row.startStr }} 〜 {{ row.endStr }}</div>
-              </div>
-              <span style="{{ row.activeBadge }}">{{ row.activeLabel }}</span>
-              <button onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
-            </div>
-          </sc-for>
-        </div>
+        
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;">
           <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;marginBottom:10px;">データ管理</div>
           <div style="fontSize:13px;color:#6e6e73;lineHeight:1.7;">すべてのデータはブラウザのlocalStorageに保存されています。このブラウザのデータを削除するとすべての情報が失われます。定期的なCSV書き出しをお勧めします。</div>
@@ -1878,12 +1890,12 @@
         <div style="display:flex;flexDirection:column;gap:13px;">
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">氏名</label>
-              <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 岩波 秀一" /></div>
+              <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 岩波 秀一"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">店舗名</label>
-              <input data-field="store" value="{{ formData.store }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: セブンイレブン草加金明通り店" /></div>
+              <input data-field="store" value="{{ formData.store }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: セブンイレブン草加金明通り店"></div>
           </div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">住所</label>
-            <input data-field="address" value="{{ formData.address }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 草加市金明町736-3" /></div>
+            <input data-field="address" value="{{ formData.address }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 草加市金明町736-3"></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">会員種別</label>
               <select data-field="type" value="{{ formData.type }}" onChange="{{ onMemberTypeChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
@@ -1893,19 +1905,19 @@
               </select>
               <div style="fontSize:11px;color:#aeaeb2;marginTop:3px;">種別を変えると年会費が自動設定</div></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">年会費（円）</label>
-              <input data-field="fee" value="{{ formData.fee }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" /></div>
+              <input data-field="fee" value="{{ formData.fee }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">電話番号</label>
-              <input data-field="phone" value="{{ formData.phone }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="048-000-0000" /></div>
+              <input data-field="phone" value="{{ formData.phone }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="048-000-0000"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">FAX番号</label>
-              <input data-field="fax" value="{{ formData.fax }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="048-000-0000" /></div>
+              <input data-field="fax" value="{{ formData.fax }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="048-000-0000"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">メールアドレス</label>
-              <input data-field="email" value="{{ formData.email }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="example@mail.com" /></div>
+              <input data-field="email" value="{{ formData.email }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="example@mail.com"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">入会年月</label>
-              <input data-field="joinDate" value="{{ formData.joinDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="month" /></div>
+              <input data-field="joinDate" value="{{ formData.joinDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="month"></div>
           </div>
         </div>
       </sc-if>
@@ -1921,7 +1933,7 @@
               <option value="訂正その他">訂正その他</option>
             </select></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">実施日</label>
-            <input data-field="statusDate" value="{{ formData.statusDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+            <input data-field="statusDate" value="{{ formData.statusDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">メモ・理由</label>
             <textarea data-field="statusNote" value="{{ formData.statusNote }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="3" placeholder="退会理由や変更内容を記録してください"></textarea></div>
         </div>
@@ -1938,9 +1950,9 @@
             </select></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">店舗名</label>
-              <input data-field="memberStore" value="{{ formData.memberStore }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" /></div>
+              <input data-field="memberStore" value="{{ formData.memberStore }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">氏名</label>
-              <input data-field="memberName" value="{{ formData.memberName }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" /></div>
+              <input data-field="memberName" value="{{ formData.memberName }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">種別</label>
@@ -1948,7 +1960,7 @@
                 <option value="会費">会費</option><option value="広告費">広告費</option><option value="看板費">看板費</option><option value="その他">その他</option>
               </select></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">金額（円）</label>
-              <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" /></div>
+              <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">状態</label>
@@ -1962,7 +1974,7 @@
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">発行日</label>
-              <input data-field="issuedDate" value="{{ formData.issuedDate }}" onChange="{{ onInvoiceIssuedDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="issuedDate" value="{{ formData.issuedDate }}" onChange="{{ onInvoiceIssuedDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">支払期限</label>
               <select data-field="dueDate" value="{{ formData.dueDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <sc-for list="{{ dueDateOptions }}" as="opt" hint-placeholder-count="2">
@@ -1972,14 +1984,14 @@
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">入金日</label>
-              <input data-field="paidDate" value="{{ formData.paidDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="paidDate" value="{{ formData.paidDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">状態</label>
               <select data-field="status" value="{{ formData.status }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <option value="未払">未払</option><option value="入金済">入金済</option><option value="取消">取消</option>
               </select></div>
           </div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">摘要</label>
-            <input data-field="description" value="{{ formData.description }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 令和8年度商店会会費として" /></div>
+            <input data-field="description" value="{{ formData.description }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 令和8年度商店会会費として"></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">督促メモ</label>
             <textarea data-field="reminderNote" value="{{ formData.reminderNote }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="2" placeholder="督促の記録・連絡履歴など"></textarea></div>
         </div>
@@ -1989,14 +2001,14 @@
         <div style="display:flex;flexDirection:column;gap:13px;">
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">日付</label>
-              <input data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">収入 / 支出</label>
               <select data-field="txType" value="{{ formData.txType }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <option value="収入">収入</option><option value="支出">支出</option>
               </select></div>
           </div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">摘要</label>
-            <input data-field="description" value="{{ formData.description }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 山田時計店 会費" /></div>
+            <input data-field="description" value="{{ formData.description }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 山田時計店 会費"></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">科目</label>
               <sc-if value="{{ txTypeIsIncome }}" hint-placeholder-val="{{ true }}">
@@ -2023,7 +2035,7 @@
               </select></div>
           </div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:4px;">金額（円）</label>
-            <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" /></div>
+            <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
         </div>
       </sc-if>
 
@@ -2034,29 +2046,29 @@
               <option value="収入">収入</option><option value="支出">支出</option>
             </select></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">科目名</label>
-            <input data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 会費収入" /></div>
+            <input data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 会費収入"></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">予算額（円）</label>
-            <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" /></div>
+            <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
         </div>
       </sc-if>
 
       <sc-if value="{{ isEvent }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flexDirection:column;gap:14px;">
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">事業名</label>
-            <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 夏祭り 2025" /></div>
+            <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 夏祭り 2025"></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">種別</label>
               <select data-field="type" value="{{ formData.type }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <option value="お祭り・縁日">お祭り・縁日</option><option value="総会・会議">総会・会議</option><option value="研修事業">研修事業</option><option value="文化・交流">文化・交流</option><option value="その他">その他</option>
               </select></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">開催日</label>
-              <input data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">終了日（複数日）</label>
-              <input data-field="endDate" value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="endDate" value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">参加者数</label>
-              <input data-field="participants" value="{{ formData.participants }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 約300名" /></div>
+              <input data-field="participants" value="{{ formData.participants }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 約300名"></div>
           </div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">備考・記録</label>
             <textarea data-field="notes" value="{{ formData.notes }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="3" placeholder="活動の内容・特記事項など"></textarea></div>
@@ -2066,19 +2078,19 @@
       <sc-if value="{{ isPeriod }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flexDirection:column;gap:14px;">
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">期の名称</label>
-            <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 第4期" /></div>
+            <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 第4期"></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">開始日</label>
-              <input data-field="startDate" value="{{ formData.startDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="startDate" value="{{ formData.startDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6e6e73;marginBottom:5px;">終了日</label>
-              <input data-field="endDate" value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date" /></div>
+              <input data-field="endDate" value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
           </div>
         </div>
       </sc-if>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;paddingTop:20px;borderTop:1px solid rgba(0,0,0,0.07);marginTop:20px;">
         <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#1d1d1f;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
-        <button onClick="{{ onSave }}" style="border:none;background:#0071e3;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
+        <button onClick="{{ onSave }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
       </div>
     </div>
   </div>
@@ -5107,7 +5119,7 @@ class Component extends DCLogic {
 
     // Event rows
     const periodEnd = cp.endDate||'9999-12-31';
-    const evtCardBg = {'お祭り・縁日':{background:'#fefce8',borderLeft:'3px solid #facc15'},'総会・会議':{background:'#eff6ff',borderLeft:'3px solid #60a5fa'},'研修事業':{background:'#f0fdf4',borderLeft:'3px solid #4ade80'},'文化・交流':{background:'#faf5ff',borderLeft:'3px solid #c084fc'}};
+    const evtCardBg = {'お祭り・縁日':{background:'#fefce8',borderLeft:'3px solid #facc15'},'総会・会議':{background:'#FAF5E6',borderLeft:'3px solid #60a5fa'},'研修事業':{background:'#f0fdf4',borderLeft:'3px solid #4ade80'},'文化・交流':{background:'#faf5ff',borderLeft:'3px solid #c084fc'}};
     const eventRows = pEvents.map(e=>({
       ...e, typeBadge:badge(etPalette[e.type]),
       dateStr:this.fmtD(e.date)+(e.endDate?'〜'+this.fmtD(e.endDate):''),
@@ -5129,7 +5141,7 @@ class Component extends DCLogic {
     const navItems = NAV.map(n=>({
       ...n, onClick:()=>this.nav(n.id),
       navStyle: n.id===page
-        ? {display:'block',padding:'7px 12px',fontSize:'13px',fontWeight:'500',color:'#0071e3',background:'rgba(0,113,227,0.08)',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'}
+        ? {display:'block',padding:'7px 12px',fontSize:'13px',fontWeight:'500',color:'#B0892C',background:'rgba(217,178,76,0.18)',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'}
         : {display:'block',padding:'7px 12px',fontSize:'13px',color:'#1d1d1f',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'},
     }));
 
@@ -5155,9 +5167,31 @@ class Component extends DCLogic {
 
     // Period options
     const periodOptions = periods.map(p=>({...p}));
+    const editingPeriodId = this.state.editingPeriodId||null;
+    const editingDates = this.state.editingDates||{};
     const periodRows = periods.map(p=>({
       ...p,
       startStr:this.fmtD(p.startDate), endStr:this.fmtD(p.endDate),
+      isEditing: editingPeriodId===p.id,
+      isNotEditing: editingPeriodId!==p.id,
+      editStart: editingPeriodId===p.id?(editingDates.startDate||p.startDate||''):p.startDate||'',
+      editEnd: editingPeriodId===p.id?(editingDates.endDate||p.endDate||''):p.endDate||'',
+      onEditDate:()=>{
+        const pw=prompt('パスワードを入力してください');
+        if(pw!=='2490'){if(pw!==null)alert('パスワードが違います');return;}
+        this.setState({editingPeriodId:p.id,editingDates:{startDate:p.startDate||'',endDate:p.endDate||''}});
+      },
+      onEditStart:(e)=>this.setState(s=>({editingDates:{...s.editingDates,startDate:e.target.value}})),
+      onEditEnd:(e)=>this.setState(s=>({editingDates:{...s.editingDates,endDate:e.target.value}})),
+      onSaveEdit:()=>{
+        const {startDate,endDate}=this.state.editingDates||{};
+        this.setState(s=>({
+          periods:s.periods.map(x=>x.id===p.id?{...x,startDate,endDate}:x),
+          editingPeriodId:null,editingDates:{},
+        }),()=>this.persist());
+        this.showToast('期の日付を更新しました');
+      },
+      onCancelEdit:()=>this.setState({editingPeriodId:null,editingDates:{}}),
       activeLabel:p.id===currentPeriodId?'現在の期':'',
       activeBadge:p.id===currentPeriodId?{...bBase,background:'#dcfce7',color:'#166534'}:{...bBase,background:'transparent',color:'transparent'},
       onSelect:()=>this.setState({currentPeriodId:p.id}),
@@ -5261,8 +5295,8 @@ class Component extends DCLogic {
         const hasInv=pInvoices.some(i=>i.memberId===m.id&&i.status!=='取消');
         return {
           ...m,feeStr:this.fmt(m.fee),
-          rowStyle:sel?'background:#eff6ff;':'',
-          checkStyle:{width:'18px',height:'18px',borderRadius:'5px',border:sel?'none':'1.5px solid #d1d5db',background:sel?'#0071e3':'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0},
+          rowStyle:sel?'background:#FAF5E6;':'',
+          checkStyle:{width:'18px',height:'18px',borderRadius:'5px',border:sel?'none':'1.5px solid #d1d5db',background:sel?'#B0892C':'#fff',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0},
           checkMark:sel?'✓':'',
           existsLabel:hasInv?'発行済':'',
           existsBadge:hasInv?{fontSize:'10px',color:'#6e6e73',background:'#f1f5f9',padding:'1px 6px',borderRadius:'8px'}:{display:'none'},
@@ -5409,7 +5443,7 @@ class Component extends DCLogic {
           dueStr:this.fmtD(inv.dueDate||inv.issuedDate),
           status:isPd?'入金済':isUp?'未払':inv.status,
           statusBadge:badge(isPd?['#dcfce7','#166534']:isUp?['#fee2e2','#b91c1c']:['#f1f5f9','#6e6e73']),
-          rowBg:!!chk[inv.id]?'rgba(0,113,227,0.04)':'#fff',
+          rowBg:!!chk[inv.id]?'rgba(217,178,76,0.04)':'#fff',
         };
       }),
 
