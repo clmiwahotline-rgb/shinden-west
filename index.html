@@ -3855,7 +3855,11 @@ class Component extends DCLogic {
   fetchSheets(url, apiKey) {
     const key = apiKey || this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
     fetch(`${url}?action=load&key=${encodeURIComponent(key)}&t=${Date.now()}`)
-      .then(r => r.json())
+      .then(r => r.text())
+      .then(text => {
+        console.log('GAS raw response (first 300 chars):', text.slice(0,300));
+        return JSON.parse(text);
+      })
       .then(d => {
         if (d.error) throw new Error(d.error);
         const parsed = this.migrate(this.parseSheets(d));
