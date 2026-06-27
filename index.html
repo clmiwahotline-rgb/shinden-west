@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>&#x65B0;&#x7530;&#x897F;&#x53E3;&#x5546;&#x5E97;&#x4F1A; &#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;</title>
 
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
@@ -80,7 +80,7 @@
     ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
   </style>
 
-  <script src="https://accounts.google.com/gsi/client" async></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
   <style>
     #gas-auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#f5f5f7 0%,#e8e8ed 100%);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;}
     #gas-auth-overlay.hidden{display:none;}
@@ -91,16 +91,16 @@
   </style>
 </head>
 <body>
-    <div id="gas-auth-overlay">
+<div id="gas-auth-overlay">
     <div class="auth-card">
-      <div style="font-size:36px;margin-bottom:14px;">🏪</div>
-      <div class="auth-title">新田西口商店会</div>
-      <div class="auth-sub">管理ポータルへようこそ<br>Googleアカウントでログインしてください</div>
+      <div style="font-size:36px;margin-bottom:14px;">&#x1F3EA;</div>
+      <div class="auth-title">&#x65B0;&#x7530;&#x897F;&#x53E3;&#x5546;&#x5E97;&#x4F1A;</div>
+      <div class="auth-sub">&#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;&#x3078;&#x3088;&#x3046;&#x3053;&#x305D;<br>Google&#x30A2;&#x30AB;&#x30A6;&#x30F3;&#x30C8;&#x3067;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#x3057;&#x3066;&#x304F;&#x3060;&#x3055;&#x3044;</div>
       <div id="g_id_onload" data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-locale="ja"></div>
       <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px;">
         <input type="checkbox" id="auto-login-chk" style="width:14px;height:14px;cursor:pointer;">
-        <label for="auto-login-chk" style="font-size:12px;color:#6e6e73;cursor:pointer;">次回から自動ログイン（30日間）</label>
+        <label for="auto-login-chk" style="font-size:12px;color:#6e6e73;cursor:pointer;">&#x6B21;&#x56DE;&#x304B;&#x3089;&#x81EA;&#x52D5;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#xFF0830&#x65E5;&#x9593;&#xFF09;</label>
       </div>
       <div class="auth-error" id="auth-error"></div>
     </div>
@@ -109,70 +109,30 @@
     const ALLOWED_EMAILS=['clmiwa.hotline@gmail.com'];
     const AUTO_LOGIN_KEY='nitta_auto_login';
     const SESSION_KEY='nitta_auth';
-
     function parseJWT(t){try{const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(t.split('.')[1].length/4)*4,'=');return JSON.parse(atob(b));}catch(e){return null;}}
-
     function handleGoogleLogin(r){
-      const p=parseJWT(r.credential);
-      if(!p){showAuthError('認証情報の解析に失敗しました。');return;}
+      const p=parseJWT(r.credential);if(!p){showAuthError('認証情報の解析に失敗しました。');return;}
       const email=p.email,name=p.name||email;
-      // ポータル内の許可リストも確認
       let extra=[];try{const s=localStorage.getItem('nitta_v5');if(s){const d=JSON.parse(s);if(Array.isArray(d.authEmails))extra=d.authEmails.map(e=>typeof e==='string'?e:e.email);}}catch(ex){}
       const allowed=[...ALLOWED_EMAILS,...extra];
       if(allowed.length>0&&!allowed.includes(email)){showAuthError(email+' はアクセスが許可されていません。');return;}
-
       const authData={email,name,exp:p.exp,savedAt:Date.now()};
       sessionStorage.setItem(SESSION_KEY,JSON.stringify(authData));
-
-      // 自動ログイン設定
       const autoChk=document.getElementById('auto-login-chk');
-      if(autoChk&&autoChk.checked){
-        localStorage.setItem(AUTO_LOGIN_KEY,JSON.stringify(authData));
-      } else {
-        localStorage.removeItem(AUTO_LOGIN_KEY);
-      }
-
+      if(autoChk&&autoChk.checked){localStorage.setItem(AUTO_LOGIN_KEY,JSON.stringify(authData));}else{localStorage.removeItem(AUTO_LOGIN_KEY);}
       window.__GAS_USER__={email,name};window.__GAS_MODE__=false;
       document.getElementById('gas-auth-overlay').classList.add('hidden');
       if(window.__initPortal)window.__initPortal({email,name});
     }
-
     function showAuthError(m){const e=document.getElementById('auth-error');e.textContent=m;e.style.display='block';}
-
-    window.__logout=function(){
-      sessionStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(AUTO_LOGIN_KEY);
-      location.reload();
-    };
-
-    // 自動ログインチェックボックスの初期値を復元
+    window.__logout=function(){sessionStorage.removeItem(SESSION_KEY);localStorage.removeItem(AUTO_LOGIN_KEY);location.reload();};
     window.addEventListener('DOMContentLoaded',function(){
       const autoSaved=localStorage.getItem(AUTO_LOGIN_KEY);
       const chk=document.getElementById('auto-login-chk');
-      if(autoSaved&&chk) chk.checked=true;
-
-      // セッション復元（sessionStorage優先）
+      if(autoSaved&&chk)chk.checked=true;
       let saved=sessionStorage.getItem(SESSION_KEY);
-      if(!saved) saved=localStorage.getItem(AUTO_LOGIN_KEY); // 自動ログイン
-
-      if(saved){
-        try{
-          const u=JSON.parse(saved);
-          const now=Math.floor(Date.now()/1000);
-          const isAutoLogin=!!localStorage.getItem(AUTO_LOGIN_KEY);
-          const expOk=u.exp&&now<u.exp;
-          const autoOk=isAutoLogin&&u.savedAt&&(Date.now()-u.savedAt)<30*24*60*60*1000; // 30日
-          if(expOk||autoOk){
-            window.__GAS_USER__={email:u.email,name:u.name};
-            window.__GAS_MODE__=false;
-            // sessionStorageにも保存（タブ間で有効）
-            sessionStorage.setItem(SESSION_KEY,JSON.stringify(u));
-            document.getElementById('gas-auth-overlay').classList.add('hidden');
-            if(window.__initPortal)window.__initPortal(u);
-            return;
-          }
-        }catch(e){}
-      }
+      if(!saved)saved=localStorage.getItem(AUTO_LOGIN_KEY);
+      if(saved){try{const u=JSON.parse(saved);const now=Math.floor(Date.now()/1000);const isAuto=!!localStorage.getItem(AUTO_LOGIN_KEY);const expOk=u.exp&&now<u.exp;const autoOk=isAuto&&u.savedAt&&(Date.now()-u.savedAt)<30*24*60*60*1000;if(expOk||autoOk){window.__GAS_USER__={email:u.email,name:u.name};window.__GAS_MODE__=false;sessionStorage.setItem(SESSION_KEY,JSON.stringify(u));document.getElementById('gas-auth-overlay').classList.add('hidden');if(window.__initPortal)window.__initPortal(u);return;}}catch(e){}}
     });
   </script>
 <x-dc>
@@ -273,7 +233,10 @@
       </sc-for>
     </div>
     <div style="padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
-      <div style="fontSize:10px;color:{{ syncStatusColor }};marginBottom:3px;">{{ syncStatusLabel }}</div>
+      <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
+        <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
+        <button onClick="{{ onRefreshFromSS }}" title="SSから再読み込み" style="border:none;background:transparent;color:#aeaeb2;fontSize:13px;cursor:pointer;padding:0;lineHeight:1;" style-hover="color:#0071e3;">↻</button>
+      </div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
         <a href="{{ gasLogoutUrl }}" style="fontSize:10px;color:#aeaeb2;textDecoration:none;">ログアウト</a>
@@ -1699,7 +1662,10 @@
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
             <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">Google スプレッドシート連携</div>
-            <span style="fontSize:12px;fontWeight:600;color:{{ syncStatusColor }};">{{ syncStatusLabel }}</span>
+            <div style="display:flex;alignItems:center;gap:10px;">
+              <span style="fontSize:12px;fontWeight:600;color:{{ syncStatusColor }};">{{ syncStatusLabel }}</span>
+              <button onClick="{{ onToggleSyncPause }}" style="{{ syncPauseBtnStyle }}">{{ syncPauseBtnLabel }}</button>
+            </div>
           </div>
           <div style="fontSize:12px;color:#6e6e73;lineHeight:1.7;marginBottom:14px;">
             Apps Script をデプロイして取得したURLとAPIキーを入力してください。<br>
@@ -1710,6 +1676,7 @@
             <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec" />
             <div style="display:flex;gap:8px;">
               <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）" />
+              <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
               <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#0071e3;color:#fff;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
             </div>
           </div>
@@ -3686,7 +3653,7 @@ class Component extends DCLogic {
     formData: {},
     toast: null, _tt: null,
     scriptUrl: '', scriptUrlInput: '', scriptApiKey: '',
-    syncStatus: null, loading: false,
+    syncStatus: null, loading: false, syncPaused: false,
     orgInfo: {name:'新田西口商店会',repName:'',address:'',phone:'',fax:'',bankName:'',bankBranch:'',bankAccount:'',bankType:'普通',bankHolder:''},
     orgInfoInput: null,
     transferModal: false,
@@ -3743,6 +3710,12 @@ class Component extends DCLogic {
     installmentStartMonth: new Date().toISOString().slice(0,7),
   };
 
+  componentWillUnmount() {
+    if (this._autoRefreshTimer) clearInterval(this._autoRefreshTimer);
+    if (this._inactivityTimer) clearInterval(this._inactivityTimer);
+    ['click','keydown','mousemove','touchstart'].forEach(ev=>document.removeEventListener(ev, this._onActivity));
+  }
+
   gen() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   fmt(n) { return '¥' + Math.abs(n||0).toLocaleString('ja-JP'); }
   fmtD(d) { if (!d) return '—'; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); }
@@ -3778,12 +3751,31 @@ class Component extends DCLogic {
         .getUserInfo();
       return;
     }
+    // 1時間無操作でログアウト
+    this._lastActivity = Date.now();
+    this._onActivity = ()=>{ this._lastActivity = Date.now(); };
+    ['click','keydown','mousemove','touchstart'].forEach(ev=>document.addEventListener(ev, this._onActivity, {passive:true}));
+    this._inactivityTimer = setInterval(()=>{
+      const TIMEOUT = 60 * 60 * 1000; // 1時間
+      if (Date.now() - this._lastActivity > TIMEOUT) {
+        this.showToast('長時間操作がなかったためログアウトします');
+        setTimeout(()=>{ if(window.__logout) window.__logout(); else location.reload(); }, 1500);
+        clearInterval(this._inactivityTimer);
+      }
+    }, 60 * 1000); // 1分ごとにチェック
+
     // 通常ブラウザモード (localStorage + optional Sheets URL)
     const url = localStorage.getItem('nitta_script_url') || '';
     const apiKey = localStorage.getItem('nitta_api_key') || '';
     if (url && apiKey) {
       this.setState({ scriptUrl: url, scriptUrlInput: url, scriptApiKey: apiKey, loading: true });
       this.fetchSheets(url, apiKey);
+      // 5分ごとに自動再読み込み（モーダルが開いていない場合のみ）
+      this._autoRefreshTimer = setInterval(()=>{
+        if (!this.state.modal && !this.state.showBulkModal && !this.state.showSettlementModal && !this.state.auditModal) {
+          this.refreshFromSS(true);
+        }
+      }, 5 * 60 * 1000);
     } else {
       this.loadLocal();
     }
@@ -3814,14 +3806,20 @@ class Component extends DCLogic {
   parseSheets(d) {
     const n = v => parseFloat(v)||0;
     return {
-      periods: d.periods||[],
-      members: (d.members||[]).map(m=>({...m, fee:n(m.fee), no:n(m.no)})),
-      officers: d.officers||[],
-      invoices: (d.invoices||[]).map(i=>({...i, amount:n(i.amount)})),
-      transactions: (d.transactions||[]).map(t=>({...t, income:n(t.income), expense:n(t.expense)})),
-      budgetItems: (d.budgetItems||[]).map(b=>({...b, amount:n(b.amount)})),
-      events: d.events||[],
+      periods:       d.periods||[],
+      members:       (d.members||[]).map(m=>({...m, fee:n(m.fee), no:n(m.no)})),
+      officers:      d.officers||[],
+      invoices:      (d.invoices||[]).map(i=>({...i, amount:n(i.amount)})),
+      transactions:  (d.transactions||[]).map(t=>({...t, income:n(t.income), expense:n(t.expense)})),
+      budgetItems:   (d.budgetItems||[]).map(b=>({...b, amount:n(b.amount)})),
+      events:        d.events||[],
       memberChangeLogs: d.memberChangeLogs||[],
+      invoiceLogs:   d.invoiceLogs||[],
+      balanceLogs:   d.balanceLogs||[],
+      settlements:   d.settlements||[],
+      authEmails:    d.authEmails||[],
+      orgInfo:       (Array.isArray(d.orgInfo)?d.orgInfo[0]:d.orgInfo)||{},
+      budgetDraft:   d.budgetDraft||null,
       currentPeriodId: d.currentPeriodId||null,
     };
   }
@@ -3858,6 +3856,43 @@ class Component extends DCLogic {
     this.showToast('代表者情報を保存しました');
   }
 
+  refreshFromSS(silent) {
+    const url = this.state.scriptUrl || localStorage.getItem('nitta_script_url') || '';
+    const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
+    if (!url || !apiKey) return;
+    fetch(`${url}?action=load&key=${encodeURIComponent(apiKey)}`)
+      .then(r=>r.json())
+      .then(res=>{
+        if (!res.ok) return;
+        const parsed = res.data||{};
+        this.setState({...parsed, syncStatus:'ok'});
+        localStorage.setItem('nitta_v5', JSON.stringify(parsed));
+        if (!silent) this.showToast('SSから最新データを取得しました');
+      })
+      .catch(()=>{ if(!silent) this.showToast('SS再読み込みに失敗しました'); });
+  }
+
+  loadFromSS() {
+    const url = this.state.scriptUrl || localStorage.getItem('nitta_script_url') || '';
+    const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
+    if (!url || !apiKey) { this.showToast('URLとAPIキーを先に設定してください'); return; }
+    if (!confirm('SSのデータをローカルに上書き読み込みします。\nローカルの未同期データは上書きされます。よろしいですか？')) return;
+    this.setState({ loading: true, syncStatus: 'syncing' });
+    fetch(`${url}?action=load&key=${encodeURIComponent(apiKey)}`)
+      .then(r=>r.json())
+      .then(res=>{
+        if (!res.ok) throw new Error(res.error||'エラー');
+        const parsed = res.data||{};
+        this.setState({...parsed, loading:false, syncStatus:'ok'});
+        localStorage.setItem('nitta_v5', JSON.stringify(parsed));
+        this.showToast('SSからデータを読み込みました（ローカルに保存済み）');
+      })
+      .catch(err=>{
+        this.setState({loading:false, syncStatus:'error'});
+        this.showToast('読み込み失敗：'+err.message);
+      });
+  }
+
   saveScriptUrl() {
     const url = (this.state.scriptUrlInput||'').trim();
     const apiKey = (this.state.scriptApiKey||'').trim();
@@ -3873,7 +3908,7 @@ class Component extends DCLogic {
   }
 
   persist() {
-    const {page,modal,formData,toast,_tt,loading,syncStatus,scriptUrl,scriptUrlInput,scriptApiKey,orgInfoInput,gasUser,...d} = this.state;
+    const {page,modal,formData,toast,_tt,loading,syncStatus,syncPaused,scriptUrl,scriptUrlInput,scriptApiKey,orgInfoInput,gasUser,...d} = this.state;
     try { localStorage.setItem('nitta_v5', JSON.stringify(d)); } catch(e){}
     const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
     const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
@@ -5571,12 +5606,20 @@ class Component extends DCLogic {
       scriptApiKey:this.state.scriptApiKey||'',
       onApiKeyInput:(e)=>this.setState({scriptApiKey:e.target.value}),
       loading:this.state.loading||false,
-      syncStatusLabel:({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
-      syncStatusColor:({null:'#aeaeb2',syncing:'#f59e0b',ok:'#34c759',error:'#ff3b30'})[String(this.state.syncStatus)]||'#aeaeb2',
+      syncPaused: this.state.syncPaused||false,
+      syncPauseBtnLabel: this.state.syncPaused ? '▶ 同期再開' : '⏸ 同期停止',
+      syncPauseBtnStyle: this.state.syncPaused
+        ? {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(52,199,89,0.12)',color:'#34c759'}
+        : {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(255,149,0,0.12)',color:'#ff9500'},
+      onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
+      syncStatusLabel: this.state.syncPaused ? '⏸ 同期停止中' : ({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
+      syncStatusColor: this.state.syncPaused ? '#ff9500' : ({null:'#aeaeb2',syncing:'#f59e0b',ok:'#34c759',error:'#ff3b30'})[String(this.state.syncStatus)]||'#aeaeb2',
       gasUserEmail:(this.state.gasUser||{}).email||'',
       gasLogoutUrl:'https://accounts.google.com/logout',
       onScriptUrlInput:(e)=>this.setState({scriptUrlInput:e.target.value}),
       onSaveScriptUrl:()=>this.saveScriptUrl(),
+      onLoadFromSS:()=>this.loadFromSS(),
+      onRefreshFromSS:()=>this.refreshFromSS(),
 
       // Auth email settings
       authEmailInput:this.state.authEmailInput||'',
