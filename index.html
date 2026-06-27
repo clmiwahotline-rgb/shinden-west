@@ -9,6 +9,29 @@
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
     body { font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; }
+    /* ローディング進捗バー */
+    @keyframes progress-indeterminate {
+      0%   { transform: translateX(-100%) scaleX(0.5); }
+      50%  { transform: translateX(0%)    scaleX(0.8); }
+      100% { transform: translateX(100%)  scaleX(0.5); }
+    }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+    #sync-progress-bar {
+      position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
+      background:rgba(0,113,227,0.12);
+      overflow:hidden;
+      transition:opacity 0.3s;
+    }
+    #sync-progress-bar.hidden { opacity:0; pointer-events:none; }
+    #sync-progress-bar::after {
+      content:'';
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(90deg,#0071e3,#34aadc,#0071e3);
+      animation:progress-indeterminate 1.4s ease-in-out infinite;
+    }
     @media print {
       /* ===== 基本設定 ===== */
       @page { size:A4 portrait; margin:15mm 18mm; }
@@ -95,7 +118,7 @@
     <div class="auth-card">
       <div style="font-size:36px;margin-bottom:14px;">&#x1F3EA;</div>
       <div class="auth-title">&#x65B0;&#x7530;&#x897F;&#x53E3;&#x5546;&#x5E97;&#x4F1A;</div>
-      <div class="auth-sub">&#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;&#x3078;&#x3088;&#x3046;&#x3053;&#x305D;<br>Google&#x30A2;&#x30AB;&#x30A6;&#x30F3;&#x30C8;&#x3067;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#x3057;&#x3066;&#x304;&#x5393;&#x3044;</div>
+      <div class="auth-sub">&#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;&#x3078;&#x3088;&#x3046;&#x3053;&#x305D;<br>Google&#x30A2;&#x30AB;&#x30A6;&#x30F3;&#x30C8;&#x3067;&#x30ED;&#x30B0;&#x30A4;&#x30F3;&#x3057;&#x3066;&#x304F;&#x3060;&#x3055;&#x3044;</div>
       <div id="g_id_onload" data-client_id="367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-locale="ja"></div>
       <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px;">
@@ -145,6 +168,29 @@
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
     body { font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; }
+    /* ローディング進捗バー */
+    @keyframes progress-indeterminate {
+      0%   { transform: translateX(-100%) scaleX(0.5); }
+      50%  { transform: translateX(0%)    scaleX(0.8); }
+      100% { transform: translateX(100%)  scaleX(0.5); }
+    }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+    #sync-progress-bar {
+      position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
+      background:rgba(0,113,227,0.12);
+      overflow:hidden;
+      transition:opacity 0.3s;
+    }
+    #sync-progress-bar.hidden { opacity:0; pointer-events:none; }
+    #sync-progress-bar::after {
+      content:'';
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(90deg,#0071e3,#34aadc,#0071e3);
+      animation:progress-indeterminate 1.4s ease-in-out infinite;
+    }
     @media print {
       /* ===== 基本設定 ===== */
       @page { size:A4 portrait; margin:15mm 18mm; }
@@ -239,7 +285,7 @@
     <div style="padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
-        <button onClick="{{ onRefreshFromSS }}" title="SSから再読み込み" style="border:none;background:transparent;color:#aeaeb2;fontSize:13px;cursor:pointer;padding:0;lineHeight:1;" style-hover="color:#0071e3;">↻</button>
+        <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(0,113,227,0.08);color:#0071e3;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(0,113,227,0.16);">↻ 更新</button>
       </div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#aeaeb2;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
@@ -247,6 +293,9 @@
       </sc-if>
     </div>
   </div>
+
+  <!-- ローディング進捗バー -->
+  <div id="sync-progress-bar" style="{{ syncProgressBarStyle }}"></div>
 
   <!-- ===== MAIN ===== -->
   <div id="main-scroll" style="flex:1;overflowY:auto;background:#f5f5f7;position:relative;">
@@ -5659,6 +5708,8 @@ class Component extends DCLogic {
         ? {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(52,199,89,0.12)',color:'#34c759'}
         : {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(255,149,0,0.12)',color:'#ff9500'},
       onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
+      syncProgressBarStyle: (this.state.syncStatus==='syncing'||this.state.loading) ? {} : {opacity:0,pointerEvents:'none'},
+      syncProgressBarClass: (this.state.syncStatus==='syncing'||this.state.loading) ? '' : 'hidden',
       syncStatusLabel: this.state.syncPaused ? '⏸ 同期停止中' : ({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
       syncStatusColor: this.state.syncPaused ? '#ff9500' : ({null:'#aeaeb2',syncing:'#f59e0b',ok:'#34c759',error:'#ff3b30'})[String(this.state.syncStatus)]||'#aeaeb2',
       gasUserEmail:(this.state.gasUser||{}).email||'',
