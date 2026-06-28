@@ -9,7 +9,7 @@
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
-    html { zoom:1.3; }
+    html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
     /* ボタン基本 */
@@ -17,9 +17,19 @@
     /* Primaryボタン hover（#E7C15F → #D4AF4C） */
     button[style*="background:#E7C15F"] { border-radius:12px!important; }
     button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
-    /* Secondaryボタン */
-    button[style*="rgba(0,0,0,0.05)"] { border-radius:10px!important; }
-    button[style*="rgba(0,0,0,0.06)"] { border-radius:10px!important; }
+    /* Secondary button — white + border */
+    button[style*="rgba(0,0,0,0.05)"] { background:#fff!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.05)"]:hover { background:#F5F6F8!important; }
+    button[style*="rgba(0,0,0,0.06)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    button[style*="rgba(0,0,0,0.07)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    /* Danger button */
+    button[style*="rgba(229,115,115"] { border-radius:10px!important; }
+    button[style*="color:#E57373"] { border-radius:10px!important; }
+    /* Info/Gold tint button */
+    button[style*="rgba(231,193,95"] { border-radius:10px!important; }
+    button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
     /* ローディング進捗バー */
@@ -162,7 +172,7 @@
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
-    html { zoom:1.3; }
+    html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
     /* ボタン基本 */
@@ -170,9 +180,19 @@
     /* Primaryボタン hover（#E7C15F → #D4AF4C） */
     button[style*="background:#E7C15F"] { border-radius:12px!important; }
     button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
-    /* Secondaryボタン */
-    button[style*="rgba(0,0,0,0.05)"] { border-radius:10px!important; }
-    button[style*="rgba(0,0,0,0.06)"] { border-radius:10px!important; }
+    /* Secondary button — white + border */
+    button[style*="rgba(0,0,0,0.05)"] { background:#fff!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.05)"]:hover { background:#F5F6F8!important; }
+    button[style*="rgba(0,0,0,0.06)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    button[style*="rgba(0,0,0,0.07)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    /* Danger button */
+    button[style*="rgba(229,115,115"] { border-radius:10px!important; }
+    button[style*="color:#E57373"] { border-radius:10px!important; }
+    /* Info/Gold tint button */
+    button[style*="rgba(231,193,95"] { border-radius:10px!important; }
+    button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
     /* ローディング進捗バー */
@@ -513,6 +533,7 @@
           </div>
           <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onExportInvoicesCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
+            <button onClick="{{ onOpenInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一覧印刷</button>
             <button onClick="{{ onBulkPrintAll }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">🖨 まとめて印刷</button>
             <button onClick="{{ onOpenBulk }}" style="border:1px solid #C39425;background:transparent;color:#C39425;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
             <button onClick="{{ onAddInvoice }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
@@ -922,6 +943,40 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- INVOICE PRINT MODAL -->
+    <sc-if value="{{ invoicePrintModalShow }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onInvoicePrintBgClick }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;">
+        <div onClick="{{ stopProp }}" style="background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,0.15);border:1px solid #DDDEE2;overflow:hidden;margin-bottom:40px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #DDDEE2;">
+            <div style="font-size:16px;font-weight:700;color:#3F414C;font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;letter-spacing:0.03em;">請求一覧 印刷</div>
+            <button onClick="{{ onCloseInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
+          </div>
+          <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">対象期</label>
+              <select value="{{ invoicePrintPeriodId }}" onChange="{{ onInvoicePrintPeriodChange }}" style="width:100%;border:1px solid #DDDEE2;border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="2">
+                  <option value="{{ opt.id }}">{{ opt.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">ステータス</label>
+              <select value="{{ invoicePrintStatus }}" onChange="{{ onInvoicePrintStatusChange }}" style="width:100%;border:1px solid #DDDEE2;border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                <option value="all">全件</option>
+                <option value="unpaid">未払いのみ</option>
+                <option value="paid">入金済みのみ</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid #DDDEE2;background:#F5F6F8;">
+            <button onClick="{{ onCloseInvoicePrint }}" style="border:1px solid #DDDEE2;background:#fff;color:#3F414C;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;">キャンセル</button>
+            <button onClick="{{ onPrintInvoiceList }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">印刷 / PDF</button>
           </div>
         </div>
       </div>
@@ -2377,6 +2432,9 @@ class Component extends DCLogic {
     installmentCount: 12,
     installmentDebitDay: 27,
     installmentStartMonth: new Date().toISOString().slice(0,7),
+    invoicePrintModal: false,
+    invoicePrintPeriodId: null,
+    invoicePrintStatus: 'all',
     cashbookModal: false,
     cashbookPeriodId: null,
     cashbookMonthFrom: 1,
@@ -2400,6 +2458,22 @@ class Component extends DCLogic {
   gen() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
   fmt(n) { return '¥' + Math.abs(n||0).toLocaleString('ja-JP'); }
   fmtD(d) { if (!d) return '—'; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); }
+
+  _lastPage = null;
+
+  componentDidUpdate() {
+    try {
+      if (this._lastPage !== this.state.page) {
+        this._lastPage = this.state.page;
+        setTimeout(() => {
+          const el = document.getElementById('main-scroll')
+            || document.querySelector('#main-scroll')
+            || document.querySelector('[id="main-scroll"]');
+          if (el) { el.scrollTop = 0; el.scrollTo && el.scrollTo(0,0); }
+        }, 20);
+      }
+    } catch(e) {}
+  }
 
   componentDidMount() {
     // GAS Web App として動作しているか検出
@@ -2954,7 +3028,7 @@ class Component extends DCLogic {
     const auditSection=audit?`<div style="page-break-before:always;break-before:page;padding-top:60px;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:0.18em;margin-bottom:28px;">監　査　報　告　書</div><div style="font-size:13px;line-height:2.4;margin-bottom:24px;">　私は${s.periodName}における決算報告書を監査した結果、収支の状況が正確に記載されていることを確認しました。</div><div style="font-size:12px;color:#555;margin-bottom:16px;">監査日：${audit.date||''}</div><sc-if value="false"><span>${audit.note||''}</span></sc-if><div style="text-align:right;font-size:12px;margin-top:32px;">監査人　${audit.name||''}</div></div>`:'';
     const htmlParts=[
       '<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>決算報告書</title>',
-      '<style>@page{size:A4 portrait;margin:20mm 18mm;}body{font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",serif;font-size:13px;}table{width:100%;border-collapse:collapse;}</style></head>',
+      '<style>@page{size:A4 portrait;margin:20mm 18mm;}@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:counter(page);font-size:9pt;font-family:serif}@bottom-right{content:""}}body{font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",serif;font-size:13px;}table{width:100%;border-collapse:collapse;}</style></head>',
       '<body>',
       `<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #3F414C;"><div style="font-size:18px;font-weight:700;letter-spacing:0.18em;">決　算　報　告　書</div><div style="font-size:12px;color:#555;margin-top:6px;">${s.periodName}</div><div style="font-size:12px;color:#555;margin-top:2px;">自　${s.periodStart||''}　至　${s.periodEnd||''}</div><div style="font-size:12px;color:#555;margin-top:2px;">${orgName}</div></div>`,
       '<table><thead><tr style="border-bottom:1px solid #999;"><th style="text-align:left;padding:4px 8px;font-weight:400;color:#888;font-size:10px;">科　目</th><th style="text-align:right;padding:4px 8px;font-weight:400;color:#888;font-size:10px;width:130px;">予　算　額</th><th style="text-align:right;padding:4px 8px;font-weight:400;color:#888;font-size:10px;width:130px;">決　算　額</th><th style="text-align:right;padding:4px 8px;font-weight:400;color:#888;font-size:10px;width:100px;">増　減</th></tr></thead><tbody>',
@@ -3436,6 +3510,57 @@ class Component extends DCLogic {
     }
     if(!html) html='<p style="font-size:11pt;color:#555;">（内容が入力されていません）</p>';
     return html;
+  }
+
+  printInvoiceList() {
+    const pid=this.state.invoicePrintPeriodId||this.state.currentPeriodId;
+    const status=this.state.invoicePrintStatus||'all';
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    let invoices=(this.state.invoices||[]).filter(i=>!pid||i.periodId===pid);
+    if(status==='unpaid') invoices=invoices.filter(i=>i.status==='未払い'||i.status==='未払');
+    if(status==='paid') invoices=invoices.filter(i=>i.status==='済み'||i.status==='入金済');
+    invoices=[...invoices].sort((a,b)=>(a.memberStore||'').localeCompare(b.memberStore||'','ja'));
+    const total=invoices.reduce((s,i)=>s+(i.amount||0),0);
+    const statusLabel={all:'全件',unpaid:'未払いのみ',paid:'入金済みのみ'}[status]||'全件';
+    let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">請　求　一　覧</div>
+      <div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}　${statusLabel}　${esc(orgName)}</div>
+      <div style="font-size:9pt;margin-top:4px;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+      <tr style="background:#f0f0f0;">
+        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:28px;">No.</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:left;">店舗名</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:left;width:72px;">氏名</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:left;width:64px;">種別</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:right;width:80px;">金額</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:72px;">発行日</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:72px;">支払期限</th>
+        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:52px;">状態</th>
+      </tr>`;
+    invoices.forEach((inv,i)=>{
+      const isPaid=inv.status==='済み'||inv.status==='入金済';
+      html+=`<tr><td style="border:1px solid #ccc;padding:4px 7px;text-align:center;">${i+1}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;">${esc(inv.memberStore||'')}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;">${esc(inv.memberName||'')}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;">${esc(inv.type||'')}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">${fmt(inv.amount)}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:center;">${esc(inv.issuedDate||'')}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:center;">${esc(inv.dueDate||'')}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:center;${isPaid?'color:#22863a;':'color:#c0392b;'}">${esc(inv.status||'')}</td>
+      </tr>`;
+    });
+    html+=`<tr style="font-weight:700;background:#f0f0f0;">
+      <td style="border:1px solid #999;padding:5px 7px;text-align:center;" colspan="4">合計　${invoices.length}件</td>
+      <td style="border:1px solid #999;padding:5px 7px;text-align:right;">${fmt(total)}</td>
+      <td style="border:1px solid #999;padding:5px 7px;" colspan="3"></td>
+    </tr></table>`;
+    this.setState({invoicePrintModal:false});
+    this._openPrintWindow(html,'請求一覧');
   }
 
   printOfficerList() {
@@ -4306,6 +4431,15 @@ class Component extends DCLogic {
       onPrintOfficers:()=>this.printOfficerList(),
       onPrintMembers:()=>this.printMemberList(),
       onPrintBudget:()=>this.printBudgetProgress(),
+      invoicePrintModalShow:!!this.state.invoicePrintModal,
+      invoicePrintPeriodId:this.state.invoicePrintPeriodId||this.state.currentPeriodId||'',
+      invoicePrintStatus:this.state.invoicePrintStatus||'all',
+      onOpenInvoicePrint:()=>this.setState({invoicePrintModal:true,invoicePrintPeriodId:this.state.currentPeriodId,invoicePrintStatus:'all'}),
+      onCloseInvoicePrint:()=>this.setState({invoicePrintModal:false}),
+      onInvoicePrintBgClick:(e)=>{if(e.target===e.currentTarget)this.setState({invoicePrintModal:false});},
+      onInvoicePrintPeriodChange:(e)=>this.setState({invoicePrintPeriodId:e.target.value}),
+      onInvoicePrintStatusChange:(e)=>this.setState({invoicePrintStatus:e.target.value}),
+      onPrintInvoiceList:()=>this.printInvoiceList(),
       onOpenCashbookModal:()=>this.openCashbookModal(),
       cashbookModalShow:!!this.state.cashbookModal,
       cashbookPeriodId:this.state.cashbookPeriodId||this.state.currentPeriodId||'',
