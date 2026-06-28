@@ -366,7 +366,7 @@
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">{{ currentPeriodName }}</div>
           </div>
           <div style="display:flex;gap:8px;" data-noprint="">
-            <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
+            <button onClick="{{ onPrintOfficers }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
             <button onClick="{{ onAddOfficer }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 役員追加</button>
           </div>
         </div>
@@ -404,8 +404,11 @@
             <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">会員管理</div>
             <div style="fontSize:13px;color:#6e6e73;marginTop:4px;">在籍 {{ activeMemberCount }} 名 ／ 全 {{ memberCount }} 件</div>
           </div>
-          <button onClick="{{ onExportMembersCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">CSV</button>
-          <button onClick="{{ onAddMember }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">＋ 新規会員登録</button>
+          <div style="display:flex;gap:8px;" data-noprint="">
+            <button onClick="{{ onExportMembersCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
+            <button onClick="{{ onPrintMembers }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
+            <button onClick="{{ onAddMember }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 新規会員登録</button>
+          </div>
         </div>
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;marginBottom:12px;">
           <div style="display:flex;background:#f9f9f9;borderBottom:1px solid rgba(0,0,0,0.06);padding:11px 18px;fontSize:11px;fontWeight:600;color:#6e6e73;letterSpacing:0.04em;">
@@ -910,8 +913,8 @@
 
     <!-- INSTALLMENT MODAL -->
     <sc-if value="{{ showInstallmentModal }}" hint-placeholder-val="{{ false }}">
-      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:210;display:flex;alignItems:center;justifyContent:center;backdropFilter:blur(6px);" onClick="{{ onCloseInstallment }}">
-        <div style="background:#fff;borderRadius:16px;width:600px;maxHeight:90vh;overflowY:auto;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;" onClick="{{ stopProp }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:210;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(6px);" onClick="{{ onCloseInstallment }}">
+        <div style="background:#fff;borderRadius:16px;width:600px;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;marginBottom:40px;" onClick="{{ stopProp }}">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:18px;">
             <div>
               <div style="fontSize:17px;fontWeight:700;color:#1d1d1f;">口座引き落とし・分割払い設定</div>
@@ -985,8 +988,8 @@
 
     <!-- BULK INVOICE MODAL -->
     <sc-if value="{{ showBulkModal }}" hint-placeholder-val="{{ false }}">
-      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:210;display:flex;alignItems:center;justifyContent:center;backdropFilter:blur(6px);" onClick="{{ onCloseBulk }}">
-        <div style="background:#fff;borderRadius:16px;width:580px;maxHeight:88vh;overflowY:auto;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;" onClick="{{ stopProp }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:210;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(6px);" onClick="{{ onCloseBulk }}">
+        <div style="background:#fff;borderRadius:16px;width:580px;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;marginBottom:40px;" onClick="{{ stopProp }}">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:18px;">
             <div style="fontSize:17px;fontWeight:700;color:#1d1d1f;">一括請求書発行</div>
             <button onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.07);color:#6e6e73;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
@@ -1207,6 +1210,53 @@
       </div>
     </sc-if>
 
+    <!-- CASHBOOK MODAL -->
+    <sc-if value="{{ cashbookModalShow }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCashbookBgClick }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;">
+        <div onClick="{{ stopProp }}" style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,0.18);overflow:hidden;margin-bottom:40px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(0,0,0,0.07);">
+            <div style="font-size:16px;font-weight:700;color:#1d1d1f;font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;">現金出納帳 印刷</div>
+            <button onClick="{{ onCloseCashbookModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#6e6e73;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
+          </div>
+          <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#6e6e73;margin-bottom:4px;">対象期</label>
+              <select value="{{ cashbookPeriodId }}" onChange="{{ onCashbookPeriodChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="2">
+                  <option value="{{ opt.value }}">{{ opt.label }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:#6e6e73;margin-bottom:4px;">開始月</label>
+                <select value="{{ cashbookMonthFrom }}" onChange="{{ onCashbookMonthFromChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                  <sc-for list="{{ cashbookMonthOptions }}" as="m" hint-placeholder-count="12">
+                    <option value="{{ m.value }}">{{ m.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+              <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:#6e6e73;margin-bottom:4px;">終了月</label>
+                <select value="{{ cashbookMonthTo }}" onChange="{{ onCashbookMonthToChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                  <sc-for list="{{ cashbookMonthOptions }}" as="m" hint-placeholder-count="12">
+                    <option value="{{ m.value }}">{{ m.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </div>
+            <div style="background:#FAF5E6;border-radius:8px;padding:12px 14px;font-size:12px;color:#B0892C;line-height:1.7;">
+              現金・預金それぞれの収入・支出・残高を月別に表示します。<br>単月指定の場合は開始月と終了月を同じに設定してください。
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid rgba(0,0,0,0.07);background:#fafafa;">
+            <button onClick="{{ onCloseCashbookModal }}" style="border:1px solid rgba(0,0,0,0.12);background:#fff;color:#1d1d1f;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;">キャンセル</button>
+            <button onClick="{{ onPrintCashbook }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">印刷 / PDF</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
     <!-- ⑤ LEDGER -->
     <sc-if value="{{ p.ledger }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:1080px;">
@@ -1214,6 +1264,7 @@
           <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.02em;">入出金管理</div>
           <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onExportTxCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
+            <button onClick="{{ onOpenCashbookModal }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">現金出納帳</button>
             <button onClick="{{ onAddTransfer }}" style="border:1px solid #6e6e73;background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⇄ 振替</button>
             <button onClick="{{ onAddComposite }}" style="border:1px solid #6e6e73;background:#fff;color:#1d1d1f;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⊞ 複合処理</button>
             <button onClick="{{ onAddTx }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 取引追加</button>
@@ -1997,8 +2048,8 @@
 
 <!-- ===== MODAL ===== -->
 <sc-if value="{{ modalShow }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:200;display:flex;align-items:center;justifyContent:center;backdropFilter:blur(8px);-webkit-backdrop-filter:blur(8px);" onClick="{{ onModalBgClick }}">
-    <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;maxHeight:88vh;overflowY:auto;boxShadow:0 20px 60px rgba(0,0,0,0.25);" onClick="{{ stopProp }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:200;display:flex;align-items:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(8px);-webkit-backdrop-filter:blur(8px);" onClick="{{ onModalBgClick }}">
+    <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
       <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:20px;">
         <div style="fontSize:17px;fontWeight:700;color:#1d1d1f;letterSpacing:-0.01em;">{{ modalTitle }}</div>
         <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6e6e73;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
@@ -2309,6 +2360,10 @@ class Component extends DCLogic {
     installmentCount: 12,
     installmentDebitDay: 27,
     installmentStartMonth: new Date().toISOString().slice(0,7),
+    cashbookModal: false,
+    cashbookPeriodId: null,
+    cashbookMonthFrom: 1,
+    cashbookMonthTo: 12,
     assemblyDoc: null,
     assemblyModal: false,
     assemblyModalTab: 'cover',
@@ -3366,6 +3421,132 @@ class Component extends DCLogic {
     return html;
   }
 
+  printOfficerList() {
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const pid=this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    const officers=(this.state.officers||[]).filter(o=>o.periodId===pid);
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">役　員　名　簿</div>
+      <div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}　${esc(orgName)}</div>
+    </div>`;
+    html+=this._buildOfficersAgendaHtml();
+    html+=`<div style="margin-top:40px;font-size:10pt;text-align:right;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>`;
+    this._openPrintWindow(html,'役員名簿');
+  }
+
+  printMemberList() {
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">会　員　名　簿</div>
+      <div style="font-size:11pt;margin-top:8px;">${esc(orgName)}</div>
+    </div>`;
+    html+=this._buildMembersAgendaHtml();
+    html+=`<div style="margin-top:40px;font-size:10pt;text-align:right;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>`;
+    this._openPrintWindow(html,'会員名簿');
+  }
+
+  openCashbookModal() {
+    const cp=(this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const sm=cp.startDate?parseInt(cp.startDate.slice(5,7)):4;
+    const em=cp.endDate?parseInt(cp.endDate.slice(5,7)):3;
+    this.setState({cashbookModal:true,cashbookPeriodId:this.state.currentPeriodId,cashbookMonthFrom:sm,cashbookMonthTo:em});
+  }
+
+  printCashbook() {
+    const pid=this.state.cashbookPeriodId||this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const mFrom=this.state.cashbookMonthFrom||1;
+    const mTo=this.state.cashbookMonthTo||12;
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    // 対象取引を期間で絞り込み
+    const txs=(this.state.transactions||[]).filter(t=>{
+      if(t.periodId&&t.periodId!==pid) return false;
+      if(!t.date) return false;
+      const m=parseInt(t.date.slice(5,7));
+      return m>=mFrom&&m<=mTo;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+    // 月ごとに集計
+    const months=[];
+    for(let m=mFrom;m<=mTo;m++) months.push(m);
+    let cashBal=0,bankBal=0;
+    // 期開始からmFrom-1月末までの繰越残高
+    const prevTxs=(this.state.transactions||[]).filter(t=>{
+      if(t.periodId&&t.periodId!==pid) return false;
+      if(!t.date) return false;
+      const m=parseInt(t.date.slice(5,7));
+      return m<mFrom;
+    });
+    prevTxs.forEach(t=>{
+      if((t.accountType||'口座')==='現金'){cashBal+=(t.income||0)-(t.expense||0);}
+      else{bankBal+=(t.income||0)-(t.expense||0);}
+    });
+    const thS='border:1px solid #999;padding:5px 7px;text-align:right;width:72px;font-size:9pt;';
+    const thSL='border:1px solid #999;padding:5px 7px;text-align:left;font-size:9pt;';
+    let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:17pt;font-weight:700;letter-spacing:0.1em;">現　金　出　納　帳</div>
+      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　${mFrom}月〜${mTo}月　${esc(orgName)}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:9pt;">
+      <tr style="background:#f0f0f0;">
+        <th style="${thSL}width:52px;">日付</th>
+        <th style="${thSL}">摘要</th>
+        <th style="${thSL}width:60px;">科目</th>
+        <th style="${thS}">現金収入</th>
+        <th style="${thS}">現金支出</th>
+        <th style="${thS}">現金残高</th>
+        <th style="${thS}">預金収入</th>
+        <th style="${thS}">預金支出</th>
+        <th style="${thS}">預金残高</th>
+      </tr>
+      <tr style="font-weight:700;background:#f9f9f9;">
+        <td style="border:1px solid #ccc;padding:4px 7px;" colspan="3">繰越残高</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">${fmt(cashBal)}</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
+        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">${fmt(bankBal)}</td>
+      </tr>`;
+    txs.forEach(t=>{
+      const isCash=(t.accountType||'口座')==='現金';
+      const inc=t.income||0; const exp=t.expense||0;
+      if(isCash){cashBal+=inc-exp;}else{bankBal+=inc-exp;}
+      const d=t.date||'';
+      const ds=d?`${parseInt(d.slice(5,7))}/${parseInt(d.slice(8,10))}`:'';
+      html+=`<tr>
+        <td style="border:1px solid #ccc;padding:3px 7px;">${esc(ds)}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;">${esc(t.description||t.category||'')}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;">${esc(t.category||'')}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${isCash&&inc>0?fmt(inc):'—'}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${isCash&&exp>0?fmt(exp):'—'}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${isCash?fmt(cashBal):'—'}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${!isCash&&inc>0?fmt(inc):'—'}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${!isCash&&exp>0?fmt(exp):'—'}</td>
+        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${!isCash?fmt(bankBal):'—'}</td>
+      </tr>`;
+    });
+    html+=`<tr style="font-weight:700;background:#f0f0f0;">
+      <td style="border:1px solid #999;padding:4px 7px;" colspan="3">合計残高</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">${fmt(cashBal)}</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">${fmt(bankBal)}</td>
+    </tr></table>
+    <div style="font-size:9pt;text-align:right;margin-top:8px;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>`;
+    this.setState({cashbookModal:false});
+    this._openPrintWindow(html,'現金出納帳');
+  }
+
   printBudgetProgress() {
     const pid=this.state.currentPeriodId;
     const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
@@ -4105,7 +4286,21 @@ class Component extends DCLogic {
       onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:'',memo:''}),
       onGotoUnpaid:()=>this.setState({page:'invoices',invoiceFilter:'未払い'}),
       onPrint:()=>window.print(),
+      onPrintOfficers:()=>this.printOfficerList(),
+      onPrintMembers:()=>this.printMemberList(),
       onPrintBudget:()=>this.printBudgetProgress(),
+      onOpenCashbookModal:()=>this.openCashbookModal(),
+      cashbookModalShow:!!this.state.cashbookModal,
+      cashbookPeriodId:this.state.cashbookPeriodId||this.state.currentPeriodId||'',
+      cashbookMonthFrom:this.state.cashbookMonthFrom||1,
+      cashbookMonthTo:this.state.cashbookMonthTo||12,
+      cashbookMonthOptions:[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>({value:m,label:`${m}月`})),
+      onCashbookPeriodChange:(e)=>this.setState({cashbookPeriodId:e.target.value}),
+      onCashbookMonthFromChange:(e)=>this.setState({cashbookMonthFrom:parseInt(e.target.value)}),
+      onCashbookMonthToChange:(e)=>this.setState({cashbookMonthTo:parseInt(e.target.value)}),
+      onCashbookBgClick:(e)=>{if(e.target===e.currentTarget)this.setState({cashbookModal:false});},
+      onCloseCashbookModal:()=>this.setState({cashbookModal:false}),
+      onPrintCashbook:()=>this.printCashbook(),
       memberRows,
       memberCount:members.filter(m=>m.type!=='その他').length,
       activeMemberCount:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).length,
@@ -4768,8 +4963,6 @@ window.__GAS_KEY__ = 'nishiguchi2490';
 const ALLOWED_EMAILS = ['clmiwa.hotline@gmail.com'];
 const AUTH_KEY = 'nitta_auth_v2';
 let __gasAuthEmails = [];
-
-// ログイン前にGASからauthEmailsを事前取得
 function prefetchAuthEmails(){
   fetch('https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec?key=nishiguchi2490&action=load')
     .then(r=>r.json())
