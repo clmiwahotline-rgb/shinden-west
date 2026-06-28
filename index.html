@@ -6,9 +6,13 @@
 <title>&#x65B0;&#x7530;&#x897F;&#x53E3;&#x5546;&#x5E97;&#x4F1A; &#x7BA1;&#x7406;&#x30DD;&#x30FC;&#x30BF;&#x30EB;</title>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; }
+    h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; }
+    /* ボタンの文字折り返しを防止（全画面共通） */
+    button { white-space:nowrap; }
     /* ローディング進捗バー */
     @keyframes progress-indeterminate {
       0%   { transform: translateX(-100%) scaleX(0.5); }
@@ -105,7 +109,7 @@
 
 <script src="https://accounts.google.com/gsi/client" async></script>
   <style>
-    #gas-auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#faf6ea 0%,#f0e6cc 100%);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;}
+    #gas-auth-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#faf6ea 0%,#f0e6cc 100%);display:flex;align-items:center;justify-content:center;font-family:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Hiragino Sans,sans-serif;}
     #gas-auth-overlay.hidden{display:none;}
     .auth-card{background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.12);padding:44px 52px 40px;text-align:center;width:360px;}
     .auth-title{font-size:18px;font-weight:700;color:#1d1d1f;margin-bottom:4px;letter-spacing:0.02em;}
@@ -165,9 +169,13 @@
 <x-dc>
 <helmet>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; }
+    h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; }
+    /* ボタンの文字折り返しを防止（全画面共通） */
+    button { white-space:nowrap; }
     /* ローディング進捗バー */
     @keyframes progress-indeterminate {
       0%   { transform: translateX(-100%) scaleX(0.5); }
@@ -1277,8 +1285,8 @@
           <sc-for list="{{ txRows }}" as="row" hint-placeholder-count="8">
             <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
               <span style="width:88px;fontSize:12px;color:#6e6e73;">{{ row.dateStr }}</span>
-              <span style="flex:1;fontSize:13px;color:#1d1d1f;display:flex;alignItems:center;gap:6px;">
-                {{ row.description }}
+              <span style="flex:1;minWidth:0;fontSize:13px;color:#1d1d1f;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">
+                {{ row.description }}&nbsp;
                 <sc-if value="{{ row.isTransfer }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#f1f5f9;color:#475569;padding:1px 6px;borderRadius:6px;whiteSpace:nowrap;">振替</span></sc-if>
                 <sc-if value="{{ row.isComposite }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#ede9fe;color:#5b21b6;padding:1px 6px;borderRadius:6px;whiteSpace:nowrap;">複合</span></sc-if>
               </span>
@@ -1714,11 +1722,12 @@
         <!-- Google Sheets 連携 -->
         <div style="background:#fff;borderRadius:14px;boxShadow:0 1px 4px rgba(0,0,0,0.06);padding:22px;marginBottom:16px;">
           
-          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:8px;">
             <div style="fontSize:14px;fontWeight:600;color:#1d1d1f;">期の管理</div>
-            <button onClick="{{ onAddPeriod }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">＋ 新しい期を追加</button>
-          </div><div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
+            <button onClick="{{ onAddPeriod }}" style="border:none;background:#D9B24C;color:#2B2D31;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">＋ 新しい期を追加</button>
+          </div>
+          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
               <div style="flex:1;">
                 <div style="fontSize:13px;fontWeight:600;color:#1d1d1f;">{{ row.name }}</div>
                 <sc-if value="{{ row.isEditing }}" hint-placeholder-val="{{ false }}">
