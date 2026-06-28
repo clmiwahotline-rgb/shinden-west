@@ -42,6 +42,10 @@
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.6; }
     }
+    @keyframes logo-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.75; transform: scale(0.95); }
+    }
     #sync-progress-bar {
       position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
       background:rgba(231,193,95,0.12);
@@ -205,6 +209,10 @@
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.6; }
     }
+    @keyframes logo-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.75; transform: scale(0.95); }
+    }
     #sync-progress-bar {
       position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
       background:rgba(231,193,95,0.12);
@@ -302,6 +310,17 @@
   </style>
 </helmet>
 
+<!-- ===== LOADING SCREEN ===== -->
+<sc-if value="{{ showLoader }}" hint-placeholder-val="{{ true }}">
+  <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;">
+    <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:200px;height:auto;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display='none'" />
+    <div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;">
+      <div style="height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;"></div>
+    </div>
+    <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
+  </div>
+</sc-if>
+
 <div style="height:100vh;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
 <div style="display:flex;width:100%;maxWidth:1440px;height:100vh;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
 
@@ -338,7 +357,7 @@
   <div id="sync-progress-bar" style="{{ syncProgressBarStyle }}"></div>
 
   <!-- ===== MAIN ===== -->
-  <div id="main-scroll" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
+  <div id="main-scroll" ref="{{ mainScrollRef }}" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
 
     <!-- ① DASHBOARD -->
     <sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
@@ -347,28 +366,43 @@
           <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
           <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
         </div>
-        <div style="display:grid;gridTemplateColumns:repeat(4,1fr);gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">年間収入</div>
-            <div style="fontSize:24px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.income }}</div>
+        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
+          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
+            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
+            <div style="display:flex;align-items:baseline;gap:6px;">
+              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
+              <div style="fontSize:14px;color:#6B7280;">件</div>
+            </div>
+            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">年間支出</div>
-            <div style="fontSize:24px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.expense }}</div>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">収支残高</div>
-            <div style="fontSize:24px;fontWeight:700;color:#C39425;letterSpacing:0.02em;">{{ kpi.balance }}</div>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.05em;marginBottom:8px;">未払い会員</div>
-            <div style="fontSize:24px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaid }}</div>
-            <div style="fontSize:10px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
+          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
+            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
+            <div style="display:flex;align-items:baseline;gap:6px;">
+              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
+              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
+            </div>
+            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
           </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1.5fr 1fr;gap:16px;">
+        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
+          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
+            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
+              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
+              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
+            </div>
+            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
+            </sc-if>
+            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
+                <div style="{{ dt.dotStyle }}"></div>
+                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
+                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
+              </div>
+            </sc-for>
+          </div>
           <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">最近の取引</div>
+            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
             <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
               <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
             </div>
@@ -1778,6 +1812,49 @@
       </div>
     </sc-if>
 
+    <!-- TASKS -->
+    <sc-if value="{{ p.tasks }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:900px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;">
+          <div>
+            <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">タスク管理</div>
+            <div style="fontSize:13px;color:#6B7280;marginTop:4px;">未完了 {{ taskOpenCount }}件 ／ 完了 {{ taskDoneCount }}件</div>
+          </div>
+          <button onClick="{{ onAddTask }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:12px;fontSize:13px;fontWeight:500;" data-noprint="">＋ タスク追加</button>
+        </div>
+        <div style="display:flex;gap:6px;marginBottom:16px;" data-noprint="">
+          <sc-for list="{{ taskFilters }}" as="f" hint-placeholder-count="3">
+            <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+          <sc-if value="{{ taskEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:48px;textAlign:center;color:#A1A1AA;fontSize:13px;">タスクがありません。「＋ タスク追加」から追加してください。</div>
+          </sc-if>
+          <sc-for list="{{ taskRows }}" as="task" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;borderBottom:1px solid rgba(0,0,0,0.05);">
+              <button onClick="{{ task.onToggle }}" style="{{ task.toggleStyle }}" title="完了切り替え">{{ task.toggleIcon }}</button>
+              <div style="flex:1;min-width:0;">
+                <div style="{{ task.titleStyle }}">{{ task.title }}</div>
+                <div style="display:flex;gap:8px;marginTop:4px;alignItems:center;flexWrap:wrap;">
+                  <sc-if value="{{ task.hasCategory }}" hint-placeholder-val="{{ false }}">
+                    <span style="fontSize:11px;background:#F5F6F8;color:#6B7280;padding:1px 8px;borderRadius:4px;border:1px solid #DDDEE2;">{{ task.category }}</span>
+                  </sc-if>
+                  <sc-if value="{{ task.hasDue }}" hint-placeholder-val="{{ false }}">
+                    <span style="{{ task.dueDateStyle }}">{{ task.dueDateStr }}</span>
+                  </sc-if>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;" data-noprint="">
+                <button onClick="{{ task.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:7px;fontSize:11px;">編集</button>
+                <button onClick="{{ task.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:4px 10px;borderRadius:7px;fontSize:11px;">削除</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
     <!-- ⑨ ASSEMBLY -->
     <sc-if value="{{ p.assembly }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:860px;">
@@ -2337,6 +2414,30 @@
         </div>
       </sc-if>
 
+      <sc-if value="{{ isTask }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flexDirection:column;gap:14px;">
+          <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">タスク名 *</label>
+            <input data-field="title" value="{{ formData.title }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 総会案内状の送付"></div>
+          <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
+            <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">期日</label>
+              <input data-field="dueDate" value="{{ formData.dueDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+            <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">カテゴリ</label>
+              <select data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+                <option value="">なし</option><option value="運営">運営</option><option value="広報">広報</option><option value="財務">財務</option><option value="イベント">イベント</option><option value="その他">その他</option>
+              </select></div>
+          </div>
+          <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">担当者</label>
+            <select data-field="assignee" value="{{ formData.assignee }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+              <option value="">なし</option>
+              <sc-for list="{{ officerOptions }}" as="opt" hint-placeholder-count="5">
+                <option value="{{ opt.id }}">{{ opt.label }}</option>
+              </sc-for>
+            </select></div>
+          <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">メモ</label>
+            <textarea data-field="note" value="{{ formData.note }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="2" placeholder="補足メモ"></textarea></div>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ isPeriod }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flexDirection:column;gap:14px;">
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">期の名称</label>
@@ -2432,6 +2533,8 @@ class Component extends DCLogic {
     installmentCount: 12,
     installmentDebitDay: 27,
     installmentStartMonth: new Date().toISOString().slice(0,7),
+    tasks: [],
+    taskFilter: '全て',
     invoicePrintModal: false,
     invoicePrintPeriodId: null,
     invoicePrintStatus: 'all',
@@ -2459,18 +2562,18 @@ class Component extends DCLogic {
   fmt(n) { return '¥' + Math.abs(n||0).toLocaleString('ja-JP'); }
   fmtD(d) { if (!d) return '—'; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); }
 
+  _mainScrollRef = React.createRef();
   _lastPage = null;
 
   componentDidUpdate() {
     try {
       if (this._lastPage !== this.state.page) {
         this._lastPage = this.state.page;
-        setTimeout(() => {
-          const el = document.getElementById('main-scroll')
-            || document.querySelector('#main-scroll')
-            || document.querySelector('[id="main-scroll"]');
-          if (el) { el.scrollTop = 0; el.scrollTo && el.scrollTo(0,0); }
-        }, 20);
+        const el = this._mainScrollRef && this._mainScrollRef.current;
+        if (el) {
+          el.scrollTop = 0;
+          try { el.scrollTo({top:0, behavior:'instant'}); } catch(e2) {}
+        }
       }
     } catch(e) {}
   }
@@ -2635,8 +2738,10 @@ class Component extends DCLogic {
           this.setState({ syncStatus: 'ok', loading: false });
           this.showToast('SSにデータが見つかりません。ローカルデータを使用中（SS未書込）');
         } else {
-          this.setState({ ...parsed, loading: false, syncStatus: 'ok', ssReady: true });
-          localStorage.setItem('nitta_v5', JSON.stringify(parsed));
+          const assemblyDoc = this._restoreAssemblyDoc(parsed);
+          const merged = {...parsed, assemblyDoc};
+          this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true });
+          localStorage.setItem('nitta_v5', JSON.stringify(merged));
           this.showToast('スプレッドシートから読み込みました');
         }
       })
@@ -2664,8 +2769,10 @@ class Component extends DCLogic {
       .then(d=>{
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length===0) { if(!silent) this.showToast('SSにデータがありません'); return; }
-        this.setState({...parsed, syncStatus:'ok', ssReady:true});
-        localStorage.setItem('nitta_v5', JSON.stringify(parsed));
+        const assemblyDoc = this._restoreAssemblyDoc(parsed);
+        const merged = {...parsed, assemblyDoc};
+        this.setState({...merged, syncStatus:'ok', ssReady:true});
+        localStorage.setItem('nitta_v5', JSON.stringify(merged));
         if (!silent) this.showToast('SSから最新データを取得しました');
       })
       .catch(()=>{ if(!silent) this.showToast('SS再読み込みに失敗しました'); });
@@ -2683,8 +2790,10 @@ class Component extends DCLogic {
       .then(d=>{
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length===0) throw new Error('SSにデータがありません');
-        this.setState({...parsed, loading:false, syncStatus:'ok', ssReady:true});
-        localStorage.setItem('nitta_v5', JSON.stringify(parsed));
+        const assemblyDoc = this._restoreAssemblyDoc(parsed);
+        const merged = {...parsed, assemblyDoc};
+        this.setState({...merged, loading:false, syncStatus:'ok', ssReady:true});
+        localStorage.setItem('nitta_v5', JSON.stringify(merged));
         this.showToast('SSからデータを読み込みました（ローカルに保存済み）');
       })
       .catch(err=>{
@@ -3061,7 +3170,7 @@ class Component extends DCLogic {
       return `<tr style="border-bottom:1px solid #efefef;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
     }).join('');
     const bodyHtml = [
-      `<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #3F414C;"><div style="font-size:18px;font-weight:700;letter-spacing:0.18em;">事　業　報　告　書</div><div style="font-size:12px;color:#555;margin-top:6px;">${esc(cp.name||'')}</div><div style="font-size:12px;color:#555;margin-top:2px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:12px;color:#555;margin-top:2px;">${esc(orgName)}</div></div>`,
+      `<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #3F414C;"><div style="font-size:18px;font-weight:700;letter-spacing:0.18em;">事　業　進　捗　報　告</div><div style="font-size:12px;color:#555;margin-top:6px;">${esc(cp.name||'')}</div><div style="font-size:12px;color:#555;margin-top:2px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:12px;color:#555;margin-top:2px;">${esc(orgName)}</div></div>`,
       `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #3F414C;"><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:96px;">開　催　日</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">事　業　名</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:78px;">種　別</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:92px;">参　加　者</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">備　考　・　記　録</th></tr></thead><tbody>${rowsHtml}<tr style="border-top:2px solid #3F414C;font-weight:700;"><td colspan="5" style="padding:8px;text-align:right;">事業件数　${evts.length}　件</td></tr></tbody></table>`,
       `<div style="margin-top:52px;font-size:12px;text-align:right;line-height:1.9;">${esc(orgName)}<br>会長　${esc(orgInfo.repName||'')}</div>`,
     ].join('');
@@ -3284,8 +3393,17 @@ class Component extends DCLogic {
       agendas:this.state.assemblyFormAgendas||[],
       savedAt:new Date().toISOString(),
     };
+    // SS同期で上書きされても消えないよう専用キーにも保存
+    try { localStorage.setItem('nitta_assemblyDoc', JSON.stringify(doc)); } catch(e) {}
     this.setState({assemblyDoc:doc,assemblyModal:false},()=>this.persist());
     this.showToast('総会資料を保存しました');
+  }
+
+  _restoreAssemblyDoc(parsed) {
+    // SSから読み込んだparsedにassemblyDocがない場合、専用キーまたは現stateから復元
+    return parsed.assemblyDoc
+      || this.state.assemblyDoc
+      || JSON.parse(localStorage.getItem('nitta_assemblyDoc') || 'null');
   }
 
   addAgendaItem() {
@@ -3561,6 +3679,25 @@ class Component extends DCLogic {
     </tr></table>`;
     this.setState({invoicePrintModal:false});
     this._openPrintWindow(html,'請求一覧');
+  }
+
+  saveTask() {
+    const {formData:f,modal:m} = this.state;
+    if(!f.title||!f.title.trim()){alert('タスク名を入力してください');return;}
+    const rec={title:(f.title||'').trim(),dueDate:f.dueDate||'',category:f.category||'',note:f.note||'',status:f.status||'未完了'};
+    if(m.editId) this.setState(s=>({tasks:(s.tasks||[]).map(t=>t.id===m.editId?{...t,...rec}:t)}),()=>this.persist());
+    else this.setState(s=>({tasks:[...(s.tasks||[]),{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal();
+    this.showToast('タスクを保存しました');
+  }
+
+  toggleTask(id) {
+    this.setState(s=>({tasks:(s.tasks||[]).map(t=>t.id===id?{...t,status:t.status==='完了'?'未完了':'完了'}:t)}),()=>this.persist());
+  }
+
+  delTask(id) {
+    if(!confirm('このタスクを削除しますか？')) return;
+    this.setState(s=>({tasks:(s.tasks||[]).filter(t=>t.id!==id)}),()=>this.persist());
   }
 
   printOfficerList() {
@@ -4332,7 +4469,15 @@ class Component extends DCLogic {
 
     // Event rows
     const periodEnd = cp.endDate||'9999-12-31';
-    const evtCardBg = {'お祭り・縁日':{background:'#fefce8',borderLeft:'3px solid #facc15'},'総会・会議':{background:'#F5F6F8',borderLeft:'3px solid #60a5fa'},'研修事業':{background:'#f0fdf4',borderLeft:'3px solid #4ade80'},'文化・交流':{background:'#faf5ff',borderLeft:'3px solid #c084fc'}};
+    const evtCardBg = {
+      'お祭り・縁日':{background:'rgba(231,193,95,0.10)',borderLeft:'3px solid #E7C15F'},
+      '総会・会議':  {background:'rgba(175,195,215,0.12)',borderLeft:'3px solid #AFC3D7'},
+      '研修事業':    {background:'rgba(199,210,197,0.18)',borderLeft:'3px solid #C7D2C5'},
+      '文化・交流':  {background:'rgba(123,192,149,0.10)',borderLeft:'3px solid #7BC095'},
+      '清掃・環境':  {background:'rgba(199,210,197,0.15)',borderLeft:'3px solid #C7D2C5'},
+      '広報・PR':    {background:'rgba(175,195,215,0.10)',borderLeft:'3px solid #AFC3D7'},
+      '懇親会・交流':{background:'rgba(231,193,95,0.08)',borderLeft:'3px solid #C39425'},
+    };
     const eventRows = pEvents.map(e=>({
       ...e, typeBadge:badge(etPalette[e.type]),
       dateStr:this.fmtD(e.date)+(e.endDate?'〜'+this.fmtD(e.endDate):''),
@@ -4349,7 +4494,7 @@ class Component extends DCLogic {
       {id:'members',label:'会員管理'},{id:'invoices',label:'請求書管理'},
       {id:'ledger',label:'入出金管理'},{id:'budget',label:'予算管理'},
       {id:'statements',label:'決算書'},{id:'events',label:'事業記録'},
-      {id:'assembly',label:'総会資料'},{id:'settings',label:'設定'},
+      {id:'tasks',label:'タスク管理'},{id:'assembly',label:'総会資料'},{id:'settings',label:'設定'},
     ];
     const navItems = NAV.map(n=>({
       ...n, onClick:()=>this.nav(n.id),
@@ -4411,22 +4556,86 @@ class Component extends DCLogic {
     }));
 
     // Modal
-    const TITLES={officer:modal.editId?'役員を編集':'役員を追加',member:modal.editId?'会員情報を編集':'新規会員登録',memberStatus:'退会・訂正の記録',invoice:modal.editId?'請求書を編集':'請求書を追加',transaction:modal.editId?'取引を編集':'取引を追加',budget:modal.editId?'予算科目を編集':'予算科目を追加',event:modal.editId?'事業を編集':'事業を追加',period:'新しい期を追加'};
-    const SAVES={officer:()=>this.saveOfficer(),member:()=>this.saveMember(),memberStatus:()=>this.saveStatusChange(),invoice:()=>this.saveInvoice(),transaction:()=>this.saveTx(),budget:()=>this.saveBudget(),event:()=>this.saveEvent(),period:()=>this.savePeriod()};
+    const TITLES={task:modal.editId?'タスクを編集':'タスクを追加',officer:modal.editId?'役員を編集':'役員を追加',member:modal.editId?'会員情報を編集':'新規会員登録',memberStatus:'退会・訂正の記録',invoice:modal.editId?'請求書を編集':'請求書を追加',transaction:modal.editId?'取引を編集':'取引を追加',budget:modal.editId?'予算科目を編集':'予算科目を追加',event:modal.editId?'事業を編集':'事業を追加',period:'新しい期を追加'};
+    const SAVES={task:()=>this.saveTask(),officer:()=>this.saveOfficer(),member:()=>this.saveMember(),memberStatus:()=>this.saveStatusChange(),invoice:()=>this.saveInvoice(),transaction:()=>this.saveTx(),budget:()=>this.saveBudget(),event:()=>this.saveEvent(),period:()=>this.savePeriod()};
 
     return {
-      p:{dashboard:page==='dashboard',officers:page==='officers',members:page==='members',invoices:page==='invoices',ledger:page==='ledger',budget:page==='budget',statements:page==='statements',events:page==='events',assembly:page==='assembly',settings:page==='settings',printInvoice:!!(this.state.printDoc)},
+      p:{dashboard:page==='dashboard',officers:page==='officers',members:page==='members',invoices:page==='invoices',ledger:page==='ledger',budget:page==='budget',statements:page==='statements',tasks:page==='tasks',events:page==='events',assembly:page==='assembly',settings:page==='settings',printInvoice:!!(this.state.printDoc)},
       navItems, periodOptions, currentPeriodId,
       onChangePeriod:(e)=>this.setState({currentPeriodId:e.target.value}),
       currentPeriodName:cp.name,
       periodName:cp.name, periodStart:this.fmtD(cp.startDate), periodEnd:this.fmtD(cp.endDate),
       prevPeriodName:cp.name,
-      kpi:{income:this.fmt(totalIncome),expense:this.fmt(totalExpense),balance:this.fmt(totalIncome-totalExpense),unpaid:unpaidCount+'社'},
+      kpi:(()=>{
+        const allTasks=this.state.tasks||[];
+        const today2=new Date().toISOString().slice(0,10);
+        const taskOpen=allTasks.filter(t=>t.status!=='完了').length;
+        const taskOverdue=allTasks.filter(t=>t.status!=='完了'&&t.dueDate&&t.dueDate<today2).length;
+        const taskDone=allTasks.filter(t=>t.status==='完了').length;
+        const unpaidInv=pInvoices.filter(i=>i.status==='未払い'||i.status==='未払').length;
+        return {income:this.fmt(totalIncome),expense:this.fmt(totalExpense),balance:this.fmt(totalIncome-totalExpense),unpaid:unpaidCount+'社',
+          taskOpen,taskOverdue,taskDone,taskOverdueStyle:{color:taskOverdue>0?'#E57373':'#7BC095',fontWeight:'600'},
+          unpaidInvoice:unpaidInv};
+      })(),
       recentTx, upcomingEvts,
       officerRows,
       memberOptions: members.map(m=>({id:m.id, label:`${m.name}（${m.store}）`})),
       onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:'',memo:''}),
       onGotoUnpaid:()=>this.setState({page:'invoices',invoiceFilter:'未払い'}),
+      onGotoTasks:()=>this.setState({page:'tasks'}),
+      // タスク管理
+      officerOptions:(this.state.officers||[]).filter(o=>o.periodId===this.state.currentPeriodId).map(o=>{const mb=(this.state.members||[]).find(m=>m.id===o.memberId)||{};return {id:o.memberId,label:`${mb.name||'?'}（${o.role}）`};}).filter(o=>o.label),
+      onAddTask:()=>this.openModal('task',null,{title:'',dueDate:'',category:'',assignee:'',note:'',status:'未完了'}),
+      taskOpenCount:(()=>{const t=this.state.tasks||[];return t.filter(x=>x.status!=='完了').length;})(),
+      taskDoneCount:(()=>{const t=this.state.tasks||[];return t.filter(x=>x.status==='完了').length;})(),
+      taskEmpty:(()=>{
+        const tf=this.state.taskFilter||'全て';const t=this.state.tasks||[];
+        const f=tf==='未完了'?t.filter(x=>x.status!=='完了'):tf==='完了'?t.filter(x=>x.status==='完了'):t;
+        return !f.length;
+      })(),
+      taskFilters:['全て','未完了','完了'].map(label=>({
+        label,onClick:()=>this.setState({taskFilter:label}),
+        style:(this.state.taskFilter||'全て')===label
+          ?{border:'none',background:'#C7D2C5',color:'#3F414C',padding:'5px 14px',borderRadius:'8px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}
+          :{border:'1px solid #DDDEE2',background:'#fff',color:'#6B7280',padding:'5px 14px',borderRadius:'8px',fontSize:'12px',cursor:'pointer'},
+      })),
+      taskRows:(()=>{
+        const tf=this.state.taskFilter||'全て';const tday=new Date().toISOString().slice(0,10);
+        const t=this.state.tasks||[];
+        const f=tf==='未完了'?t.filter(x=>x.status!=='完了'):tf==='完了'?t.filter(x=>x.status==='完了'):t;
+        return f.map(task=>{
+          const done=task.status==='完了';
+          const overdue=!done&&task.dueDate&&task.dueDate<tday;
+          return {
+            title:task.title||'（無題）',
+            hasCategory:!!task.category,category:task.category||'',
+            hasDue:!!task.dueDate,
+            dueDateStr:task.dueDate?(this.fmtD(task.dueDate)+(overdue?' ⚠':'')):'' ,
+            dueDateStyle:{fontSize:'11px',color:overdue?'#E57373':'#A1A1AA'},
+            toggleIcon:done?'✓':'○',
+            toggleStyle:done
+              ?{border:'none',width:'26px',height:'26px',borderRadius:'50%',background:'#C7D2C5',color:'#3F414C',fontSize:'13px',fontWeight:'700',cursor:'pointer',flexShrink:'0',padding:'0',lineHeight:'1.8'}
+              :{border:'2px solid #DDDEE2',width:'26px',height:'26px',borderRadius:'50%',background:'transparent',color:'transparent',fontSize:'13px',cursor:'pointer',flexShrink:'0',padding:'0',lineHeight:'1'},
+            titleStyle:{fontSize:'13px',color:done?'#A1A1AA':'#3F414C',fontWeight:done?'400':'500',textDecoration:done?'line-through':'none'},
+            onToggle:()=>this.toggleTask(task.id),
+            onEdit:()=>this.openModal('task',task.id,{...task}),
+            onDel:()=>this.delTask(task.id),
+          };
+        });
+      })(),
+      dashTaskEmpty:!(this.state.tasks||[]).filter(t=>t.status!=='完了').length,
+      dashTaskRows:(()=>{
+        const tday2=new Date().toISOString().slice(0,10);
+        return (this.state.tasks||[]).filter(t=>t.status!=='完了').slice(0,4).map(task=>{
+          const overdue=task.dueDate&&task.dueDate<tday2;
+          return {
+            title:task.title||'（無題）',
+            dotStyle:{width:'6px',height:'6px',borderRadius:'50%',background:overdue?'#E57373':'#AFC3D7',flexShrink:'0'},
+            dueLabel:task.dueDate?this.fmtD(task.dueDate):'',
+            dueLabelStyle:{fontSize:'11px',color:overdue?'#E57373':'#A1A1AA',flexShrink:'0'},
+          };
+        });
+      })(),
       onPrint:()=>window.print(),
       onPrintOfficers:()=>this.printOfficerList(),
       onPrintMembers:()=>this.printMemberList(),
@@ -4862,6 +5071,8 @@ class Component extends DCLogic {
           };
         });
       })(),
+      mainScrollRef: this._mainScrollRef,
+      showLoader: !!this.state.loading,
       onOpenAssemblyModal:()=>this.openAssemblyModal(),
       onPrintAssembly:()=>this.printAssemblyDoc(),
       assemblyModalShow:this.state.assemblyModal||false,
@@ -5012,6 +5223,7 @@ class Component extends DCLogic {
       onInput:(e)=>this.setField(e.target.dataset.field,e.target.value),
       onModalBgClick:(e)=>{ if(e.target===e.currentTarget) this.closeModal(); },
       stopProp:(e)=>e.stopPropagation(),
+      isTask:modal.type==='task',
       isOfficer:modal.type==='officer', isMember:modal.type==='member', isMemberStatus:modal.type==='memberStatus',
       isInvoice:modal.type==='invoice', isTx:modal.type==='transaction',
       isBudget:modal.type==='budget', isEvent:modal.type==='event', isPeriod:modal.type==='period',
@@ -5067,8 +5279,8 @@ class Component extends DCLogic {
         ? {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(123,192,149,0.12)',color:'#7BC095'}
         : {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(255,149,0,0.12)',color:'#ff9500'},
       onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
-      syncProgressBarStyle: (this.state.syncStatus==='syncing'||this.state.loading) ? {} : {opacity:0,pointerEvents:'none'},
-      syncProgressBarClass: (this.state.syncStatus==='syncing'||this.state.loading) ? '' : 'hidden',
+      syncProgressBarStyle: (this.state.syncStatus==='syncing'&&!this.state.loading) ? {} : {opacity:0,pointerEvents:'none'},
+      syncProgressBarClass: (this.state.syncStatus==='syncing'&&!this.state.loading) ? '' : 'hidden',
       syncStatusLabel: this.state.syncPaused ? '⏸ 同期停止中' : ({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
       syncStatusColor: this.state.syncPaused ? '#ff9500' : ({null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'})[String(this.state.syncStatus)]||'#A1A1AA',
       gasUserEmail:(this.state.gasUser||{}).email||'',
