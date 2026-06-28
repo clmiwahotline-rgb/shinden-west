@@ -39,7 +39,15 @@
     }
     @media print {
       /* ===== 基本設定 ===== */
-      @page { size:A4 portrait; margin:15mm 18mm; }
+      @page {
+        size:A4 portrait; margin:15mm 18mm;
+        @top-left   { content:none; }
+        @top-center { content:none; }
+        @top-right  { content:none; }
+        @bottom-left  { content:none; }
+        @bottom-center { content:counter(page); font-size:9pt; font-family:serif; }
+        @bottom-right { content:none; }
+      }
       html, body { height:auto!important; overflow:visible!important; background:#fff!important; zoom:1!important; }
 
       /* ===== UI非表示 ===== */
@@ -175,7 +183,15 @@
     }
     @media print {
       /* ===== 基本設定 ===== */
-      @page { size:A4 portrait; margin:15mm 18mm; }
+      @page {
+        size:A4 portrait; margin:15mm 18mm;
+        @top-left   { content:none; }
+        @top-center { content:none; }
+        @top-right  { content:none; }
+        @bottom-left  { content:none; }
+        @bottom-center { content:counter(page); font-size:9pt; font-family:serif; }
+        @bottom-right { content:none; }
+      }
       html, body { height:auto!important; overflow:visible!important; background:#fff!important; zoom:1!important; }
 
       /* ===== UI非表示 ===== */
@@ -1368,7 +1384,7 @@
           <div style="display:flex;gap:8px;">
             <button onClick="{{ onOpenBudgetDraft }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">翌年度予算を作る →</button>
             <button onClick="{{ onOpenSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">決算処理 →</button>
-            <button onClick="{{ onPrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">印刷</button>
+            <button onClick="{{ onPrintBudget }}" style="border:none;background:rgba(0,0,0,0.05);color:#1d1d1f;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">印刷</button>
           </div>
         </div>
         <div style="marginBottom:28px;">
@@ -3349,9 +3365,76 @@ class Component extends DCLogic {
     return html;
   }
 
+  printBudgetProgress() {
+    const pid=this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    const today=new Date().toISOString().slice(0,10);
+    const budItems=(this.state.budgetItems||[]).filter(b=>b.periodId===pid);
+    const txs=(this.state.transactions||[]).filter(t=>t.periodId===pid);
+    const txMap={};
+    txs.forEach(t=>{
+      if(t.income>0) txMap[t.category]=(txMap[t.category]||{income:0,expense:0}), txMap[t.category].income=(txMap[t.category].income||0)+t.income;
+      if(t.expense>0) txMap[t.category]=(txMap[t.category]||{income:0,expense:0}), txMap[t.category].expense=(txMap[t.category].expense||0)+t.expense;
+    });
+    const inc=budItems.filter(b=>b.type==='収入');
+    const exp=budItems.filter(b=>b.type==='支出');
+    const thS='border:1px solid #999;padding:5px 8px;text-align:right;width:82px;';
+    const thSL='border:1px solid #999;padding:5px 8px;text-align:left;';
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}　（${esc(fmtWa(cp.startDate))}〜${esc(fmtWa(cp.endDate))}）</div>
+      <div style="font-size:10pt;color:#333;margin-top:4px;">作成日：${esc(fmtWa(today))}　　${esc(orgName)}</div>
+    </div>`;
+    const buildSection=(rows,label,isIncome)=>{
+      let total_b=0,total_a=0;
+      let sec=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:18px;">
+        <tr style="background:#f0f0f0;">
+          <th style="${thSL}">科目</th>
+          <th style="${thS}">予算額</th>
+          <th style="${thS}">実績額</th>
+          <th style="${thS}">差引</th>
+          <th style="border:1px solid #999;padding:5px 8px;text-align:center;width:50px;">達成率</th>
+        </tr>
+        <tr><td colspan="5" style="border:1px solid #999;padding:4px 8px;background:#f7f7f7;font-weight:700;">【${label}の部】</td></tr>`;
+      rows.forEach(b=>{
+        const bud=b.amount||0;
+        const actObj=txMap[b.category]||{income:0,expense:0};
+        const act=isIncome?(actObj.income||0):(actObj.expense||0);
+        const diff=isIncome?(act-bud):(bud-act);
+        const pct=bud?Math.round(act/bud*100):0;
+        const diffStr=diff===0?'―':(diff>0?'＋':'')+fmt(diff);
+        total_b+=bud; total_a+=act;
+        sec+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(b.category)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(bud)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(act)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${diffStr}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:center;">${pct}%</td></tr>`;
+      });
+      const tDiff=isIncome?(total_a-total_b):(total_b-total_a);
+      const tPct=total_b?Math.round(total_a/total_b*100):0;
+      sec+=`<tr style="font-weight:700;background:#f0f0f0;"><td style="border:1px solid #999;padding:4px 8px;">${label}合計</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(total_b)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(total_a)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${(tDiff>=0?'＋':'')+fmt(tDiff)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:center;">${tPct}%</td></tr></table>`;
+      return {html:sec, totalB:total_b, totalA:total_a};
+    };
+    const incSec=buildSection(inc,'収入',true);
+    const expSec=buildSection(exp,'支出',false);
+    html+=incSec.html+expSec.html;
+    const bal_b=incSec.totalB-expSec.totalB;
+    const bal_a=incSec.totalA-expSec.totalA;
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:24px;">
+      <tr style="font-weight:700;background:#e8e8e8;">
+        <td style="border:1px solid #999;padding:5px 10px;">収支差引</td>
+        <td style="border:1px solid #999;padding:5px 8px;text-align:right;width:82px;">${fmt(bal_b)}</td>
+        <td style="border:1px solid #999;padding:5px 8px;text-align:right;width:82px;">${fmt(bal_a)}</td>
+        <td style="border:1px solid #999;padding:5px 8px;text-align:right;width:82px;">${((bal_a-bal_b)>=0?'＋':'')+fmt(bal_a-bal_b)}</td>
+        <td style="border:1px solid #999;padding:5px 8px;width:50px;"></td>
+      </tr>
+    </table>`;
+    this._openPrintWindow(html,'予算進捗');
+  }
+
   _openPrintWindow(bodyHtml, title) {
     const printCss = [
-      '@page{size:A4 portrait;margin:15mm 18mm;}',
+      '@page{size:A4 portrait;margin:15mm 18mm;@top-left{content:none}@top-center{content:none}@top-right{content:none}@bottom-left{content:none}@bottom-center{content:counter(page);font-size:9pt}@bottom-right{content:none}}',
       'body{margin:0;background:#fff;color:#000;font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;}',
       '*{color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
       'td,th,div,span,p{color:#000!important;}',
@@ -4021,6 +4104,7 @@ class Component extends DCLogic {
       onAddOfficer:()=>this.openModal('officer',null,{role:'理事',memberId:'',memo:''}),
       onGotoUnpaid:()=>this.setState({page:'invoices',invoiceFilter:'未払い'}),
       onPrint:()=>window.print(),
+      onPrintBudget:()=>this.printBudgetProgress(),
       memberRows,
       memberCount:members.filter(m=>m.type!=='その他').length,
       activeMemberCount:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).length,
