@@ -1623,9 +1623,11 @@ class Component extends DCLogic {
     const thSL='border:1px solid #999;padding:5px 7px;text-align:left;font-size:8.5pt;';
     const tdA='border:1px solid #ccc;padding:3px 7px;text-align:right;font-size:8.5pt;';
     const tdL='border:1px solid #ccc;padding:3px 7px;font-size:8.5pt;';
-    let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
-      <div style="font-size:17pt;font-weight:700;letter-spacing:0.1em;">現　金　出　納　帳</div>
-      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　${mFrom}月〜${mTo}月　${esc(orgName)}</div>
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">現　金　出　納　帳</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div>
+      <div style="font-size:11pt;margin-top:6px;">${mFrom}月〜${mTo}月</div>
+      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
       <tr style="background:#E6E8EC;">
@@ -1859,6 +1861,7 @@ class Component extends DCLogic {
     const fmt=n=>(n||0).toLocaleString('ja-JP');
     const fmtWa=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
     const today=new Date().toISOString().slice(0,10);
+    const fmtD=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
     const budItems=(this.state.budgetItems||[]).filter(b=>b.periodId===pid);
     const txs=(this.state.transactions||[]).filter(t=>t.periodId===pid);
     const txMap={};
@@ -1872,8 +1875,9 @@ class Component extends DCLogic {
     const thSL='padding:4pt 8pt;text-align:left;font-weight:600;';
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
-      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}　（${esc(fmtWa(cp.startDate))}〜${esc(fmtWa(cp.endDate))}）</div>
-      <div style="font-size:10pt;color:#333;margin-top:4px;">作成日：${esc(fmtWa(today))}　　${esc(orgName)}</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div>
+      <div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div>
+      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
     </div>`;
     const buildSection=(rows,label,isIncome)=>{
       let total_b=0,total_a=0;

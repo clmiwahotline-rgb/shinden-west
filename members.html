@@ -1023,10 +1023,13 @@ class Component extends DCLogic {
     const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    const fmtD=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
     const officers=(this.state.officers||[]).filter(o=>o.periodId===pid);
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">役　員　名　簿</div>
-      <div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}　${esc(orgName)}</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div>
+      <div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div>
+      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
     </div>`;
     html+=this._buildOfficersAgendaHtml();
     html+=`<div style="margin-top:40px;font-size:10pt;text-align:right;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>`;
@@ -1037,9 +1040,14 @@ class Component extends DCLogic {
     const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    const pid=this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const fmtD=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">会　員　名　簿</div>
-      <div style="font-size:11pt;margin-top:8px;">${esc(orgName)}</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div>
+      <div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div>
+      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
     </div>`;
     html+=this._buildMembersAgendaHtml();
     html+=`<div style="margin-top:40px;font-size:10pt;text-align:right;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>`;

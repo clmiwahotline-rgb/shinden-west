@@ -1537,10 +1537,11 @@ class Component extends DCLogic {
     invoices=[...invoices].sort((a,b)=>(a.memberStore||'').localeCompare(b.memberStore||'','ja'));
     const total=invoices.reduce((s,i)=>s+(i.amount||0),0);
     const statusLabel={all:'全件',unpaid:'未払いのみ',paid:'入金済みのみ'}[status]||'全件';
-    let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">請　求　一　覧</div>
-      <div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}　${statusLabel}　${esc(orgName)}</div>
-      <div style="font-size:9pt;margin-top:4px;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}${statusLabel?' （'+statusLabel+'）':''}</div>
+      <div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div>
+      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:10pt;">
       <tr style="border-bottom:1pt solid #000;">
