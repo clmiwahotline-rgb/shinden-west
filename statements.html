@@ -176,10 +176,8 @@
 <x-dc>
 
 <helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
     html,body { height:100%; }
     html { zoom:1.2; }
@@ -1070,8 +1068,10 @@ class Component extends DCLogic {
     const url = localStorage.getItem('nitta_script_url') || '';
     const apiKey = localStorage.getItem('nitta_api_key') || '';
     if (url && apiKey) {
-      this.setState({ scriptUrl: url, scriptUrlInput: url, scriptApiKey: apiKey, loading: true });
-      this.fetchSheets(url, apiKey);
+      this.setState({ scriptUrl: url, scriptUrlInput: url, scriptApiKey: apiKey });
+      this.loadLocal();
+      this.setState({ syncStatus: 'syncing' });
+      setTimeout(() => this.fetchSheets(url, apiKey, true), 50);
       // 5分ごとに自動再読み込み（モーダルが開いていない場合のみ）
       this._autoRefreshTimer = setInterval(()=>{
         if (!this.state.modal && !this.state.showBulkModal && !this.state.showSettlementModal && !this.state.auditModal) {

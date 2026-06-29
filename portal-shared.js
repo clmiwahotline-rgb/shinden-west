@@ -76,23 +76,17 @@
     };
   },
 
-  fetchSheets(url, apiKey) {
+  fetchSheets(url, apiKey, silent) {
     const key = apiKey || this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
+    if (!silent) this.setState({ syncStatus: 'syncing' });
     fetch(`${url}?action=load&key=${encodeURIComponent(key)}&t=${Date.now()}`)
       .then(r => r.text())
       .then(text => {
-        console.log('GAS raw response (first 300 chars):', text.slice(0,300));
-        // 先頭文字のcharCodeを確認（BOMや不可視文字の検出）
-        console.log('First 5 charCodes:', [...text.slice(0,5)].map(c=>c.charCodeAt(0)));
-        // trimしてから試す
-        const trimmed = text.trim().replace(/^\uFEFF/,''); // BOM除去
-        try {
-          return JSON.parse(trimmed);
-        } catch(e) {
-          // エラー位置の前後100文字を表示
+        const trimmed = text.trim().replace(/^\uFEFF/,'');
+        try { return JSON.parse(trimmed); }
+        catch(e) {
           const pos = parseInt((e.message.match(/position (\d+)/)||[])[1]||0);
           console.error('JSON parse error at pos', pos, ':', trimmed.slice(Math.max(0,pos-20),pos+50));
-          console.error('Full response length:', text.length);
           throw e;
         }
       })
@@ -100,23 +94,21 @@
         if (d.error) throw new Error(d.error);
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length === 0) {
-          // SSが空または旧データ → ローカルを使い、SSへの自動書き込みはしない
-          this.loadLocal();
+          if (!silent) this.loadLocal();
           this.setState({ syncStatus: 'ok', loading: false });
-          this.showToast('SSにデータが見つかりません。ローカルデータを使用中（SS未書込）');
+          if (!silent) this.showToast('SSにデータが見つかりません。ローカルデータを使用中');
         } else {
           const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
           const merged = {...parsed, assemblyDoc};
           this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true });
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
-          this.showToast('スプレッドシートから読み込みました');
+          if (!silent) this.showToast('スプレッドシートから読み込みました');
         }
       })
       .catch(err => {
         console.warn('Sheets fetch failed:', err.message);
-        this.loadLocal();
-        this.setState({ syncStatus: 'error' });
-        this.showToast('スプレッドシート接続失敗。ローカルデータを使用します');
+        if (!silent) { this.loadLocal(); this.showToast('スプレッドシート接続失敗。ローカルデータを使用します'); }
+        this.setState({ syncStatus: 'error', loading: false });
       });
   },
 
