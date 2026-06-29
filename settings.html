@@ -464,6 +464,21 @@
               <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
               <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
             </div>
+            <!-- デバイスを追加 -->
+            <div style="marginTop:12px;padding:12px 14px;background:rgba(175,195,215,0.10);borderRadius:10px;border:1px solid rgba(175,195,215,0.3);">
+              <div style="fontSize:12px;fontWeight:600;color:#3F414C;marginBottom:6px;">📱 他のデバイスに設定を共有</div>
+              <div style="fontSize:11px;color:#6B7280;marginBottom:4px;lineHeight:1.7;">
+                <div style="marginBottom:4px;">新しい端末でこのポータルを使うには、以下の手順でAPIキーを共有してください。</div>
+                <div style="paddingLeft:4px;">① コピーボタンでURLをコピー</div>
+                <div style="paddingLeft:4px;">② LINEやメールで受け取る端末に送る</div>
+                <div style="paddingLeft:4px;">③ 受け取った端末でURLを開くと自動設定完了</div>
+              </div>
+              <div style="fontSize:11px;color:#E57373;marginBottom:8px;">⚠️ このURLにはAPIキーが含まれます。信頼できる相手にのみ共有してください。</div>
+              <div style="display:flex;gap:8px;alignItems:center;">
+                <input readOnly value="{{ deviceSetupUrl }}" style="flex:1;border:1px solid rgba(0,0,0,0.12);borderRadius:7px;padding:6px 10px;fontSize:11px;fontFamily:monospace;background:#fff;color:#3F414C;" placeholder="APIキーを保存後に表示されます">
+                <button onClick="{{ onCopyDeviceUrl }}" style="border:none;background:#AFC3D7;color:#fff;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;cursor:pointer;">コピー</button>
+              </div>
+            </div>
           </div>
         </div>
         <!-- 代表者情報 -->
@@ -903,7 +918,15 @@ class Component extends DCLogic {
 
   componentDidMount() {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    const _hash = window.location.hash.slice(1);
+    // デバイス追加URL対応: #k=APIキー
+    const _rawHash = window.location.hash.slice(1);
+    const _kMatch = _rawHash.match(/(?:^|&)k=([^&]+)/);
+    if (_kMatch) {
+      localStorage.setItem('nitta_api_key', decodeURIComponent(_kMatch[1]));
+      window.location.hash = '';
+      this.showToast?.('APIキーを設定しました。このデバイスで利用できます。');
+    }
+    const _hash = _kMatch ? '' : _rawHash;
     if (_hash && this._myPages && this._myPages.includes(_hash)) this.setState({page:_hash});
 
     // GAS Web App として動作しているか検出
@@ -952,13 +975,13 @@ class Component extends DCLogic {
     // 通常ブラウザモード (localStorage + optional Sheets URL)
     // GAS接続情報を常に上書き（全端末・リロード後も自動接続）
     const DEFAULT_URL = window.__GAS_URL__ || 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
-    const DEFAULT_KEY = window.__GAS_KEY__ || 'nishiguchi2490';
-    localStorage.setItem('nitta_script_url', DEFAULT_URL);
-    localStorage.setItem('nitta_api_key', DEFAULT_KEY);
-    const url = localStorage.getItem('nitta_script_url') || '';
+    // APIキーはlocalStorageのみから読み込む（HTMLに埋め込まない）
+    const url = DEFAULT_URL;
     const apiKey = localStorage.getItem('nitta_api_key') || '';
+    localStorage.setItem('nitta_script_url', url);
+    this.setState({ scriptUrl: url, scriptUrlInput: url });
     if (url && apiKey) {
-      this.setState({ scriptUrl: url, scriptUrlInput: url, scriptApiKey: apiKey });
+      this.setState({ scriptApiKey: apiKey });
       this.loadLocal();
       this.setState({ syncStatus: 'syncing' });
       setTimeout(() => this.fetchSheets(url, apiKey, true), 50);
@@ -2058,7 +2081,17 @@ class Component extends DCLogic {
       onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
       syncProgressBarStyle: (this.state.syncStatus==='syncing'&&!this.state.loading) ? {} : {opacity:0,pointerEvents:'none'},
       syncProgressBarClass: (this.state.syncStatus==='syncing'&&!this.state.loading) ? '' : 'hidden',
-      syncStatusLabel: this.state.syncPaused ? '⏸ 同期停止中' : ({null:'未連携',syncing:'同期中...',ok:'✓ 同期済み',error:'✗ エラー'})[String(this.state.syncStatus)]||'未連携',
+      syncStatusLabel: (()=>{
+        if (this.state.syncPaused) return '⏸ 同期停止中';
+        const st = String(this.state.syncStatus);
+        if (st === 'syncing') return '同期中...';
+        if (st === 'error') return '✗ オフライン — ローカルデータ使用中';
+        if (st === 'ok' && this.state.lastSyncAt) {
+          const mins = Math.floor((Date.now() - this.state.lastSyncAt) / 60000);
+          return mins < 1 ? '✓ たった今同期' : mins < 60 ? `✓ ${mins}分前に同期` : `✓ ${Math.floor(mins/60)}時間前に同期`;
+        }
+        return '未連携';
+      })(),
       syncStatusColor: this.state.syncPaused ? '#ff9500' : ({null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'})[String(this.state.syncStatus)]||'#A1A1AA',
       gasUserEmail:(this.state.gasUser||{}).email||'',
       gasLogoutUrl:'https://accounts.google.com/logout',
@@ -2095,6 +2128,19 @@ class Component extends DCLogic {
         const emails=(this.state.authEmails||[]).map(e=>typeof e==='string'?`'${e}'`:`'${e.email}'`).join(', ');
         return `const ALLOWED_EMAILS = [${emails}];`;
       })(),
+      deviceSetupUrl:(()=>{
+        const key=localStorage.getItem('nitta_api_key')||'';
+        if(!key) return '';
+        const base=window.location.origin+window.location.pathname.replace(/[^/]*$/,'')+'settings.html';
+        return base+'#k='+encodeURIComponent(key);
+      })(),
+      onCopyDeviceUrl:()=>{
+        const key=localStorage.getItem('nitta_api_key')||'';
+        if(!key){this.showToast('APIキーが設定されていません');return;}
+        const base=window.location.origin+window.location.pathname.replace(/[^/]*$/,'')+'settings.html';
+        const url=base+'#k='+encodeURIComponent(key);
+        navigator.clipboard.writeText(url).then(()=>this.showToast('デバイス追加URLをコピーしました'));
+      },
       onSelectAuthCode:(e)=>{ e.target.select(); try{document.execCommand('copy');this.showToast('コピーしました');}catch(err){} },
     };
   }
@@ -2102,12 +2148,13 @@ class Component extends DCLogic {
 </script>
 <script>
 window.__GAS_URL__ = 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
-window.__GAS_KEY__ = 'nishiguchi2490';
+// APIキーはlocalStorageから読み込みます（設定ページで初期設定してください）
 const ALLOWED_EMAILS = ['clmiwa.hotline@gmail.com'];
 const AUTH_KEY = 'nitta_auth_v2';
 let __gasAuthEmails = [];
 function prefetchAuthEmails(){
-  fetch('https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec?key=nishiguchi2490&action=load')
+  const _pk=localStorage.getItem('nitta_api_key')||'';
+  fetch('https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec?key='+encodeURIComponent(_pk)+'&action=load')
     .then(r=>r.json())
     .then(d=>{ if(d&&d.authEmails) __gasAuthEmails=(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email); })
     .catch(()=>{});

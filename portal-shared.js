@@ -100,7 +100,7 @@
         } else {
           const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
           const merged = {...parsed, assemblyDoc};
-          this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true });
+          this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true, lastSyncAt: Date.now() });
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
           if (!silent) this.showToast('スプレッドシートから読み込みました');
         }
