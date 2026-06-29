@@ -154,13 +154,13 @@
 #g_id_signin{display:flex;justify-content:center;}
 .auto-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:12px;color:#6B7280;}
 </style>
-</head>
+<script src="./portal-shared.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
 <div id="auth-overlay">
   <div class="auth-card">
-    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'">
+    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'" style="pointer-events:none;user-select:none;-webkit-user-select:none;">
     <div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div>
     <div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div>
     <div id="g_id_signin"></div>
@@ -310,7 +310,6 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
   </style>
-  <script src="./portal-shared.js"></script>
 </helmet>
 
 <!-- ===== LOADING SCREEN ===== -->
@@ -968,6 +967,8 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
+    // portal-shared.js mixin（helm外ロードのため再適用）
+    if (window.PortalMethods) Object.assign(this, window.PortalMethods);
     const _hash = window.location.hash.slice(1);
     if (_hash && this._myPages && this._myPages.includes(_hash)) this.setState({page:_hash});
 
