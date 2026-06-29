@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>決算書 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -370,68 +370,257 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
-      <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="marginBottom:24px;">
-          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
-          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
+<sc-if value="{{ showSettlementModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);zIndex:230;display:flex;alignItems:flex-start;justifyContent:center;backdropFilter:blur(6px);overflowY:auto;padding:24px 0;" onClick="{{ onCloseSettlement }}">
+        <div style="background:#F5F6F8;borderRadius:18px;width:680px;boxShadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;" onClick="{{ stopProp }}">
+          <!-- Header -->
+          <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;alignItems:center;">
+            <div>
+              <div style="fontSize:18px;fontWeight:700;color:#3F414C;">決算処理</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:2px;">{{ settlementPeriodName }}の収支を確定します</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onConfirmSettlement }}" style="border:none;background:#5856d6;color:#fff;padding:9px 20px;borderRadius:9px;fontSize:13px;fontWeight:700;cursor:pointer;">決算確定</button>
+              <button onClick="{{ onCloseSettlement }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:9px 14px;borderRadius:9px;fontSize:13px;cursor:pointer;">閉じる</button>
+            </div>
+          </div>
+          <!-- KPI cards -->
+          <div style="padding:20px 24px 0;">
+            <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;marginBottom:16px;">
+              <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="fontSize:11px;color:#6B7280;marginBottom:4px;">収入合計</div>
+                <div style="fontSize:18px;fontWeight:700;color:#7BC095;">{{ settlementTotalI }}</div>
+              </div>
+              <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="fontSize:11px;color:#6B7280;marginBottom:4px;">支出合計</div>
+                <div style="fontSize:18px;fontWeight:700;color:#E57373;">{{ settlementTotalE }}</div>
+              </div>
+              <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="fontSize:11px;color:#6B7280;marginBottom:4px;">収支差額</div>
+                <div style="fontSize:18px;fontWeight:700;color:#C39425;">{{ settlementNet }}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Formal document -->
+          <div style="margin:0 20px 16px;background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:28px 36px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',HGS明朝E,serif;">
+            <div style="textAlign:center;marginBottom:20px;paddingBottom:14px;borderBottom:2px solid #3F414C;">
+              <div style="fontSize:16px;fontWeight:700;letterSpacing:0.18em;color:#3F414C;">決　算　報　告　書</div>
+              <div style="fontSize:11px;color:#555;marginTop:6px;letterSpacing:0.05em;">{{ settlementPeriodName }}</div>
+              <div style="fontSize:11px;color:#555;marginTop:2px;letterSpacing:0.05em;">自　{{ settlementPeriodStart }}　至　{{ settlementPeriodEnd }}</div>
+              <div style="fontSize:11px;color:#555;marginTop:2px;letterSpacing:0.05em;">{{ stmtOrgName }}</div>
+            </div>
+            <!-- 収支表 -->
+            <table style="width:100%;borderCollapse:collapse;fontSize:12px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',serif;">
+              <thead>
+                <tr style="borderBottom:1px solid #999;">
+                  <th style="textAlign:left;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;">科　目</th>
+                  <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:120px;">予　算　額</th>
+                  <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:120px;">決　算　額</th>
+                  <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:100px;">増　減</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colSpan="4" style="padding:8px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">収　入　の　部</td></tr>
+                <sc-if value="{{ noSettlementInc }}" hint-placeholder-val="{{ false }}">
+                  <tr><td colSpan="4" style="padding:6px 12px;color:#A1A1AA;">（収入データなし）</td></tr>
+                </sc-if>
+                <sc-for list="{{ settlementIncRows }}" as="row" hint-placeholder-count="0">
+                  <tr style="borderBottom:1px solid #efefef;">
+                    <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                  </tr>
+                </sc-for>
+                <tr style="borderTop:2px solid #3F414C;fontWeight:700;">
+                  <td style="padding:7px 8px;">収入合計</td>
+                  <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ settlementBudgetTotalI }}</td>
+                  <td style="padding:7px 8px;textAlign:right;">{{ settlementTotalI }}</td>
+                  <td style="padding:7px 8px;textAlign:right;color:#555;">{{ settlementIDiff }}</td>
+                </tr>
+                <tr><td colSpan="4" style="padding:10px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">支　出　の　部</td></tr>
+                <sc-if value="{{ noSettlementExp }}" hint-placeholder-val="{{ false }}">
+                  <tr><td colSpan="4" style="padding:6px 12px;color:#A1A1AA;">（支出データなし）</td></tr>
+                </sc-if>
+                <sc-for list="{{ settlementExpRows }}" as="row" hint-placeholder-count="0">
+                  <tr style="borderBottom:1px solid #efefef;">
+                    <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                  </tr>
+                </sc-for>
+                <tr style="borderTop:2px solid #3F414C;fontWeight:700;">
+                  <td style="padding:7px 8px;">支出合計</td>
+                  <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ settlementBudgetTotalE }}</td>
+                  <td style="padding:7px 8px;textAlign:right;">{{ settlementTotalE }}</td>
+                  <td style="padding:7px 8px;textAlign:right;color:#555;">{{ settlementEDiff }}</td>
+                </tr>
+                <tr style="background:#f5f5f5;borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                  <td style="padding:10px 8px;letterSpacing:0.04em;">収支差額（次期繰越金）</td>
+                  <td style="padding:10px 8px;textAlign:right;fontWeight:400;color:#666;">{{ settlementBudgetNet }}</td>
+                  <td style="padding:10px 8px;textAlign:right;">{{ settlementNet }}</td>
+                  <td style="padding:10px 8px;"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 備考 -->
+          <div style="padding:0 20px 20px;">
+            <div style="background:#fff;borderRadius:12px;padding:14px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:6px;">備考・監査メモ</label>
+              <textarea value="{{ settlementNote }}" onChange="{{ onSettlementNote }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="2" placeholder="監査完了、承認日、特記事項など"></textarea>
+            </div>
+            <div style="marginTop:8px;padding:10px 14px;background:rgba(88,86,214,0.06);borderRadius:9px;fontSize:11px;color:#5856d6;">
+              ※「決算確定」を押すと収支内容が確定され、決算書ページに記録されます。
+            </div>
+          </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
-          </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ p.statements }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:820px;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;" data-noprint="">
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">決算書</div>
+          <button onClick="{{ onGotoBudgetSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 14px;borderRadius:8px;fontSize:12px;fontWeight:600;">決算処理 →</button>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
-              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
-              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
-            </div>
-            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
-            </sc-if>
-            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <div style="{{ dt.dotStyle }}"></div>
-                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
-                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
-              </div>
-            </sc-for>
+
+        <!-- 未確定の場合 -->
+        <sc-if value="{{ noSettlements }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:48px;textAlign:center;">
+            <div style="fontSize:32px;marginBottom:12px;">📋</div>
+            <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:6px;">決算書がありません</div>
+            <div style="fontSize:13px;color:#6B7280;">予算管理の「決算処理」から収支を確定すると、ここに決算書が表示されます。</div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
-            <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
-              <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
+        </sc-if>
+
+        <!-- 確定済み決算書一覧 -->
+        <sc-for list="{{ settlementDocList }}" as="doc" hint-placeholder-count="0">
+          <div style="background:#fff;borderRadius:16px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;marginBottom:28px;overflow:hidden;">
+            <!-- Doc header -->
+            <div style="display:flex;alignItems:center;gap:10px;padding:16px 24px;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint="">
+              <span style="background:#5856d6;color:#fff;fontSize:11px;fontWeight:700;padding:3px 10px;borderRadius:10px;">確定済み</span>
+              <span style="fontSize:14px;fontWeight:700;color:#3F414C;flex:1;">{{ doc.periodName }}</span>
+              <span style="fontSize:12px;color:#6B7280;">{{ doc.confirmedAt }}確定</span>
+              <sc-if value="{{ doc.hasAudit }}" hint-placeholder-val="{{ false }}">
+                <span style="background:#7BC095;color:#fff;fontSize:11px;fontWeight:700;padding:3px 10px;borderRadius:10px;">監査済み</span>
+              </sc-if>
+              <button onClick="{{ doc.onAudit }}" style="{{ doc.auditBtnStyle }}">{{ doc.auditBtnLabel }}</button>
+              <button onClick="{{ doc.onPrintDoc }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:6px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;">印刷</button>
+              <button onClick="{{ doc.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:6px 10px;borderRadius:7px;fontSize:12px;">削除</button>
             </div>
-            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="5">
-              <div style="display:flex;gap:8px;padding:6px 0;fontSize:12px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
-                <span style="width:54px;color:#A1A1AA;">{{ tx.dateStr }}</span>
-                <span style="flex:1;color:#3F414C;">{{ tx.description }}</span>
-                <span style="{{ tx.amtStyle }}">{{ tx.amtStr }}</span>
+            <!-- 収支決算書（明朝体フォーマル） -->
+            <div class="stmt-card-body" style="padding:40px 52px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',serif;maxWidth:680px;margin:0 auto;">
+              <div style="textAlign:center;marginBottom:24px;paddingBottom:16px;borderBottom:2px solid #3F414C;">
+                <div style="fontSize:18px;fontWeight:700;letterSpacing:0.18em;">決　算　報　告　書</div>
+                <div style="fontSize:12px;color:#555;marginTop:6px;letterSpacing:0.05em;">{{ doc.periodName }}</div>
+                <div style="fontSize:12px;color:#555;marginTop:2px;letterSpacing:0.05em;">自　{{ doc.periodStart }}　至　{{ doc.periodEnd }}</div>
+                <div style="fontSize:12px;color:#555;marginTop:2px;">{{ stmtOrgName }}</div>
               </div>
-            </sc-for>
+              <!-- 収支表 -->
+              <table style="width:100%;borderCollapse:collapse;fontSize:12px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',serif;">
+                <thead>
+                  <tr style="borderBottom:1px solid #999;">
+                    <th style="textAlign:left;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;">科　目</th>
+                    <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:130px;">予　算　額</th>
+                    <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:130px;">決　算　額</th>
+                    <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:110px;">増　減</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colSpan="4" style="padding:8px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">収　入　の　部</td></tr>
+                  <sc-for list="{{ doc.incRows }}" as="row" hint-placeholder-count="0">
+                    <tr style="borderBottom:1px solid #efefef;">
+                      <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                    </tr>
+                  </sc-for>
+                  <tr style="borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                    <td style="padding:7px 8px;">収入合計</td>
+                    <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ doc.budgetTotalI }}</td>
+                    <td style="padding:7px 8px;textAlign:right;">{{ doc.totalIncomeStr }}</td>
+                    <td style="padding:7px 8px;textAlign:right;color:#555;">{{ doc.diffTotalI }}</td>
+                  </tr>
+                  <tr><td colSpan="4" style="padding:10px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">支　出　の　部</td></tr>
+                  <sc-for list="{{ doc.expRows }}" as="row" hint-placeholder-count="0">
+                    <tr style="borderBottom:1px solid #efefef;">
+                      <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                    </tr>
+                  </sc-for>
+                  <tr style="borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                    <td style="padding:7px 8px;">支出合計</td>
+                    <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ doc.budgetTotalE }}</td>
+                    <td style="padding:7px 8px;textAlign:right;">{{ doc.totalExpenseStr }}</td>
+                    <td style="padding:7px 8px;textAlign:right;color:#555;">{{ doc.diffTotalE }}</td>
+                  </tr>
+                  <tr style="background:#f5f5f5;borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                    <td style="padding:10px 8px;letterSpacing:0.04em;">収支差額（次期繰越金）</td>
+                    <td style="padding:10px 8px;textAlign:right;fontWeight:400;color:#666;">{{ doc.budgetNet }}</td>
+                    <td style="padding:10px 8px;textAlign:right;">{{ doc.netStr }}</td>
+                    <td style="padding:10px 8px;"></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- 監査報告書（2ページ目） -->
+              <sc-if value="{{ doc.hasAudit }}" hint-placeholder-val="{{ false }}">
+                <div class="audit-report-section" style="paddingTop:40px;">
+                  <div style="textAlign:center;fontSize:15px;fontWeight:700;letterSpacing:0.15em;marginBottom:16px;">監　査　報　告　書</div>
+                  <div style="fontSize:13px;lineHeight:2.2;color:#333;">
+                    　私は{{ doc.periodName }}における収支決算書を監査した結果、収支の状況が正確に記載されていることを確認しました。<br>
+                    <div style="marginTop:8px;fontSize:12px;color:#555;">監査日：{{ doc.auditDate }}　　{{ doc.auditNote }}</div>
+                  </div>
+                  <div style="display:flex;justifyContent:flex-end;marginTop:20px;gap:12px;fontSize:12px;color:#555;alignItems:center;">
+                    <span>監査人　{{ doc.auditorName }}</span>
+                    {{ doc.auditorHanko }}
+                  </div>
+                </div>
+              </sc-if>
+            </div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近のイベント</div>
-            <sc-for list="{{ upcomingEvts }}" as="evt" hint-placeholder-count="3">
-              <div style="{{ evt.cardStyle }}">
-                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ evt.name }}</div>
-                <div style="fontSize:11px;color:#6B7280;marginTop:3px;">{{ evt.dateStr }}</div>
-              </div>
-            </sc-for>
+        </sc-for>
+      </div>
+    </sc-if>
+<sc-if value="{{ showAuditModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);zIndex:230;display:flex;alignItems:center;justifyContent:center;backdropFilter:blur(6px);" onClick="{{ onCloseAudit }}">
+        <div style="background:#F5F6F8;borderRadius:18px;width:500px;boxShadow:0 24px 80px rgba(0,0,0,0.28);" onClick="{{ stopProp }}">
+          <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.08);borderRadius:18px 18px 0 0;display:flex;justify-content:space-between;alignItems:center;">
+            <div>
+              <div style="fontSize:16px;fontWeight:700;color:#3F414C;">監査報告</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:2px;">{{ auditTargetName }}</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onConfirmAudit }}" style="border:none;background:#7BC095;color:#fff;padding:8px 18px;borderRadius:9px;fontSize:13px;fontWeight:700;cursor:pointer;">監査完了</button>
+              <button onClick="{{ onCloseAudit }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:8px 14px;borderRadius:9px;fontSize:13px;cursor:pointer;">閉じる</button>
+            </div>
+          </div>
+          <div style="padding:24px 28px;display:flex;flexDirection:column;gap:14px;">
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">監査人（役員から選択）</label>
+              <select value="{{ auditName }}" onChange="{{ onAuditName }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+                <option value="">— 役員を選択 —</option>
+                <sc-for list="{{ auditOfficerOptions }}" as="opt" hint-placeholder-count="5">
+                  <option value="{{ opt.value }}">{{ opt.label }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">監査日</label>
+              <input type="date" value="{{ auditDate }}" onChange="{{ onAuditDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;">
+            </div>
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">監査結果・特記事項</label>
+              <textarea value="{{ auditNote }}" onChange="{{ onAuditNote }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="3" placeholder="特記事項があれば入力してください"></textarea>
+            </div>
+            <div style="background:rgba(123,192,149,0.06);borderRadius:10px;padding:10px 14px;fontSize:12px;color:#166534;">
+              ✓ 監査完了すると決算書に監査報告書と監査人の印鑑が自動で記載されます。
+            </div>
           </div>
         </div>
       </div>
@@ -711,7 +900,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'dashboard',
+    page: 'statements',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -795,7 +984,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["dashboard"];
+    this._myPages = ["statements"];
   })();
 
   componentWillUnmount() {
@@ -891,24 +1080,88 @@ class Component extends DCLogic {
   }
 
 
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
+  confirmAudit() {
+    const sid = this.state.auditTargetId;
+    if (!sid) return;
     this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
+      settlements:(s.settlements||[]).map(st=>st.id===sid?{
+        ...st,
+        audit:{name:s.auditName,date:s.auditDate,note:s.auditNote,doneAt:new Date().toISOString().slice(0,10)},
+      }:st),
+      auditModal:false, auditName:'', auditNote:'',
     }),()=>this.persist());
-    this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
+    this.showToast('監査報告を記録しました');
+  }
+
+  confirmSettlement() {
+    const cp = (this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const pid = cp.id;
+    const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid);
+    const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===pid);
+    const totalI = txs.reduce((s,t)=>s+(t.income||0),0);
+    const totalE = txs.reduce((s,t)=>s+(t.expense||0),0);
+    // 実績集計
+    const incActMap={}, expActMap={};
+    txs.forEach(t=>{
+      if((t.income||0)>0){const k=t.category||'その他';incActMap[k]=(incActMap[k]||0)+(t.income||0);}
+      if((t.expense||0)>0){const k=t.category||'その他';expActMap[k]=(expActMap[k]||0)+(t.expense||0);}
+    });
+    const budMap={}; budgets.forEach(b=>{budMap[b.category]=(b.amount||0);});
+    // 予算科目ベースで全科目（¥0含む）＋実績のみ科目も含める
+    const incCats=[...new Set([...budgets.filter(b=>b.type==='収入').map(b=>b.category),...Object.keys(incActMap)])];
+    const expCats=[...new Set([...budgets.filter(b=>b.type==='支出').map(b=>b.category),...Object.keys(expActMap)])];
+    const categories=[
+      ...incCats.map(cat=>({cat,type:'収入',amt:incActMap[cat]||0,budget:budMap[cat]||0})),
+      ...expCats.map(cat=>({cat,type:'支出',amt:expActMap[cat]||0,budget:budMap[cat]||0})),
+    ];
+    const rec = {
+      id:'stl_'+Date.now(),
+      periodId:pid,
+      periodName:cp.name||'',
+      periodStart:cp.startDate||'',
+      periodEnd:cp.endDate||'',
+      confirmedAt:new Date().toISOString().slice(0,10),
+      totalIncome:totalI,
+      totalExpense:totalE,
+      net:totalI-totalE,
+      categories,
+      note:this.state.settlementNote||'',
+    };
+    this.setState(s=>({
+      settlements:[rec,...(s.settlements||[]).filter(s=>s.periodId!==pid)],
+      settlementModal:false,
+      settlementNote:'',
+    }),()=>this.persist());
+    this.showToast('決算を確定しました');
+  }
+
+  printSettlementDoc(s) {
+    const orgInfo = this.state.orgInfo||{};
+    const orgName = orgInfo.name||'新田西口商店会';
+    const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===s.periodId);
+    const budMap={}; budgets.forEach(b=>{budMap[b.category]=(b.amount||0);});
+    const cats = s.categories||[];
+    const incRows = cats.filter(c=>c.type==='収入');
+    const expRows = cats.filter(c=>c.type==='支出');
+    const fmt = n=>n!=null?'¥'+Number(n).toLocaleString('ja-JP'):'—';
+    const dif = (a,b)=>{const d=a-b;return d===0?'—':(d>0?'＋':'▲')+Math.abs(d).toLocaleString('ja-JP');};
+    const rowsHtml = rows=>rows.map(c=>`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${c.cat}</td><td style="padding:4pt 8pt;text-align:right;">${c.budget?fmt(c.budget):'—'}</td><td style="padding:4pt 8pt;text-align:right;font-weight:600;">${fmt(c.amt||0)}</td><td style="padding:4pt 8pt;text-align:right;">${dif(c.amt||0,c.budget||0)}</td></tr>`).join('');
+    const budTotalI=budgets.filter(b=>b.type==='収入').reduce((a,b)=>a+(b.amount||0),0);
+    const budTotalE=budgets.filter(b=>b.type==='支出').reduce((a,b)=>a+(b.amount||0),0);
+    const audit=s.audit;
+    const auditSection=audit?`<div style="page-break-before:always;break-before:page;padding-top:60px;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:0.18em;margin-bottom:28px;">監　査　報　告　書</div><div style="font-size:13px;line-height:2.4;margin-bottom:24px;">　私は${s.periodName}における決算報告書を監査した結果、収支の状況が正確に記載されていることを確認しました。</div><div style="font-size:12px;color:#555;margin-bottom:16px;">監査日：${audit.date||''}</div><sc-if value="false"><span>${audit.note||''}</span></sc-if><div style="text-align:right;font-size:12px;margin-top:32px;">監査人　${audit.name||''}</div></div>`:'';
+    const bodyHtml=[
+      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">決　算　報　告　書</div><div style="font-size:11pt;margin-top:8px;">${s.periodName}</div><div style="font-size:10pt;color:#333;margin-top:4px;">自　${s.periodStart||''}　至　${s.periodEnd||''}</div><div style="font-size:10pt;color:#333;margin-top:2px;">${orgName}</div></div>`,
+      '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:16pt;"><thead><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:left;font-weight:400;">科　目</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:90pt;">予　算　額</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:90pt;">決　算　額</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:70pt;">増　減</th></tr></thead><tbody>',
+      `<tr><td colspan="4" style="padding:8pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">収　入　の　部</td></tr>${rowsHtml(incRows)}`,
+      `<tr style="border-top:1.5pt solid #000;font-weight:700;"><td style="padding:5pt 8pt;">収入合計</td><td style="padding:5pt 8pt;text-align:right;">${budTotalI?fmt(budTotalI):'—'}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(s.totalIncome)}</td><td style="padding:5pt 8pt;text-align:right;">${dif(s.totalIncome,budTotalI)}</td></tr>`,
+      `<tr><td colspan="4" style="padding:10pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">支　出　の　部</td></tr>${rowsHtml(expRows)}`,
+      `<tr style="border-top:1.5pt solid #000;font-weight:700;"><td style="padding:5pt 8pt;">支出合計</td><td style="padding:5pt 8pt;text-align:right;">${budTotalE?fmt(budTotalE):'—'}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(s.totalExpense)}</td><td style="padding:5pt 8pt;text-align:right;">${dif(s.totalExpense,budTotalE)}</td></tr>`,
+      `<tr style="border-top:2pt solid #000;font-weight:700;background:#f5f5f5;"><td style="padding:6pt 8pt;">収支差額（次期繰越金）</td><td style="padding:6pt 8pt;text-align:right;">${budTotalI||budTotalE?fmt(budTotalI-budTotalE):'—'}</td><td style="padding:6pt 8pt;text-align:right;">${fmt(s.net)}</td><td></td></tr>`,
+      '</tbody></table>',
+      auditSection,
+    ].join('');
+    this._openPrintWindow(bodyHtml,'決算報告書');
   }
 
 

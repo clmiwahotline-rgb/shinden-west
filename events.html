@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>事業記録 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -370,69 +370,45 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ p.events }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="marginBottom:24px;">
-          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
-          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
-        </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;">
+          <div>
+            <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">事業記録</div>
+            <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ currentPeriodName }}</div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
+          <div style="display:flex;gap:8px;" data-noprint="">
+            <button onClick="{{ onPrintEvents }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
+            <button onClick="{{ onAddNextEvent }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;">＋ 翌期計画追加</button>
+            <button onClick="{{ onAddEvent }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 事業追加</button>
           </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
-              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
-              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+          <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+            <span style="width:90px;">開催日</span>
+            <span style="flex:1;">事業名</span>
+            <span style="width:90px;">種別</span>
+            <span style="width:100px;">参加者</span>
+            <span style="flex:1.2;">備考・記録</span>
+            <span style="width:88px;" data-noprint=""></span>
+          </div>
+          <sc-for list="{{ eventRows }}" as="row" hint-placeholder-count="5">
+            <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:flex-start;">
+              <span style="width:90px;fontSize:12px;color:#6B7280;flexShrink:0;paddingTop:1px;">{{ row.dateStr }}</span>
+              <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:600;paddingRight:10px;display:flex;alignItems:center;gap:7px;">
+                {{ row.name }}
+                <sc-if value="{{ row.isScheduled }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#dbeafe;color:#1d4ed8;padding:1px 7px;borderRadius:8px;whiteSpace:nowrap;">予定</span></sc-if>
+                <sc-if value="{{ row.isBeyondPeriod }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#fef3c7;color:#92400e;padding:1px 7px;borderRadius:8px;whiteSpace:nowrap;">翌期引継</span></sc-if>
+              </span>
+              <span style="width:90px;flexShrink:0;"><span style="{{ row.typeBadge }}">{{ row.type }}</span></span>
+              <span style="width:100px;fontSize:12px;color:#6B7280;flexShrink:0;">{{ row.participants }}</span>
+              <span style="flex:1.2;fontSize:12px;color:#A1A1AA;lineHeight:1.5;">{{ row.notes }}</span>
+              <span style="width:88px;display:flex;gap:5px;flexShrink:0;" data-noprint="">
+                <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 9px;borderRadius:6px;fontSize:11px;fontWeight:500;">編集</button>
+                <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:4px 9px;borderRadius:6px;fontSize:11px;fontWeight:500;">削除</button>
+              </span>
             </div>
-            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
-            </sc-if>
-            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <div style="{{ dt.dotStyle }}"></div>
-                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
-                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
-              </div>
-            </sc-for>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
-            <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
-              <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
-            </div>
-            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="5">
-              <div style="display:flex;gap:8px;padding:6px 0;fontSize:12px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
-                <span style="width:54px;color:#A1A1AA;">{{ tx.dateStr }}</span>
-                <span style="flex:1;color:#3F414C;">{{ tx.description }}</span>
-                <span style="{{ tx.amtStyle }}">{{ tx.amtStr }}</span>
-              </div>
-            </sc-for>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近のイベント</div>
-            <sc-for list="{{ upcomingEvts }}" as="evt" hint-placeholder-count="3">
-              <div style="{{ evt.cardStyle }}">
-                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ evt.name }}</div>
-                <div style="fontSize:11px;color:#6B7280;marginTop:3px;">{{ evt.dateStr }}</div>
-              </div>
-            </sc-for>
-          </div>
+          </sc-for>
         </div>
       </div>
     </sc-if>
@@ -711,7 +687,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'dashboard',
+    page: 'events',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -795,7 +771,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["dashboard"];
+    this._myPages = ["events"];
   })();
 
   componentWillUnmount() {
@@ -891,24 +867,37 @@ class Component extends DCLogic {
   }
 
 
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
-    this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
-    }),()=>this.persist());
+  saveEvent() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {...f,periodId:pid};
+    if (m.editId) this.setState(s=>({events:s.events.map(e=>e.id===m.editId?{...e,...rec}:e)}),()=>this.persist());
+    else this.setState(s=>({events:[...s.events,{id:this.gen(),...rec}]}),()=>this.persist());
     this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
+  }
+  delEvent(id) {
+    if (!confirm('この事業記録を削除しますか？')) return;
+    this.setState(s=>({events:s.events.filter(e=>e.id!==id)}),()=>this.persist());
+  }
+
+  printEventsDoc() {
+    const cp = (this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const orgInfo = this.state.orgInfo||{};
+    const orgName = orgInfo.name||'新田西口商店会';
+    const today = new Date().toISOString().slice(0,10);
+    const esc = s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmtD = d=>{ if(!d) return ''; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); };
+    const evts = (this.state.events||[]).filter(e=>e.periodId===cp.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    const rowsHtml = evts.map(e=>{
+      const dateStr = fmtD(e.date)+(e.endDate?'〜'+fmtD(e.endDate):'');
+      const sched = (e.date && e.date>today) ? '<span style="font-size:10px;color:#555;">（予定）</span>' : '';
+      return `<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
+    }).join('');
+    const bodyHtml = [
+      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">事　業　進　捗　報　告</div><div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div><div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div></div>`,
+      `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #3F414C;"><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:96px;">開　催　日</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">事　業　名</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:78px;">種　別</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:92px;">参　加　者</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">備　考　・　記　録</th></tr></thead><tbody>${rowsHtml}<tr style="border-top:2px solid #3F414C;font-weight:700;"><td colspan="5" style="padding:8px;text-align:right;">事業件数　${evts.length}　件</td></tr></tbody></table>`,
+
+    ].join('');
+    this._openPrintWindow(bodyHtml, '事業進捗報告');
   }
 
 

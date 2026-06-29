@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>総会・イベント — 新田西口商店会</title>
+<title>総会資料 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -358,8 +358,7 @@
   <!-- ローディング進捗バー -->
   <div id="sync-progress-bar" style="{{ syncProgressBarStyle }}"></div>
 
-  <!-- ===== MAIN ===== -->
-  <!-- ===== MAIN ===== -->
+    <!-- ===== MAIN ===== -->
   <div id="main-scroll" ref="{{ mainScrollRef }}" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
 
     <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ true }}">
@@ -371,113 +370,6 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.events }}" hint-placeholder-val="{{ false }}">
-      <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;">
-          <div>
-            <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">事業記録</div>
-            <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ currentPeriodName }}</div>
-          </div>
-          <div style="display:flex;gap:8px;" data-noprint="">
-            <button onClick="{{ onPrintEvents }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">印刷</button>
-            <button onClick="{{ onAddNextEvent }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;">＋ 翌期計画追加</button>
-            <button onClick="{{ onAddEvent }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 事業追加</button>
-          </div>
-        </div>
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
-          <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
-            <span style="width:90px;">開催日</span>
-            <span style="flex:1;">事業名</span>
-            <span style="width:90px;">種別</span>
-            <span style="width:100px;">参加者</span>
-            <span style="flex:1.2;">備考・記録</span>
-            <span style="width:88px;" data-noprint=""></span>
-          </div>
-          <sc-for list="{{ eventRows }}" as="row" hint-placeholder-count="5">
-            <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:flex-start;">
-              <span style="width:90px;fontSize:12px;color:#6B7280;flexShrink:0;paddingTop:1px;">{{ row.dateStr }}</span>
-              <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:600;paddingRight:10px;display:flex;alignItems:center;gap:7px;">
-                {{ row.name }}
-                <sc-if value="{{ row.isScheduled }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#dbeafe;color:#1d4ed8;padding:1px 7px;borderRadius:8px;whiteSpace:nowrap;">予定</span></sc-if>
-                <sc-if value="{{ row.isBeyondPeriod }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#fef3c7;color:#92400e;padding:1px 7px;borderRadius:8px;whiteSpace:nowrap;">翌期引継</span></sc-if>
-              </span>
-              <span style="width:90px;flexShrink:0;"><span style="{{ row.typeBadge }}">{{ row.type }}</span></span>
-              <span style="width:100px;fontSize:12px;color:#6B7280;flexShrink:0;">{{ row.participants }}</span>
-              <span style="flex:1.2;fontSize:12px;color:#A1A1AA;lineHeight:1.5;">{{ row.notes }}</span>
-              <span style="width:88px;display:flex;gap:5px;flexShrink:0;" data-noprint="">
-                <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 9px;borderRadius:6px;fontSize:11px;fontWeight:500;">編集</button>
-                <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:4px 9px;borderRadius:6px;fontSize:11px;fontWeight:500;">削除</button>
-              </span>
-            </div>
-          </sc-for>
-        </div>
-      </div>
-    </sc-if>
-<sc-if value="{{ p.tasks }}" hint-placeholder-val="{{ false }}">
-      <div style="padding:32px 36px;maxWidth:900px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;">
-          <div>
-            <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">タスク管理</div>
-            <div style="fontSize:13px;color:#6B7280;marginTop:4px;">未完了 {{ taskOpenCount }}件 ／ 完了 {{ taskDoneCount }}件</div>
-          </div>
-          <button onClick="{{ onAddTask }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:12px;fontSize:13px;fontWeight:500;" data-noprint="">＋ タスク追加</button>
-        </div>
-        <div style="display:flex;gap:6px;marginBottom:16px;" data-noprint="">
-          <sc-for list="{{ taskFilters }}" as="f" hint-placeholder-count="3">
-            <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
-          </sc-for>
-        </div>
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
-          <sc-if value="{{ taskEmpty }}" hint-placeholder-val="{{ false }}">
-            <div style="padding:48px;textAlign:center;color:#A1A1AA;fontSize:13px;">タスクがありません。「＋ タスク追加」から追加してください。</div>
-          </sc-if>
-          <sc-for list="{{ taskRows }}" as="task" hint-placeholder-count="3">
-            <div style="borderBottom:1px solid rgba(0,0,0,0.05);">
-              <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;">
-                <button onClick="{{ task.onToggle }}" style="{{ task.toggleStyle }}" title="完了切り替え">{{ task.toggleIcon }}</button>
-                <div style="flex:1;min-width:0;">
-                  <div style="{{ task.titleStyle }}">{{ task.title }}</div>
-                  <div style="display:flex;gap:8px;marginTop:4px;alignItems:center;flexWrap:wrap;">
-                    <sc-if value="{{ task.hasCategory }}" hint-placeholder-val="{{ false }}">
-                      <span style="fontSize:11px;background:#F5F6F8;color:#6B7280;padding:1px 8px;borderRadius:4px;border:1px solid #DDDEE2;">{{ task.category }}</span>
-                    </sc-if>
-                    <sc-if value="{{ task.hasDue }}" hint-placeholder-val="{{ false }}">
-                      <span style="{{ task.dueDateStyle }}">{{ task.dueDateStr }}</span>
-                    </sc-if>
-                    <sc-if value="{{ task.hasNotePreview }}" hint-placeholder-val="{{ false }}">
-                      <span style="fontSize:11px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;maxWidth:220px;">{{ task.notePreview }}</span>
-                    </sc-if>
-                  </div>
-                </div>
-                <div style="display:flex;gap:6px;" data-noprint="">
-                  <button onClick="{{ task.onToggleExpand }}" style="{{ task.expandBtnStyle }}" title="詳細・コメント">{{ task.expandIcon }}</button>
-                  <button onClick="{{ task.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:7px;fontSize:11px;">編集</button>
-                  <button onClick="{{ task.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:4px 10px;borderRadius:7px;fontSize:11px;">削除</button>
-                </div>
-              </div>
-              <sc-if value="{{ task.isExpanded }}" hint-placeholder-val="{{ false }}">
-                <div style="padding:12px 18px 16px 58px;background:#FAFAFA;borderTop:1px solid rgba(0,0,0,0.04);">
-                  <sc-if value="{{ task.hasNote }}" hint-placeholder-val="{{ false }}">
-                    <div style="fontSize:12px;color:#3F414C;marginBottom:14px;lineHeight:1.8;whiteSpace:pre-wrap;background:#fff;padding:10px 12px;borderRadius:8px;border:1px solid #DDDEE2;">{{ task.note }}</div>
-                  </sc-if>
-                  <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:8px;letterSpacing:0.04em;">コメント {{ task.commentCount }}件</div>
-                  <sc-for list="{{ task.comments }}" as="cm" hint-placeholder-count="0">
-                    <div style="padding:7px 10px;background:#fff;borderRadius:6px;marginBottom:6px;border:1px solid #DDDEE2;">
-                      <div style="fontSize:10px;color:#A1A1AA;marginBottom:2px;">{{ cm.timeStr }}</div>
-                      <div style="fontSize:12px;color:#3F414C;lineHeight:1.6;">{{ cm.text }}</div>
-                    </div>
-                  </sc-for>
-                  <div style="display:flex;gap:6px;marginTop:8px;" data-noprint="">
-                    <input value="{{ task.commentInput }}" onChange="{{ task.onCommentInput }}" placeholder="コメントを追加..." style="flex:1;border:1px solid #DDDEE2;borderRadius:8px;padding:6px 10px;fontSize:12px;background:#fff;" />
-                    <button onClick="{{ task.onAddComment }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:8px;fontSize:12px;fontWeight:500;">追加</button>
-                  </div>
-                </div>
-              </sc-if>
-            </div>
-          </sc-for>
-        </div>
-      </div>
-    </sc-if>
 <sc-if value="{{ p.assembly }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:860px;">
         <!-- ヘッダー -->
@@ -665,10 +557,10 @@
         </div>
       </sc-if>
     </sc-if>
-
   </div>
 </div>
 </div>
+
 <sc-if value="{{ modalShow }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:200;display:flex;align-items:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(8px);-webkit-backdrop-filter:blur(8px);" onClick="{{ onModalBgClick }}">
     <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
@@ -940,7 +832,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'events',
+    page: 'assembly',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -1024,7 +916,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["events","tasks","assembly"];
+    this._myPages = ["assembly"];
   })();
 
   componentWillUnmount() {
@@ -1119,48 +1011,6 @@ class Component extends DCLogic {
     }
   }
 
-
-  saveEvent() {
-    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
-    const rec = {...f,periodId:pid};
-    if (m.editId) this.setState(s=>({events:s.events.map(e=>e.id===m.editId?{...e,...rec}:e)}),()=>this.persist());
-    else this.setState(s=>({events:[...s.events,{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal();
-  }
-  delEvent(id) {
-    if (!confirm('この事業記録を削除しますか？')) return;
-    this.setState(s=>({events:s.events.filter(e=>e.id!==id)}),()=>this.persist());
-  }
-
-  saveTask() {
-    const {formData:f,modal:m} = this.state;
-    if(!f.title||!f.title.trim()){alert('タスク名を入力してください');return;}
-    const existingComments=m.editId?((this.state.tasks||[]).find(t=>t.id===m.editId)||{}).comments||[]:[];
-    const rec={title:(f.title||'').trim(),dueDate:f.dueDate||'',category:f.category||'',note:f.note||'',status:f.status||'未完了',assignee:f.assignee||'',comments:existingComments};
-    if(m.editId) this.setState(s=>({tasks:(s.tasks||[]).map(t=>t.id===m.editId?{...t,...rec}:t)}),()=>this.persist());
-    else this.setState(s=>({tasks:[...(s.tasks||[]),{id:this.gen(),...rec}]}),()=>this.persist());
-    this.closeModal();
-    this.showToast('タスクを保存しました');
-  }
-
-  toggleTask(id) {
-    this.setState(s=>({tasks:(s.tasks||[]).map(t=>t.id===id?{...t,status:t.status==='完了'?'未完了':'完了'}:t)}),()=>this.persist());
-  }
-
-  delTask(id) {
-    if(!confirm('このタスクを削除しますか？')) return;
-    this.setState(s=>({tasks:(s.tasks||[]).filter(t=>t.id!==id)}),()=>this.persist());
-  }
-
-  addTaskComment(taskId) {
-    const text=((this.state.taskCommentInputs||{})[taskId]||'').trim();
-    if(!text) return;
-    const comment={id:this.gen(),text,timestamp:new Date().toISOString()};
-    this.setState(s=>({
-      tasks:(s.tasks||[]).map(t=>t.id===taskId?{...t,comments:[...(t.comments||[]),comment]}:t),
-      taskCommentInputs:{...(s.taskCommentInputs||{}),[taskId]:''},
-    }),()=>this.persist());
-  }
 
   openAssemblyModal() {
     const doc = this.state.assemblyDoc||{};
@@ -1274,6 +1124,8 @@ class Component extends DCLogic {
       <div style="margin-top:80px;font-size:13pt;">${esc(orgName)}</div>
     </div>`;
     let agNo=0;
+    const cp2=(this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const orgName2=((this.state.orgInfo||{}).name)||'新田西口商店会';
     const agendaPages=(doc.agendas||[]).map((ag)=>{
       const kind=ag.kind||'agenda';
       const isAgenda=kind==='agenda';
@@ -1288,7 +1140,16 @@ class Component extends DCLogic {
       else if(ag.preset==='officers') content=this._buildOfficersAgendaHtml();
       else if(ag.preset==='members') content=this._buildMembersAgendaHtml();
       else if(ag.preset==='custom') content=this._buildCustomAgendaHtml(ag.customData||{});
-      return `<div style="page-break-before:always;padding-top:4mm;"><div style="font-size:14pt;font-weight:700;border-bottom:2pt solid #000;padding-bottom:8px;margin-bottom:22px;letter-spacing:0.02em;">${heading}</div>${content}</div>`;
+      const fmtD2=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
+      return `<div style="page-break-before:always;padding-top:4mm;">
+        <div style="text-align:center;margin-bottom:16px;padding-bottom:10px;border-bottom:2pt solid #000;">
+          <div style="font-size:11pt;">${esc(cp2.name||'')}</div>
+          <div style="font-size:11pt;margin-top:4px;">自　${fmtD2(cp2.startDate)}　至　${fmtD2(cp2.endDate)}</div>
+          <div style="font-size:11pt;margin-top:4px;">${esc(orgName2)}</div>
+        </div>
+        <div style="font-size:14pt;font-weight:700;border-bottom:1pt solid #000;padding-bottom:8px;margin-bottom:22px;letter-spacing:0.02em;">${heading}</div>
+        ${content}
+      </div>`;
     });
     this._openPrintWindow(coverHtml+agendaPages.join(''),'総会議案書');
   }
@@ -1424,27 +1285,6 @@ class Component extends DCLogic {
     }
     if(!html) html='<p style="font-size:11pt;color:#555;">（内容が入力されていません）</p>';
     return html;
-  }
-
-  printEventsDoc() {
-    const cp = (this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
-    const orgInfo = this.state.orgInfo||{};
-    const orgName = orgInfo.name||'新田西口商店会';
-    const today = new Date().toISOString().slice(0,10);
-    const esc = s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const fmtD = d=>{ if(!d) return ''; const [y,m,dd]=d.split('-'); return y+'.'+parseInt(m)+'.'+parseInt(dd); };
-    const evts = (this.state.events||[]).filter(e=>e.periodId===cp.id).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-    const rowsHtml = evts.map(e=>{
-      const dateStr = fmtD(e.date)+(e.endDate?'〜'+fmtD(e.endDate):'');
-      const sched = (e.date && e.date>today) ? '<span style="font-size:10px;color:#555;">（予定）</span>' : '';
-      return `<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
-    }).join('');
-    const bodyHtml = [
-      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">事　業　進　捗　報　告</div><div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div><div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div></div>`,
-      `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #3F414C;"><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:96px;">開　催　日</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">事　業　名</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:78px;">種　別</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:92px;">参　加　者</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">備　考　・　記　録</th></tr></thead><tbody>${rowsHtml}<tr style="border-top:2px solid #3F414C;font-weight:700;"><td colspan="5" style="padding:8px;text-align:right;">事業件数　${evts.length}　件</td></tr></tbody></table>`,
-
-    ].join('');
-    this._openPrintWindow(bodyHtml, '事業進捗報告');
   }
 
 

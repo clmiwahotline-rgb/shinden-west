@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>請求管理 — 新田西口商店会</title>
+<title>請求書管理 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -358,8 +358,7 @@
   <!-- ローディング進捗バー -->
   <div id="sync-progress-bar" style="{{ syncProgressBarStyle }}"></div>
 
-  <!-- ===== MAIN ===== -->
-  <!-- ===== MAIN ===== -->
+    <!-- ===== MAIN ===== -->
   <div id="main-scroll" ref="{{ mainScrollRef }}" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
 
     <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ true }}">
@@ -796,10 +795,10 @@
         </div>
       </div>
     </sc-if>
-
   </div>
 </div>
 </div>
+
 <sc-if value="{{ modalShow }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:200;display:flex;align-items:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(8px);-webkit-backdrop-filter:blur(8px);" onClick="{{ onModalBgClick }}">
     <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">

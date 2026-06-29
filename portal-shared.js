@@ -357,11 +357,17 @@
       this.setState({page:id, modal:{show:false,type:null,editId:null}});
     } else {
       const map = {
-        dashboard:'./', settings:'./',
-        officers:'members.html', members:'members.html',
-        invoices:'invoices.html',
-        ledger:'ledger.html', budget:'ledger.html', statements:'ledger.html',
-        events:'assembly.html', tasks:'assembly.html', assembly:'assembly.html',
+        dashboard:  './',
+        officers:   'officers.html',
+        members:    'members.html',
+        invoices:   'invoices.html',
+        ledger:     'ledger.html',
+        budget:     'budget.html',
+        statements: 'statements.html',
+        events:     'events.html',
+        tasks:      'tasks.html',
+        assembly:   'assembly.html',
+        settings:   'settings.html',
       };
       window.location.href = map[id] || './';
     }

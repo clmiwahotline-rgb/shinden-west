@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>設定 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -370,69 +370,148 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
-      <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="marginBottom:24px;">
-          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
-          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
-        </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
+<sc-if value="{{ p.settings }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:580px;">
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;marginBottom:28px;">設定</div>
+        <!-- Google Sheets 連携 -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:8px;">
+            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">期の管理</div>
+            <button onClick="{{ onAddPeriod }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">＋ 新しい期を追加</button>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
+          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
+              <div style="flex:1;">
+                <div style="fontSize:13px;fontWeight:600;color:#3F414C;">{{ row.name }}</div>
+                <sc-if value="{{ row.isEditing }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:6px;marginTop:6px;alignItems:center;">
+                    <input type="date" value="{{ row.editStart }}" onChange="{{ row.onEditStart }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
+                    <span style="fontSize:11px;color:#6B7280;">〜</span>
+                    <input type="date" value="{{ row.editEnd }}" onChange="{{ row.onEditEnd }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
+                    <button onClick="{{ row.onSaveEdit }}" style="border:none;background:#7BC095;color:#fff;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:600;">保存</button>
+                    <button onClick="{{ row.onCancelEdit }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;padding:4px 8px;borderRadius:6px;fontSize:11px;">取消</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ row.isNotEditing }}" hint-placeholder-val="{{ true }}">
+                  <div style="fontSize:11px;color:#A1A1AA;marginTop:2px;">{{ row.startStr }} 〜 {{ row.endStr }}</div>
+                </sc-if>
+              </div>
+              <span style="{{ row.activeBadge }}">{{ row.activeLabel }}</span>
+              <button onClick="{{ row.onEditDate }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 10px;borderRadius:6px;fontSize:11px;" data-noprint="">日付修正</button>
+              <button onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
             </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
+          </sc-for>
+        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:16px;">
+            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">代表者・団体情報</div>
+            <button onClick="{{ onSaveOrgInfo }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
+          </div>
+          <div style="display:flex;flexDirection:column;gap:12px;">
+            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">団体名</label>
+                <input value="{{ orgInfo.name }}" onChange="{{ onOrgInput }}" data-field="name" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田西口商店会"></div>
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">代表者名</label>
+                <input value="{{ orgInfo.repName }}" onChange="{{ onOrgInput }}" data-field="repName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="会長名"></div>
+            </div>
+            <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">住所</label>
+              <input value="{{ orgInfo.address }}" onChange="{{ onOrgInput }}" data-field="address" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="例: 埼玉県草加市金明町XX-XX"></div>
+            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">電話番号</label>
+                <input value="{{ orgInfo.phone }}" onChange="{{ onOrgInput }}" data-field="phone" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
+              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">FAX</label>
+                <input value="{{ orgInfo.fax }}" onChange="{{ onOrgInput }}" data-field="fax" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
+            </div>
+            <div style="borderTop:1px solid rgba(0,0,0,0.06);paddingTop:12px;">
+              <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:8px;">振込先（請求書に印刷されます）</div>
+              <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;marginBottom:10px;">
+                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">銀行名</label>
+                  <input value="{{ orgInfo.bankName }}" onChange="{{ onOrgInput }}" data-field="bankName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="東京東信用金庫"></div>
+                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">支店名</label>
+                  <input value="{{ orgInfo.bankBranch }}" onChange="{{ onOrgInput }}" data-field="bankBranch" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田支店"></div>
+              </div>
+              <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;">
+                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座種別</label>
+                  <select value="{{ orgInfo.bankType }}" onChange="{{ onOrgInput }}" data-field="bankType" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;background:#fff;">
+                    <option value="普通">普通</option><option value="当座">当座</option>
+                  </select></div>
+                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座番号</label>
+                  <input value="{{ orgInfo.bankAccount }}" onChange="{{ onOrgInput }}" data-field="bankAccount" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="0000000"></div>
+                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座名義</label>
+                  <input value="{{ orgInfo.bankHolder }}" onChange="{{ onOrgInput }}" data-field="bankHolder" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="ニッタニシグチ"></div>
+              </div>
+            </div>
+          </div>
+        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">Google スプレッドシート連携</div>
+            <div style="display:flex;alignItems:center;gap:10px;">
+              <span style="fontSize:12px;fontWeight:600;color:{{ syncStatusColor }};">{{ syncStatusLabel }}</span>
+              <button onClick="{{ onToggleSyncPause }}" style="{{ syncPauseBtnStyle }}">{{ syncPauseBtnLabel }}</button>
+            </div>
+          </div>
+          <div style="fontSize:12px;color:#6B7280;lineHeight:1.7;marginBottom:14px;">
+            Apps Script をデプロイして取得したURLとAPIキーを入力してください。<br>
+            ⚠️ デプロイ時「アクセスできるユーザー：<b>全員（匿名ユーザーを含む）</b>」を選択してください。<br>
+            APIキーはGASの「プロジェクトの設定→スクリプトプロパティ→API_KEY」で確認できます。
+          </div>
+          <div style="display:flex;flexDirection:column;gap:8px;">
+            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec">
+            <div style="display:flex;gap:8px;">
+              <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）">
+              <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
+              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
+            </div>
           </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
-              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
-              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
-            </div>
-            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
+        <!-- 代表者情報 -->
+        
+        <!-- Google認証設定 -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
+          <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:4px;">Googleアカウント認証設定</div>
+          <div style="fontSize:12px;color:#6B7280;lineHeight:1.7;marginBottom:14px;">
+            アクセスを許可するGoogleアカウントのメールアドレスを登録します。<br>
+            空の場合はすべてのGoogleアカウントがアクセス可能です（GitHub Pagesのindex.html内で管理）。
+          </div>
+          <div style="marginBottom:10px;">
+            <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:6px;">許可済みアカウント</div>
+            <sc-if value="{{ noAuthEmails }}" hint-placeholder-val="{{ false }}">
+              <div style="fontSize:12px;color:#A1A1AA;padding:8px 0;">登録なし（全員許可）</div>
             </sc-if>
-            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <div style="{{ dt.dotStyle }}"></div>
-                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
-                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
+            <sc-for list="{{ authEmailList }}" as="ae" hint-placeholder-count="0">
+              <div style="display:flex;alignItems:center;gap:8px;padding:7px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
+                <sc-if value="{{ ae.hasName }}" hint-placeholder-val="{{ false }}">
+                  <span style="fontSize:12px;fontWeight:600;color:#3F414C;minWidth:90px;">{{ ae.name }}</span>
+                </sc-if>
+                <span style="fontSize:12px;color:#6B7280;flex:1;">{{ ae.email }}</span>
+                <button onClick="{{ ae.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
               </div>
             </sc-for>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
-            <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
-              <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
+          <div style="display:flex;gap:8px;marginBottom:6px;">
+            <input value="{{ authNameInput }}" onChange="{{ onAuthNameInput }}" style="width:120px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="氏名・役割">
+            <input value="{{ authEmailInput }}" onChange="{{ onAuthEmailInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="example@gmail.com" type="email">
+            <button onClick="{{ onAddAuthEmail }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
+          </div>
+          <div style="marginTop:10px;fontSize:11px;color:#A1A1AA;lineHeight:1.7;">
+            ⚠️ 変更後は「index.htmlを更新して」とお伝えください。新しいindex.htmlをGitHubにアップすると反映されます。
+          </div>
+          <sc-if value="{{ showAuthCopyBtn }}" hint-placeholder-val="{{ false }}">
+            <div style="marginTop:12px;">
+              <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">index.html用コード（このまま貼り替えてください）</div>
+              <div style="position:relative;">
+                <textarea value="{{ authCopyCode }}" readonly="" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:11px;fontFamily:monospace;resize:none;background:#F5F6F8;color:#3F414C;" rows="2" onClick="{{ onSelectAuthCode }}"></textarea>
+              </div>
+              <div style="fontSize:10px;color:#A1A1AA;marginTop:4px;">テキストをクリックして全選択→コピーしてindex.html内のALLOWED_EMAILSと置き換えてください</div>
             </div>
-            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="5">
-              <div style="display:flex;gap:8px;padding:6px 0;fontSize:12px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
-                <span style="width:54px;color:#A1A1AA;">{{ tx.dateStr }}</span>
-                <span style="flex:1;color:#3F414C;">{{ tx.description }}</span>
-                <span style="{{ tx.amtStyle }}">{{ tx.amtStr }}</span>
-              </div>
-            </sc-for>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近のイベント</div>
-            <sc-for list="{{ upcomingEvts }}" as="evt" hint-placeholder-count="3">
-              <div style="{{ evt.cardStyle }}">
-                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ evt.name }}</div>
-                <div style="fontSize:11px;color:#6B7280;marginTop:3px;">{{ evt.dateStr }}</div>
-              </div>
-            </sc-for>
-          </div>
+          </sc-if>
+        </div>
+
+        <!-- 期の管理 -->
+        
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;">
+          <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:10px;">データ管理</div>
+          <div style="fontSize:13px;color:#6B7280;lineHeight:1.7;">すべてのデータはブラウザのlocalStorageに保存されています。このブラウザのデータを削除するとすべての情報が失われます。定期的なCSV書き出しをお勧めします。</div>
         </div>
       </div>
     </sc-if>
@@ -711,7 +790,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'dashboard',
+    page: 'settings',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -795,7 +874,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["dashboard"];
+    this._myPages = ["settings"];
   })();
 
   componentWillUnmount() {
@@ -890,26 +969,6 @@ class Component extends DCLogic {
     }
   }
 
-
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
-    this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
-    }),()=>this.persist());
-    this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
-  }
 
 
   renderVals() {

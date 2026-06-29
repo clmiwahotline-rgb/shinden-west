@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>予算管理 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -370,68 +370,173 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ showBudgetDraftModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);zIndex:220;display:flex;alignItems:flex-start;justifyContent:center;backdropFilter:blur(6px);overflowY:auto;padding:24px 0;">
+        <div style="background:#F5F6F8;borderRadius:18px;width:900px;boxShadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;" onClick="{{ stopProp }}">
+          <!-- Header -->
+          <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.07);display:flex;justify-content:space-between;alignItems:center;">
+            <div>
+              <div style="fontSize:18px;fontWeight:700;color:#3F414C;letterSpacing:0.01em;">翌年度予算作成</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:3px;">{{ budgetDraftTargetName }}　— 今年度実績を参考に翌年度予算を入力してください</div>
+            </div>
+            <div style="display:flex;gap:8px;alignItems:center;">
+              <div style="fontSize:12px;color:{{ budgetDraftSavedColor }};">{{ budgetDraftSavedLabel }}</div>
+              <button onClick="{{ onConfirmBudgetDraft }}" style="border:none;background:#ff9500;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:600;">確定して翌期に反映</button>
+              <button onClick="{{ onCloseBudgetDraft }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:32px;height:32px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
+            </div>
+          </div>
+          <!-- Body -->
+          <div style="padding:20px 28px;">
+            <!-- Income section -->
+            <div style="marginBottom:20px;">
+              <div style="fontSize:13px;fontWeight:700;color:#7BC095;marginBottom:10px;">収入の部</div>
+              <div style="background:#fff;borderRadius:12px;overflow:hidden;boxShadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:9px 16px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+                  <span style="flex:1;">科目</span>
+                  <span style="width:100px;textAlign:right;">今年度予算</span>
+                  <span style="width:100px;textAlign:right;">今年度実績</span>
+                  <span style="width:130px;textAlign:right;">翌年度予算</span>
+                  <span style="flex:1;paddingLeft:12px;">備考・変更理由</span>
+                  <span style="width:36px;" data-noprint=""></span>
+                </div>
+                <sc-for list="{{ draftIncomeRows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;padding:9px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;gap:0;">
+                    <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:500;">{{ row.category }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;color:#6B7280;">{{ row.currentBudgetStr }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;fontWeight:600;color:#7BC095;">{{ row.currentActualStr }}</span>
+                    <span style="width:130px;paddingLeft:10px;">
+                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
+                    </span>
+                    <span style="flex:1;paddingLeft:8px;">
+                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考">
+                    </span>
+                    <span style="width:36px;textAlign:center;" data-noprint="">
+                      <button onClick="{{ row.onDel }}" style="border:none;background:none;color:#A1A1AA;fontSize:14px;cursor:pointer;">×</button>
+                    </span>
+                  </div>
+                </sc-for>
+                <div style="padding:9px 16px;borderTop:1px solid rgba(0,0,0,0.06);display:flex;justifyContent:space-between;alignItems:center;">
+                  <button onClick="{{ onAddDraftIncome }}" style="border:none;background:rgba(123,192,149,0.08);color:#7BC095;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 科目追加</button>
+                  <div style="fontSize:12px;fontWeight:700;color:#3F414C;">翌年度合計: {{ draftIncomeTotalStr }}</div>
+                </div>
+              </div>
+            </div>
+            <!-- Expense section -->
+            <div>
+              <div style="fontSize:13px;fontWeight:700;color:#E57373;marginBottom:10px;">支出の部</div>
+              <div style="background:#fff;borderRadius:12px;overflow:hidden;boxShadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:9px 16px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+                  <span style="flex:1;">科目</span>
+                  <span style="width:100px;textAlign:right;">今年度予算</span>
+                  <span style="width:100px;textAlign:right;">今年度実績</span>
+                  <span style="width:130px;textAlign:right;">翌年度予算</span>
+                  <span style="flex:1;paddingLeft:12px;">備考・変更理由</span>
+                  <span style="width:36px;" data-noprint=""></span>
+                </div>
+                <sc-for list="{{ draftExpenseRows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;padding:9px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                    <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:500;">{{ row.category }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;color:#6B7280;">{{ row.currentBudgetStr }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;fontWeight:600;color:#E57373;">{{ row.currentActualStr }}</span>
+                    <span style="width:130px;paddingLeft:10px;">
+                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
+                    </span>
+                    <span style="flex:1;paddingLeft:8px;">
+                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考">
+                    </span>
+                    <span style="width:36px;textAlign:center;" data-noprint="">
+                      <button onClick="{{ row.onDel }}" style="border:none;background:none;color:#A1A1AA;fontSize:14px;cursor:pointer;">×</button>
+                    </span>
+                  </div>
+                </sc-for>
+                <div style="padding:9px 16px;borderTop:1px solid rgba(0,0,0,0.06);display:flex;justifyContent:space-between;alignItems:center;">
+                  <button onClick="{{ onAddDraftExpense }}" style="border:none;background:rgba(229,115,115,0.06);color:#E57373;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 科目追加</button>
+                  <div style="fontSize:12px;fontWeight:700;color:#3F414C;">翌年度合計: {{ draftExpenseTotalStr }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ p.budget }}" hint-placeholder-val="{{ false }}">
       <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="marginBottom:24px;">
-          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
-          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
-        </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:28px;">
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">予算管理</div>
+          <div style="display:flex;gap:8px;">
+            <button onClick="{{ onOpenBudgetDraft }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">翌年度予算を作る →</button>
+            <button onClick="{{ onOpenSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">決算処理 →</button>
+            <button onClick="{{ onPrintBudget }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">印刷</button>
           </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
-              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
-              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
-            </div>
-            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
-            </sc-if>
-            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <div style="{{ dt.dotStyle }}"></div>
-                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
-                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
-              </div>
-            </sc-for>
+        <div style="marginBottom:28px;">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+            <div style="fontSize:14px;fontWeight:600;color:#7BC095;">収入の部</div>
+            <button onClick="{{ onAddIncomeBudget }}" style="border:none;background:rgba(123,192,149,0.1);color:#7BC095;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint="">＋ 科目追加</button>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
-            <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
-              <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+            <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">達成率</span><span style="width:64px;" data-noprint=""></span>
             </div>
-            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="5">
-              <div style="display:flex;gap:8px;padding:6px 0;fontSize:12px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
-                <span style="width:54px;color:#A1A1AA;">{{ tx.dateStr }}</span>
-                <span style="flex:1;color:#3F414C;">{{ tx.description }}</span>
-                <span style="{{ tx.amtStyle }}">{{ tx.amtStr }}</span>
+            <sc-for list="{{ incomeBudget }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                <span style="flex:1;fontSize:13px;color:#3F414C;">{{ row.category }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;color:#6B7280;">{{ row.budgetStr }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;fontWeight:600;color:#7BC095;">{{ row.actualStr }}</span>
+                <span style="{{ row.diffStyle }}">{{ row.diffStr2 }}</span>
+                <span style="width:130px;padding:0 10px;">
+                  <div style="background:rgba(0,0,0,0.06);borderRadius:3px;height:4px;overflow:hidden;">
+                    <div style="{{ row.barStyle }}"></div>
+                  </div>
+                  <div style="fontSize:10px;color:#A1A1AA;textAlign:right;marginTop:3px;">{{ row.pctStr }}</div>
+                </span>
+                <span style="width:64px;display:flex;gap:4px;" data-noprint="">
+                  <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
+                  <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">×</button>
+                </span>
               </div>
             </sc-for>
+            <div style="display:flex;padding:11px 18px;background:#F5F6F8;borderTop:1px solid rgba(0,0,0,0.06);fontSize:13px;fontWeight:600;">
+              <span style="flex:1;color:#3F414C;">合計</span>
+              <span style="width:92px;textAlign:right;color:#6B7280;">{{ totalBudgetI }}</span>
+              <span style="width:92px;textAlign:right;color:#7BC095;">{{ totalActualI }}</span>
+              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint=""></span>
+            </div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近のイベント</div>
-            <sc-for list="{{ upcomingEvts }}" as="evt" hint-placeholder-count="3">
-              <div style="{{ evt.cardStyle }}">
-                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ evt.name }}</div>
-                <div style="fontSize:11px;color:#6B7280;marginTop:3px;">{{ evt.dateStr }}</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+            <div style="fontSize:14px;fontWeight:600;color:#E57373;">支出の部</div>
+            <button onClick="{{ onAddExpenseBudget }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint="">＋ 科目追加</button>
+          </div>
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+            <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">進捗</span><span style="width:64px;" data-noprint=""></span>
+            </div>
+            <sc-for list="{{ expenseBudget }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                <span style="flex:1;fontSize:13px;color:#3F414C;">{{ row.category }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;color:#6B7280;">{{ row.budgetStr }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;fontWeight:600;color:#E57373;">{{ row.actualStr }}</span>
+                <span style="{{ row.diffStyle }}">{{ row.diffStr2 }}</span>
+                <span style="width:130px;padding:0 10px;">
+                  <div style="background:rgba(0,0,0,0.06);borderRadius:3px;height:4px;overflow:hidden;">
+                    <div style="{{ row.barStyle }}"></div>
+                  </div>
+                  <div style="fontSize:10px;color:#A1A1AA;textAlign:right;marginTop:3px;">{{ row.pctStr }}</div>
+                </span>
+                <span style="width:64px;display:flex;gap:4px;" data-noprint="">
+                  <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
+                  <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">×</button>
+                </span>
               </div>
             </sc-for>
+            <div style="display:flex;padding:11px 18px;background:#F5F6F8;borderTop:1px solid rgba(0,0,0,0.06);fontSize:13px;fontWeight:600;">
+              <span style="flex:1;color:#3F414C;">合計</span>
+              <span style="width:92px;textAlign:right;color:#6B7280;">{{ totalBudgetE }}</span>
+              <span style="width:92px;textAlign:right;color:#E57373;">{{ totalActualE }}</span>
+              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint=""></span>
+            </div>
           </div>
         </div>
       </div>
@@ -711,7 +816,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'dashboard',
+    page: 'budget',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -795,7 +900,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["dashboard"];
+    this._myPages = ["budget"];
   })();
 
   componentWillUnmount() {
@@ -891,24 +996,153 @@ class Component extends DCLogic {
   }
 
 
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
+  openBudgetDraft() {
+    const {currentPeriodId,budgetItems,transactions,periods} = this.state;
+    const cp = periods.find(p=>p.id===currentPeriodId)||{};
+    // Find or create next period
+    const nextPeriod = periods.find(p=>p.id!==currentPeriodId&&p.startDate>cp.startDate)||null;
+    const targetPeriodId = nextPeriod?nextPeriod.id:null;
+    const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
+    const pTx = transactions.filter(t=>t.periodId===currentPeriodId);
+    const calcActual = (cat,type)=>pTx.reduce((s,t)=>s+(t.category===cat?(type==='収入'?t.income:t.expense)||0:0),0);
+    // Load existing draft or build from current period
+    const existing = this.state.budgetDraft;
+    const existingItems = (existing&&existing.targetPeriodId===targetPeriodId)?existing.items:null;
+    const items = existingItems || pBudget.map(b=>({
+      id:this.gen(), category:b.category, type:b.type,
+      currentBudget:b.amount, currentActual:calcActual(b.category,b.type),
+      nextAmount:b.amount, remark:'',
+    }));
+    this.setState({budgetDraftModal:true, budgetDraft:{targetPeriodId, items, savedAt:existing?.savedAt||null}});
+  }
+
+  updateDraftItem(id, field, value) {
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      const items = draft.items.map(item=>item.id===id?{...item,[field]:value}:item);
+      return {budgetDraft:{...draft,items,savedAt:new Date().toISOString()}};
+    },()=>this.persist());
+  }
+
+  addDraftItem(type) {
+    const cat = prompt(`新しい科目名を入力（${type}）`,'');
+    if (!cat) return;
+    const item = {id:this.gen(),category:cat,type,currentBudget:0,currentActual:0,nextAmount:0,remark:''};
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      return {budgetDraft:{...draft,items:[...draft.items,item],savedAt:new Date().toISOString()}};
+    },()=>this.persist());
+  }
+
+  delDraftItem(id) {
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      return {budgetDraft:{...draft,items:draft.items.filter(i=>i.id!==id)}};
+    },()=>this.persist());
+  }
+
+  confirmBudgetDraft() {
+    const {budgetDraft,periods,currentPeriodId} = this.state;
+    if (!budgetDraft) return;
+    const {targetPeriodId,items} = budgetDraft;
+    if (!targetPeriodId) {
+      alert('翌期が設定されていません。先に設定ページで翌期を追加してください。');
+      return;
+    }
+    if (!confirm(`翌期（${periods.find(p=>p.id===targetPeriodId)?.name||'翌期'}）の予算として確定しますか？\n既存の予算は上書きされます。`)) return;
+    const newItems = items.map(item=>({
+      id:this.gen(), periodId:targetPeriodId, type:item.type,
+      category:item.category, amount:parseInt(item.nextAmount)||0, remark:item.remark||'',
+    }));
     this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
+      budgetItems:[...s.budgetItems.filter(b=>b.periodId!==targetPeriodId),...newItems],
+      budgetDraftModal:false,
     }),()=>this.persist());
+    this.showToast('翌年度予算を確定しました');
+  }
+
+  saveBudget() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {type:f.type||'収入',category:f.category||'',amount:parseInt(f.amount)||0,periodId:pid};
+    if (m.editId) this.setState(s=>({budgetItems:s.budgetItems.map(b=>b.id===m.editId?{...b,...rec}:b)}),()=>this.persist());
+    else this.setState(s=>({budgetItems:[...s.budgetItems,{id:this.gen(),...rec}]}),()=>this.persist());
     this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
+  }
+  delBudget(id) {
+    if (!confirm('この科目を削除しますか？')) return;
+    this.setState(s=>({budgetItems:s.budgetItems.filter(b=>b.id!==id)}),()=>this.persist());
+  }
+
+  printBudgetProgress() {
+    const pid=this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    const today=new Date().toISOString().slice(0,10);
+    const fmtD=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
+    const budItems=(this.state.budgetItems||[]).filter(b=>b.periodId===pid);
+    const txs=(this.state.transactions||[]).filter(t=>t.periodId===pid);
+    const txMap={};
+    txs.forEach(t=>{
+      if(t.income>0) txMap[t.category]=(txMap[t.category]||{income:0,expense:0}), txMap[t.category].income=(txMap[t.category].income||0)+t.income;
+      if(t.expense>0) txMap[t.category]=(txMap[t.category]||{income:0,expense:0}), txMap[t.category].expense=(txMap[t.category].expense||0)+t.expense;
+    });
+    const inc=budItems.filter(b=>b.type==='収入');
+    const exp=budItems.filter(b=>b.type==='支出');
+    const thS='padding:4pt 8pt;text-align:right;width:72pt;font-weight:600;';
+    const thSL='padding:4pt 8pt;text-align:left;font-weight:600;';
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div>
+      <div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div>
+      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
+    </div>`;
+    const buildSection=(rows,label,isIncome)=>{
+      let total_b=0,total_a=0;
+      let sec=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:18px;">
+        <tr style="border-bottom:1pt solid #000;">
+          <th style="${thSL}">科目</th>
+          <th style="${thS}">予算額</th>
+          <th style="${thS}">実績額</th>
+          <th style="${thS}">差引</th>
+          <th style="padding:4pt 8pt;text-align:center;font-weight:600;width:46pt;">達成率</th>
+        </tr>
+        <tr><td colspan="5" style="padding:6pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">【${label}の部】</td></tr>`;
+      rows.forEach(b=>{
+        const bud=b.amount||0;
+        const actObj=txMap[b.category]||{income:0,expense:0};
+        const act=isIncome?(actObj.income||0):(actObj.expense||0);
+        const diff=isIncome?(act-bud):(bud-act);
+        const pct=bud?Math.round(act/bud*100):0;
+        const diffStr=diff===0?'―':(diff>0?'＋':'')+fmt(diff);
+        total_b+=bud; total_a+=act;
+        sec+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${esc(b.category)}</td><td style="padding:4pt 8pt;text-align:right;">${fmt(bud)}</td><td style="padding:4pt 8pt;text-align:right;">${fmt(act)}</td><td style="padding:4pt 8pt;text-align:right;">${diffStr}</td><td style="padding:4pt 8pt;text-align:center;">${pct}%</td></tr>`;
+      });
+      const tDiff=isIncome?(total_a-total_b):(total_b-total_a);
+      const tPct=total_b?Math.round(total_a/total_b*100):0;
+      sec+=`<tr style="font-weight:700;border-top:1.5pt solid #000;"><td style="padding:5pt 8pt;">${label}合計</td><td style="padding:5pt 8pt;text-align:right;">${fmt(total_b)}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(total_a)}</td><td style="padding:5pt 8pt;text-align:right;">${(tDiff>=0?'＋':'')+fmt(tDiff)}</td><td style="padding:5pt 8pt;text-align:center;">${tPct}%</td></tr></table>`;
+      return {html:sec, totalB:total_b, totalA:total_a};
+    };
+    const incSec=buildSection(inc,'収入',true);
+    const expSec=buildSection(exp,'支出',false);
+    html+=incSec.html+expSec.html;
+    const bal_b=incSec.totalB-expSec.totalB;
+    const bal_a=incSec.totalA-expSec.totalA;
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:24px;">
+      <tr style="font-weight:700;border-top:2pt solid #000;background:#f5f5f5;">
+        <td style="padding:5pt 8pt;">収支差引</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${fmt(bal_b)}</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${fmt(bal_a)}</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${((bal_a-bal_b)>=0?'＋':'')+fmt(bal_a-bal_b)}</td>
+        <td style="padding:5pt 8pt;width:46pt;"></td>
+      </tr>
+    </table>`;
+    this._openPrintWindow(html,'予算進捗');
   }
 
 
