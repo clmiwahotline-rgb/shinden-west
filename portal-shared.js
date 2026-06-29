@@ -387,6 +387,8 @@
       '*{color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
       'td,th,div,span,p{color:#000!important;}',
       'table{border-collapse:collapse;}',
+      '[style*="border-bottom"]{border-bottom-color:#000!important;}',
+      '[style*="border-top"]{border-top-color:#000!important;}',
       '[style*="color:#555"],[style*="color:#666"],[style*="color:#888"],[style*="color:#999"],[style*="color:#A1A1AA"],[style*="color:#6B7280"]{color:#000!important;}',
       'img{-webkit-print-color-adjust:exact;}',
     ].join('');
