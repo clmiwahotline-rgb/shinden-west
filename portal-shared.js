@@ -386,10 +386,7 @@
       'body{margin:0;background:#fff;color:#000;font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;}',
       '*{color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
       'td,th,div,span,p{color:#000!important;}',
-      'table{border-collapse:collapse;border:none!important;}',
-      'td,th{border:none!important;}',
-      '[style*="border-bottom"]{border-left:none!important;border-right:none!important;border-top:none!important;}',
-      '[style*="border-top"]{border-left:none!important;border-right:none!important;border-bottom:none!important;}',
+      'table{border-collapse:collapse;}',
       '[style*="color:#555"],[style*="color:#666"],[style*="color:#888"],[style*="color:#999"],[style*="color:#A1A1AA"],[style*="color:#6B7280"]{color:#000!important;}',
       'img{-webkit-print-color-adjust:exact;}',
     ].join('');
