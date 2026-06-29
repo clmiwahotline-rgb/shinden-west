@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>請求管理 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -371,214 +371,428 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
-      <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="marginBottom:24px;">
-          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
-          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
-        </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
+<sc-if value="{{ p.invoices }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:1080px;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:20px;">
+          <div>
+            <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">請求書管理・入金確認</div>
+            <div style="fontSize:13px;color:#6B7280;marginTop:4px;">入金済 {{ paidCount }}件 ／ 未払い {{ unpaidCount }}件 ／ 合計 {{ totalInvoiceAmt }}</div>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
-            </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
+          <div style="display:flex;gap:8px;" data-noprint="">
+            <button onClick="{{ onExportInvoicesCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
+            <button onClick="{{ onOpenInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一覧印刷</button>
+            <button onClick="{{ onBulkPrintAll }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">🖨 まとめて印刷</button>
+            <button onClick="{{ onOpenBulk }}" style="border:1px solid #C39425;background:transparent;color:#C39425;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
+            <button onClick="{{ onAddInvoice }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
           </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
-              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
-              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
+        <!-- Year nav + Month tabs -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:14px 18px;marginBottom:14px;">
+          <div style="display:flex;alignItems:center;gap:8px;marginBottom:12px;">
+            <button onClick="{{ onInvPrevYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">←</button>
+            <div style="display:flex;gap:4px;flex:1;justifyContent:center;">
+              <sc-for list="{{ invPeriodTabs }}" as="tab" hint-placeholder-count="3">
+                <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
+              </sc-for>
             </div>
-            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
-            </sc-if>
-            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <div style="{{ dt.dotStyle }}"></div>
-                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
-                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
-              </div>
+            <div style="fontSize:12px;color:#6B7280;minWidth:64px;textAlign:center;">{{ invYearLabel }}</div>
+            <button onClick="{{ onInvNextYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">→</button>
+          </div>
+          <div style="display:flex;gap:4px;flexWrap:wrap;">
+            <sc-for list="{{ invMonthTabs }}" as="tab" hint-placeholder-count="13">
+              <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
             </sc-for>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
-            <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
-              <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
-            </div>
-            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="5">
-              <div style="display:flex;gap:8px;padding:6px 0;fontSize:12px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
-                <span style="width:54px;color:#A1A1AA;">{{ tx.dateStr }}</span>
-                <span style="flex:1;color:#3F414C;">{{ tx.description }}</span>
-                <span style="{{ tx.amtStyle }}">{{ tx.amtStr }}</span>
-              </div>
-            </sc-for>
+        </div>
+        <!-- Status Filter bar -->
+        <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint="">
+          <sc-for list="{{ invoiceFilters }}" as="f" hint-placeholder-count="4">
+            <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <!-- Table -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+          <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 16px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+            <span style="flex:1;">店舗名</span>
+            <span style="width:60px;">種別</span>
+            <span style="width:76px;textAlign:right;">金額</span>
+            <span style="width:60px;textAlign:center;">状態</span>
+            <span style="width:70px;textAlign:center;">発行日</span>
+            <span style="width:70px;textAlign:center;">入金日</span>
+            <span style="width:70px;textAlign:center;">入金方法</span>
+            <span style="width:70px;textAlign:center;">督促メモ</span>
+            <span style="width:210px;textAlign:center;" data-noprint="">操作</span>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近のイベント</div>
-            <sc-for list="{{ upcomingEvts }}" as="evt" hint-placeholder-count="3">
-              <div style="{{ evt.cardStyle }}">
-                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ evt.name }}</div>
-                <div style="fontSize:11px;color:#6B7280;marginTop:3px;">{{ evt.dateStr }}</div>
-              </div>
-            </sc-for>
+          <sc-for list="{{ invoiceRows }}" as="row" hint-placeholder-count="8">
+            <div style="{{ row.rowBg }}display:flex;padding:11px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+              <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:500;">{{ row.memberStore }}</span>
+              <span style="width:60px;fontSize:11px;color:#6B7280;">{{ row.type }}</span>
+              <span style="width:76px;textAlign:right;fontSize:13px;fontWeight:600;color:#3F414C;">{{ row.amountStr }}</span>
+              <span style="width:60px;textAlign:center;"><span style="{{ row.statusBadge }}">{{ row.status }}</span></span>
+              <span style="width:70px;textAlign:center;fontSize:11px;color:#6B7280;">{{ row.issuedStr }}</span>
+              <span style="width:70px;textAlign:center;fontSize:11px;color:#6B7280;">{{ row.paidStr }}</span>
+              <span style="width:70px;textAlign:center;fontSize:11px;color:#6B7280;">{{ row.paymentMethodStr }}</span>
+              <span style="width:70px;textAlign:center;">
+                <sc-if value="{{ row.hasReminder }}" hint-placeholder-val="{{ false }}">
+                  <span style="fontSize:10px;color:#f59e0b;cursor:pointer;" onClick="{{ row.onReminder }}">📝</span>
+                </sc-if>
+                <sc-if value="{{ row.noReminder }}" hint-placeholder-val="{{ false }}">
+                  <span style="fontSize:10px;color:#A1A1AA;cursor:pointer;" onClick="{{ row.onReminder }}" data-noprint="">＋</span>
+                </sc-if>
+              </span>
+              <span style="width:210px;display:flex;gap:3px;flexWrap:wrap;" data-noprint="">
+                <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
+                <button onClick="{{ row.onMarkPaid }}" style="{{ row.markPaidStyle }}">入金</button>
+                <button onClick="{{ row.onPrintInvoice }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">請求書</button>
+                <button onClick="{{ row.onPrintReceipt }}" style="{{ row.receiptStyle }}">領収書</button>
+                <button onClick="{{ row.onInstallment }}" style="border:none;background:rgba(255,149,0,0.1);color:#ff9500;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">分割</button>
+                <button onClick="{{ row.onCancel }}" style="{{ row.cancelStyle }}">取消</button>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+        <!-- Invoice logs -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;marginTop:16px;">
+          <div style="padding:13px 18px;borderBottom:1px solid rgba(0,0,0,0.06);fontSize:13px;fontWeight:600;color:#3F414C;display:flex;justify-content:space-between;alignItems:center;">
+            <span>請求・入金ログ</span>
+          </div>
+          <sc-if value="{{ hasNoInvoiceLogs }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:16px 18px;fontSize:12px;color:#A1A1AA;fontStyle:italic;">ログはまだありません</div>
+          </sc-if>
+          <sc-for list="{{ invoiceLogRows }}" as="log" hint-placeholder-count="3">
+            <div style="display:flex;padding:9px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;gap:12px;">
+              <span style="fontSize:11px;color:#A1A1AA;width:130px;flexShrink:0;">{{ log.timeStr }}</span>
+              <span style="width:140px;fontSize:12px;color:#3F414C;fontWeight:500;flexShrink:0;">{{ log.memberStore }}</span>
+              <span style="{{ log.actionBadge }}">{{ log.action }}</span>
+              <span style="width:80px;fontSize:12px;color:#333;textAlign:right;flexShrink:0;">{{ log.amountStr }}</span>
+              <span style="flex:1;fontSize:12px;color:#6B7280;">{{ log.detail }}</span>
+              <button onClick="{{ log.onDel }}" style="border:none;background:none;color:#A1A1AA;fontSize:14px;padding:0 4px;cursor:pointer;" data-noprint="">×</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ invoicePrintModalShow }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onInvoicePrintBgClick }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;">
+        <div onClick="{{ stopProp }}" style="background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,0.15);border:1px solid #DDDEE2;overflow:hidden;margin-bottom:40px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #DDDEE2;">
+            <div style="font-size:16px;font-weight:700;color:#3F414C;font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;letter-spacing:0.03em;">請求一覧 印刷</div>
+            <button onClick="{{ onCloseInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
+          </div>
+          <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">対象期</label>
+              <select value="{{ invoicePrintPeriodId }}" onChange="{{ onInvoicePrintPeriodChange }}" style="width:100%;border:1px solid #DDDEE2;border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="2">
+                  <option value="{{ opt.id }}">{{ opt.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">ステータス</label>
+              <select value="{{ invoicePrintStatus }}" onChange="{{ onInvoicePrintStatusChange }}" style="width:100%;border:1px solid #DDDEE2;border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                <option value="all">全件</option>
+                <option value="unpaid">未払いのみ</option>
+                <option value="paid">入金済みのみ</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid #DDDEE2;background:#F5F6F8;">
+            <button onClick="{{ onCloseInvoicePrint }}" style="border:1px solid #DDDEE2;background:#fff;color:#3F414C;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;">キャンセル</button>
+            <button onClick="{{ onPrintInvoiceList }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">印刷 / PDF</button>
           </div>
         </div>
       </div>
     </sc-if>
-<sc-if value="{{ p.settings }}" hint-placeholder-val="{{ false }}">
-      <div style="padding:32px 36px;maxWidth:580px;">
-        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;marginBottom:28px;">設定</div>
-        <!-- Google Sheets 連携 -->
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          
-          <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:8px;">
-            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">期の管理</div>
-            <button onClick="{{ onAddPeriod }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">＋ 新しい期を追加</button>
+<sc-if value="{{ showInstallmentModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:210;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(6px);" onClick="{{ onCloseInstallment }}">
+        <div style="background:#fff;borderRadius:16px;width:600px;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;marginBottom:40px;" onClick="{{ stopProp }}">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:18px;">
+            <div>
+              <div style="fontSize:17px;fontWeight:700;color:#3F414C;">口座引き落とし・分割払い設定</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:3px;">{{ installmentInvoiceStore }}　{{ installmentTotalStr }}</div>
+            </div>
+            <button onClick="{{ onCloseInstallment }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
           </div>
-          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
-            <div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
-              <div style="flex:1;">
-                <div style="fontSize:13px;fontWeight:600;color:#3F414C;">{{ row.name }}</div>
-                <sc-if value="{{ row.isEditing }}" hint-placeholder-val="{{ false }}">
-                  <div style="display:flex;gap:6px;marginTop:6px;alignItems:center;">
-                    <input type="date" value="{{ row.editStart }}" onChange="{{ row.onEditStart }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
-                    <span style="fontSize:11px;color:#6B7280;">〜</span>
-                    <input type="date" value="{{ row.editEnd }}" onChange="{{ row.onEditEnd }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
-                    <button onClick="{{ row.onSaveEdit }}" style="border:none;background:#7BC095;color:#fff;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:600;">保存</button>
-                    <button onClick="{{ row.onCancelEdit }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;padding:4px 8px;borderRadius:6px;fontSize:11px;">取消</button>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ row.isNotEditing }}" hint-placeholder-val="{{ true }}">
-                  <div style="fontSize:11px;color:#A1A1AA;marginTop:2px;">{{ row.startStr }} 〜 {{ row.endStr }}</div>
-                </sc-if>
-              </div>
-              <span style="{{ row.activeBadge }}">{{ row.activeLabel }}</span>
-              <button onClick="{{ row.onEditDate }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 10px;borderRadius:6px;fontSize:11px;" data-noprint="">日付修正</button>
-              <button onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
+          <!-- Settings -->
+          <div style="background:#F5F6F8;borderRadius:10px;padding:16px;marginBottom:16px;display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:12px;">
+            <div>
+              <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">分割回数</label>
+              <select value="{{ installmentCount }}" onChange="{{ onInstallmentCountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 9px;fontSize:13px;background:#fff;">
+                <option value="2">2回</option>
+                <option value="3">3回</option>
+                <option value="4">4回</option>
+                <option value="6">6回</option>
+                <option value="10">10回</option>
+                <option value="12">12回</option>
+              </select>
             </div>
-          </sc-for>
-        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:16px;">
-            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">代表者・団体情報</div>
-            <button onClick="{{ onSaveOrgInfo }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
-          </div>
-          <div style="display:flex;flexDirection:column;gap:12px;">
-            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">団体名</label>
-                <input value="{{ orgInfo.name }}" onChange="{{ onOrgInput }}" data-field="name" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田西口商店会"></div>
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">代表者名</label>
-                <input value="{{ orgInfo.repName }}" onChange="{{ onOrgInput }}" data-field="repName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="会長名"></div>
+            <div>
+              <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">引き落とし日</label>
+              <select value="{{ installmentDebitDay }}" onChange="{{ onInstallmentDebitDayChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 9px;fontSize:13px;background:#fff;">
+                <option value="5">5日</option>
+                <option value="10">10日</option>
+                <option value="15">15日</option>
+                <option value="20">20日</option>
+                <option value="25">25日</option>
+                <option value="27">27日</option>
+              </select>
             </div>
-            <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">住所</label>
-              <input value="{{ orgInfo.address }}" onChange="{{ onOrgInput }}" data-field="address" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="例: 埼玉県草加市金明町XX-XX"></div>
-            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">電話番号</label>
-                <input value="{{ orgInfo.phone }}" onChange="{{ onOrgInput }}" data-field="phone" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">FAX</label>
-                <input value="{{ orgInfo.fax }}" onChange="{{ onOrgInput }}" data-field="fax" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
-            </div>
-            <div style="borderTop:1px solid rgba(0,0,0,0.06);paddingTop:12px;">
-              <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:8px;">振込先（請求書に印刷されます）</div>
-              <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;marginBottom:10px;">
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">銀行名</label>
-                  <input value="{{ orgInfo.bankName }}" onChange="{{ onOrgInput }}" data-field="bankName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="東京東信用金庫"></div>
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">支店名</label>
-                  <input value="{{ orgInfo.bankBranch }}" onChange="{{ onOrgInput }}" data-field="bankBranch" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田支店"></div>
-              </div>
-              <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;">
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座種別</label>
-                  <select value="{{ orgInfo.bankType }}" onChange="{{ onOrgInput }}" data-field="bankType" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;background:#fff;">
-                    <option value="普通">普通</option><option value="当座">当座</option>
-                  </select></div>
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座番号</label>
-                  <input value="{{ orgInfo.bankAccount }}" onChange="{{ onOrgInput }}" data-field="bankAccount" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="0000000"></div>
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座名義</label>
-                  <input value="{{ orgInfo.bankHolder }}" onChange="{{ onOrgInput }}" data-field="bankHolder" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="ニッタニシグチ"></div>
-              </div>
+            <div>
+              <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">開始月</label>
+              <input value="{{ installmentStartMonth }}" onChange="{{ onInstallmentStartChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 9px;fontSize:13px;" type="month">
             </div>
           </div>
-        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
-            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">Google スプレッドシート連携</div>
-            <div style="display:flex;alignItems:center;gap:10px;">
-              <span style="fontSize:12px;fontWeight:600;color:{{ syncStatusColor }};">{{ syncStatusLabel }}</span>
-              <button onClick="{{ onToggleSyncPause }}" style="{{ syncPauseBtnStyle }}">{{ syncPauseBtnLabel }}</button>
+          <div style="background:#fff3cd;borderRadius:8px;padding:10px 14px;marginBottom:16px;fontSize:12px;color:#856404;">
+            1回あたり {{ installmentPerStr }}（端数は最終回に調整）
+          </div>
+          <!-- Payment schedule -->
+          <div style="border:1px solid rgba(0,0,0,0.08);borderRadius:10px;overflow:hidden;marginBottom:18px;">
+            <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:9px 14px;fontSize:11px;fontWeight:600;color:#6B7280;">
+              <span style="width:32px;">回</span>
+              <span style="flex:1;">引き落とし予定日</span>
+              <span style="width:90px;textAlign:right;">金額</span>
+              <span style="width:60px;textAlign:center;">状態</span>
+              <span style="width:80px;textAlign:center;" data-noprint="">操作</span>
             </div>
-          </div>
-          <div style="fontSize:12px;color:#6B7280;lineHeight:1.7;marginBottom:14px;">
-            Apps Script をデプロイして取得したURLとAPIキーを入力してください。<br>
-            ⚠️ デプロイ時「アクセスできるユーザー：<b>全員（匿名ユーザーを含む）</b>」を選択してください。<br>
-            APIキーはGASの「プロジェクトの設定→スクリプトプロパティ→API_KEY」で確認できます。
-          </div>
-          <div style="display:flex;flexDirection:column;gap:8px;">
-            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec">
-            <div style="display:flex;gap:8px;">
-              <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）">
-              <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
-              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
-            </div>
-          </div>
-        </div>
-        <!-- 代表者情報 -->
-        
-        <!-- Google認証設定 -->
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:4px;">Googleアカウント認証設定</div>
-          <div style="fontSize:12px;color:#6B7280;lineHeight:1.7;marginBottom:14px;">
-            アクセスを許可するGoogleアカウントのメールアドレスを登録します。<br>
-            空の場合はすべてのGoogleアカウントがアクセス可能です（GitHub Pagesのindex.html内で管理）。
-          </div>
-          <div style="marginBottom:10px;">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:6px;">許可済みアカウント</div>
-            <sc-if value="{{ noAuthEmails }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:8px 0;">登録なし（全員許可）</div>
-            </sc-if>
-            <sc-for list="{{ authEmailList }}" as="ae" hint-placeholder-count="0">
-              <div style="display:flex;alignItems:center;gap:8px;padding:7px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <sc-if value="{{ ae.hasName }}" hint-placeholder-val="{{ false }}">
-                  <span style="fontSize:12px;fontWeight:600;color:#3F414C;minWidth:90px;">{{ ae.name }}</span>
-                </sc-if>
-                <span style="fontSize:12px;color:#6B7280;flex:1;">{{ ae.email }}</span>
-                <button onClick="{{ ae.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
+            <sc-for list="{{ installmentSchedule }}" as="row" hint-placeholder-count="12">
+              <div style="display:flex;padding:9px 14px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                <span style="width:32px;fontSize:12px;color:#A1A1AA;">{{ row.seq }}</span>
+                <span style="flex:1;fontSize:13px;color:#3F414C;">{{ row.dueDateStr }}</span>
+                <span style="width:90px;textAlign:right;fontSize:13px;fontWeight:600;color:#3F414C;">{{ row.amountStr }}</span>
+                <span style="width:60px;textAlign:center;"><span style="{{ row.statusBadge }}">{{ row.status }}</span></span>
+                <span style="width:80px;textAlign:center;" data-noprint="">
+                  <button onClick="{{ row.onMarkPaid }}" style="{{ row.markPaidStyle }}">入金済</button>
+                </span>
               </div>
             </sc-for>
           </div>
-          <div style="display:flex;gap:8px;marginBottom:6px;">
-            <input value="{{ authNameInput }}" onChange="{{ onAuthNameInput }}" style="width:120px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="氏名・役割">
-            <input value="{{ authEmailInput }}" onChange="{{ onAuthEmailInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="example@gmail.com" type="email">
-            <button onClick="{{ onAddAuthEmail }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
-          </div>
-          <div style="marginTop:10px;fontSize:11px;color:#A1A1AA;lineHeight:1.7;">
-            ⚠️ 変更後は「index.htmlを更新して」とお伝えください。新しいindex.htmlをGitHubにアップすると反映されます。
-          </div>
-          <sc-if value="{{ showAuthCopyBtn }}" hint-placeholder-val="{{ false }}">
-            <div style="marginTop:12px;">
-              <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">index.html用コード（このまま貼り替えてください）</div>
-              <div style="position:relative;">
-                <textarea value="{{ authCopyCode }}" readonly="" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:11px;fontFamily:monospace;resize:none;background:#F5F6F8;color:#3F414C;" rows="2" onClick="{{ onSelectAuthCode }}"></textarea>
-              </div>
-              <div style="fontSize:10px;color:#A1A1AA;marginTop:4px;">テキストをクリックして全選択→コピーしてindex.html内のALLOWED_EMAILSと置き換えてください</div>
+          <div style="display:flex;justify-content:space-between;alignItems:center;">
+            <div style="fontSize:13px;color:#6B7280;">済み {{ installmentPaidCount }} / {{ installmentCount }} 回　残高 {{ installmentRemainingStr }}</div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onCloseInstallment }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">閉じる</button>
+              <button onClick="{{ onSaveInstallment }}" style="border:none;background:#ff9500;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">設定を保存</button>
             </div>
-          </sc-if>
+          </div>
         </div>
-
-        <!-- 期の管理 -->
-        
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;">
-          <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:10px;">データ管理</div>
-          <div style="fontSize:13px;color:#6B7280;lineHeight:1.7;">すべてのデータはブラウザのlocalStorageに保存されています。このブラウザのデータを削除するとすべての情報が失われます。定期的なCSV書き出しをお勧めします。</div>
+      </div>
+    </sc-if>
+<sc-if value="{{ showBulkModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:210;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;backdropFilter:blur(6px);" onClick="{{ onCloseBulk }}">
+        <div style="background:#fff;borderRadius:16px;width:580px;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;marginBottom:40px;" onClick="{{ stopProp }}">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:18px;">
+            <div style="fontSize:17px;fontWeight:700;color:#3F414C;">一括請求書発行</div>
+            <button onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
+          </div>
+          <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:12px;marginBottom:14px;">
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">発行日</label>
+              <input value="{{ bulkIssuedDate }}" onChange="{{ onBulkDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" type="date">
+            </div>
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">種別</label>
+              <select value="{{ bulkType }}" onChange="{{ onBulkTypeChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;background:#fff;">
+                <option value="会費">会費</option>
+                <option value="広告費">広告費</option>
+                <option value="看板費">看板費</option>
+                <option value="その他">その他</option>
+              </select>
+            </div>
+          </div>
+          <div style="marginBottom:14px;">
+            <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">摘要</label>
+            <input value="{{ bulkDescription }}" onChange="{{ onBulkDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:13px;" placeholder="例: 令和8年度商店会会費として">
+          </div>
+          <div style="marginBottom:14px;display:flex;justify-content:space-between;alignItems:center;">
+            <div style="fontSize:12px;fontWeight:600;color:#6B7280;">発行対象会員を選択</div>
+            <div style="display:flex;gap:6px;">
+              <button onClick="{{ onBulkSelectAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">全選択</button>
+              <button onClick="{{ onBulkClearAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">全解除</button>
+            </div>
+          </div>
+          <div style="border:1px solid rgba(0,0,0,0.08);borderRadius:10px;overflow:hidden;marginBottom:18px;maxHeight:300px;overflowY:auto;">
+            <sc-for list="{{ bulkMemberList }}" as="bm" hint-placeholder-count="10">
+              <div style="{{ bm.rowStyle }}display:flex;alignItems:center;padding:9px 14px;borderBottom:1px solid rgba(0,0,0,0.04);cursor:pointer;gap:10px;" onClick="{{ bm.onToggle }}">
+                <div style="{{ bm.checkStyle }}">{{ bm.checkMark }}</div>
+                <div style="flex:1;">
+                  <div style="fontSize:13px;color:#3F414C;fontWeight:500;">{{ bm.store }}</div>
+                  <div style="fontSize:11px;color:#6B7280;">{{ bm.name }}</div>
+                </div>
+                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ bm.feeStr }}</div>
+                <div style="{{ bm.existsBadge }}">{{ bm.existsLabel }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;alignItems:center;padding-top:14px;borderTop:1px solid rgba(0,0,0,0.07);">
+            <div style="fontSize:13px;color:#6B7280;">選択中: {{ bulkSelectedCount }} 名</div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+              <button onClick="{{ onBulkGenerate }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">発行する</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ p.printInvoice }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);zIndex:300;display:flex;alignItems:center;justifyContent:center;" onClick="{{ onClosePrint }}">
+        <div style="background:#fff;borderRadius:12px;width:680px;maxHeight:92vh;overflowY:auto;boxShadow:0 20px 60px rgba(0,0,0,0.3);" onClick="{{ stopProp }}">
+          <!-- Print controls -->
+          <div style="padding:16px 20px;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint="">
+            <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+              <div style="fontSize:14px;fontWeight:600;color:#3F414C;">{{ printDocTitle }}</div>
+              <div style="display:flex;gap:8px;">
+                <button onClick="{{ onPrintInvoiceDoc }}" style="border:none;background:#E7C15F;color:#3F414C;padding:7px 16px;borderRadius:7px;fontSize:13px;fontWeight:500;">印刷 / PDF保存</button>
+                <button onClick="{{ onClosePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:7px 14px;borderRadius:7px;fontSize:13px;">閉じる</button>
+              </div>
+            </div>
+            <div style="display:flex;alignItems:center;gap:10px;background:#F5F6F8;borderRadius:8px;padding:10px 14px;">
+              <div style="fontSize:12px;color:#6B7280;whiteSpace:nowrap;">🔏 印鑑を押す：</div>
+              <input value="{{ hankoPwdInput }}" onChange="{{ onHankoPwdInput }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 10px;fontSize:13px;width:110px;" type="password" placeholder="パスワード">
+              <button onClick="{{ onHankoUnlock }}" style="border:none;background:#2d3142;color:#fff;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">確認</button>
+              <div style="fontSize:12px;color:{{ hankoStatusColor }};">{{ hankoStatusMsg }}</div>
+            </div>
+          </div>
+          <!-- Document body -->
+          <div id="print-doc" style="padding:48px 52px;fontFamily:'-apple-system,Hiragino Sans,Yu Gothic,Meiryo,sans-serif';">
+            <!-- 請求書 -->
+            <sc-if value="{{ printIsInvoice }}" hint-placeholder-val="{{ false }}">
+              <div style="textAlign:center;fontSize:22px;fontWeight:700;letterSpacing:0.1em;marginBottom:28px;color:#3F414C;">請　求　書</div>
+              <div style="display:flex;justify-content:space-between;marginBottom:24px;">
+                <div>
+                  <div style="fontSize:15px;fontWeight:700;color:#3F414C;">{{ printStore }}</div>
+                  <div style="fontSize:13px;color:#3F414C;">{{ printName }}　御中</div>
+                </div>
+                <div style="textAlign:right;fontSize:12px;color:#6B7280;lineHeight:1.9;">
+                  <div>発行日：{{ printIssuedStr }}</div>
+                  <div>請求番号：{{ printNo }}</div>
+                  <div style="marginTop:8px;fontWeight:700;color:#3F414C;">{{ printOrgName }}</div>
+                  <div>{{ printOrgAddress }}</div>
+                  <div>{{ printOrgPhone }}</div>
+                  <div style="fontWeight:600;color:#3F414C;">代表　{{ printOrgRepName }}</div>
+                  <sc-if value="{{ hankoUnlocked }}" hint-placeholder-val="{{ false }}">
+                    <div style="marginTop:6px;display:flex;justifyContent:flex-end;">
+                      <img src="uploads/西口商店会_角印.png" style="width:72px;height:72px;objectFit:contain;opacity:0.9;" alt="角印">
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+              <div style="background:#F5F6F8;borderRadius:8px;padding:16px 20px;marginBottom:24px;display:flex;justify-content:space-between;alignItems:center;">
+                <div style="fontSize:13px;color:#6B7280;">ご請求金額</div>
+                <div style="fontSize:26px;fontWeight:700;color:#3F414C;">{{ printAmountStr }}　円</div>
+              </div>
+              <table style="width:100%;borderCollapse:collapse;marginBottom:24px;fontSize:13px;">
+                <tr style="background:#F5F6F8;borderBottom:2px solid #e5e7eb;">
+                  <td style="padding:9px 12px;fontWeight:600;color:#6B7280;">件名</td>
+                  <td style="padding:9px 12px;fontWeight:600;color:#6B7280;textAlign:right;">金額</td>
+                </tr>
+                <tr style="borderBottom:1px solid #E6E8EC;">
+                  <td style="padding:11px 12px;color:#3F414C;">{{ printItemName }}<sc-if value="{{ printDescription }}" hint-placeholder-val="{{ false }}"><span style="color:#6B7280;marginLeft:10px;fontSize:12px;">{{ printDescription }}</span></sc-if></td>
+                  <td style="padding:11px 12px;textAlign:right;fontWeight:600;color:#3F414C;">{{ printAmountStr }}　円</td>
+                </tr>
+              </table>
+              <div style="fontSize:12px;color:#6B7280;lineHeight:2;borderTop:1px solid #e5e7eb;paddingTop:16px;">
+                <div>お支払期限：{{ printDueStr }}</div>
+                <sc-if value="{{ printHasBankInfo }}" hint-placeholder-val="{{ false }}">
+                  <div style="marginTop:10px;background:#F5F6F8;borderRadius:6px;padding:10px 14px;fontSize:11px;lineHeight:2;color:#444;">
+                    <div style="fontWeight:600;marginBottom:2px;">【振込先】</div>
+                    <div>{{ printBankName }}　{{ printBankBranch }}　{{ printBankType }}　{{ printBankAccount }}</div>
+                    <div>口座名義：{{ printBankHolder }}</div>
+                  </div>
+                </sc-if>
+                <div style="marginTop:8px;color:#A1A1AA;fontSize:11px;">ご不明な点は商店会事務局までお問い合わせください。</div>
+              </div>
+            </sc-if>
+            <!-- 領収書 -->
+            <sc-if value="{{ printIsReceipt }}" hint-placeholder-val="{{ false }}">
+              <div style="textAlign:center;fontSize:22px;fontWeight:700;letterSpacing:0.1em;marginBottom:28px;color:#3F414C;">領　収　書</div>
+              <div style="display:flex;justify-content:space-between;marginBottom:24px;">
+                <div>
+                  <div style="fontSize:15px;fontWeight:700;color:#3F414C;">{{ printStore }}</div>
+                  <div style="fontSize:13px;color:#3F414C;">{{ printName }}　殿</div>
+                </div>
+                <div style="textAlign:right;fontSize:12px;color:#6B7280;lineHeight:1.9;">
+                  <div>発行日：{{ printPaidStr }}</div>
+                  <div>領収番号：{{ printNo }}</div>
+                  <div style="marginTop:8px;fontWeight:700;color:#3F414C;">{{ printOrgName }}</div>
+                  <div>{{ printOrgAddress }}</div>
+                  <div>{{ printOrgPhone }}</div>
+                  <div style="fontWeight:600;color:#3F414C;">代表　{{ printOrgRepName }}</div>
+                  <sc-if value="{{ hankoUnlocked }}" hint-placeholder-val="{{ false }}">
+                    <div style="marginTop:6px;display:flex;justifyContent:flex-end;">
+                      <img src="uploads/西口商店会_角印.png" style="width:72px;height:72px;objectFit:contain;opacity:0.9;" alt="角印">
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+              <div style="background:#f0fdf4;borderRadius:8px;padding:16px 20px;marginBottom:24px;display:flex;justify-content:space-between;alignItems:center;border:1px solid #bbf7d0;">
+                <div style="fontSize:13px;color:#166534;">領収金額</div>
+                <div style="fontSize:26px;fontWeight:700;color:#166534;">{{ printAmountStr }}　円</div>
+              </div>
+              <table style="width:100%;borderCollapse:collapse;marginBottom:24px;fontSize:13px;">
+                <tr style="background:#F5F6F8;borderBottom:2px solid #e5e7eb;">
+                  <td style="padding:9px 12px;fontWeight:600;color:#6B7280;">但し書き</td>
+                  <td style="padding:9px 12px;fontWeight:600;color:#6B7280;">入金方法</td>
+                  <td style="padding:9px 12px;fontWeight:600;color:#6B7280;textAlign:right;">金額</td>
+                </tr>
+                <tr style="borderBottom:1px solid #E6E8EC;">
+                  <td style="padding:11px 12px;color:#3F414C;">{{ printItemName }}として<sc-if value="{{ printDescription }}" hint-placeholder-val="{{ false }}"><span style="color:#6B7280;marginLeft:10px;fontSize:12px;">{{ printDescription }}</span></sc-if></td>
+                  <td style="padding:11px 12px;color:#6B7280;">{{ printPaymentMethod }}</td>
+                  <td style="padding:11px 12px;textAlign:right;fontWeight:600;color:#3F414C;">{{ printAmountStr }}　円</td>
+                </tr>
+              </table>
+              <div style="fontSize:12px;color:#6B7280;lineHeight:2;borderTop:1px solid #e5e7eb;paddingTop:16px;">
+                <div>上記の金額を確かに領収いたしました。</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ showBulkPrintModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.55);zIndex:310;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;padding:24px 0;" onClick="{{ onCloseBulkPrint }}">
+        <div style="background:#F5F6F8;borderRadius:14px;width:660px;boxShadow:0 24px 80px rgba(0,0,0,0.3);" onClick="{{ stopProp }}">
+          <!-- Header -->
+          <div style="display:flex;justify-content:space-between;alignItems:center;padding:16px 22px;background:#fff;borderRadius:14px 14px 0 0;borderBottom:1px solid rgba(0,0,0,0.08);">
+            <div>
+              <div style="fontSize:15px;fontWeight:700;color:#3F414C;">まとめて印刷</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:2px;">{{ bulkCheckedCount }}件選択中 ／ 1件ずつA4で出力されます</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onBulkCheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">全選択</button>
+              <button onClick="{{ onBulkUncheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">全解除</button>
+              <button onClick="{{ onDoBulkPrint }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">🖨 印刷</button>
+              <button onClick="{{ onCloseBulkPrint }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">閉じる</button>
+            </div>
+          </div>
+          <!-- チェックリスト -->
+          <div style="padding:12px 16px;maxHeight:60vh;overflowY:auto;">
+            <div style="background:#fff;borderRadius:12px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+              <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:9px 16px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+                <span style="width:28px;"></span>
+                <span style="flex:1;">店舗名 / 氏名</span>
+                <span style="width:80px;textAlign:center;">種別</span>
+                <span style="width:90px;textAlign:right;">金額</span>
+                <span style="width:64px;textAlign:center;">状態</span>
+                <span style="width:80px;textAlign:right;">支払期限</span>
+              </div>
+              <sc-for list="{{ bulkPrintRows }}" as="bp" hint-placeholder-count="8">
+                <div style="display:flex;padding:10px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;background:{{ bp.rowBg }};">
+                  <span style="width:28px;">
+                    <input type="checkbox" checked="{{ bp.checked }}" onChange="{{ bp.onToggle }}" style="width:16px;height:16px;cursor:pointer;accentColor:#C39425;">
+                  </span>
+                  <span style="flex:1;">
+                    <div style="fontSize:13px;fontWeight:600;color:#3F414C;">{{ bp.memberStore }}</div>
+                    <div style="fontSize:11px;color:#6B7280;">{{ bp.memberName }}</div>
+                  </span>
+                  <span style="width:80px;textAlign:center;fontSize:11px;color:#6B7280;">{{ bp.type }}</span>
+                  <span style="width:90px;textAlign:right;fontSize:13px;fontWeight:600;color:#3F414C;">{{ bp.amountStr }}</span>
+                  <span style="width:64px;textAlign:center;"><span style="{{ bp.statusBadge }}">{{ bp.status }}</span></span>
+                  <span style="width:80px;textAlign:right;fontSize:11px;color:#6B7280;">{{ bp.dueStr }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
         </div>
       </div>
     </sc-if>
@@ -857,7 +1071,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'dashboard',
+    page: 'invoices',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -941,7 +1155,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["dashboard","settings"];
+    this._myPages = ["invoices"];
   })();
 
 
@@ -1038,24 +1252,325 @@ class Component extends DCLogic {
   }
 
 
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
+  generateInvoices() {
+    const {currentPeriodId:pid,members,invoices} = this.state;
+    const existing = new Set(invoices.filter(i=>i.periodId===pid).map(i=>i.memberId));
+    const newOnes = members.filter(m=>!existing.has(m.id)).map(m=>({
+      id:this.gen(),periodId:pid,memberId:m.id,memberName:m.name,memberStore:m.store,
+      type:'会費',amount:m.fee,status:'未払い',
+      issuedDate:new Date().toISOString().slice(0,10),paidDate:null,dueDate:'',
+    }));
+    if (!newOnes.length) { alert('全会員の請求書が既に発行済みです'); return; }
+    this.setState(s=>({invoices:[...s.invoices,...newOnes]}),()=>this.persist());
+    this.showToast(newOnes.length+'件の請求書を発行しました');
+  }
+  saveInvoice() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {...f,periodId:pid,amount:parseInt(f.amount)||0,paidDate:f.status==='済み'?(f.paidDate||new Date().toISOString().slice(0,10)):null};
+    if (m.editId) this.setState(s=>({invoices:s.invoices.map(i=>i.id===m.editId?{...i,...rec}:i)}),()=>this.persist());
+    else this.setState(s=>({invoices:[...s.invoices,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal(); this.showToast('保存しました');
+  }
+  // ===== CSV Export =====
+  exportInvoicesCSV() {
+    const pid = this.state.currentPeriodId;
+    const rows = this.state.invoices.filter(i=>i.periodId===pid).map(i=>[
+      i.memberStore||'',i.memberName||'',i.type||'',i.description||'',
+      i.amount||0,i.status||'',i.paymentMethod||'',i.issuedDate||'',i.paidDate||'',i.reminderNote||''
+    ]);
+    this.exportCSV('請求書一覧.csv',['店舗名','氏名','種別','摘要','金額','状態','入金方法','発行日','入金日','督促メモ'],rows);
+  }
+
+  bulkPrintAll() {
+    const pid = this.state.currentPeriodId;
+    const docs = this.state.invoices.filter(i=>i.periodId===pid);
+    const checked = {};
+    docs.forEach(i=>{checked[i.id]=true;});
+    this.setState({bulkPrintModal:true, bulkPrintDocs:docs, bulkChecked:checked});
+  }
+
+  doBulkPrint() {
+    const checked = this.state.bulkChecked||{};
+    const docs = (this.state.bulkPrintDocs||[]).filter(i=>checked[i.id]);
+    if (!docs.length) { alert('印刷する請求書を選択してください'); return; }
+    const pw = prompt('印鑑を押印するにはパスワードを入力してください（スキップ：キャンセル）');
+    const hankoImg = (pw==='2490') ? window.location.href.replace(/\/[^/]*$/, '')+'/uploads/西口商店会_角印.png' : null;
+    const pages = docs.map(inv=>this._buildInvoiceHtml(inv,'invoice',hankoImg))
+      .join('<div style="page-break-before:always;break-before:page;"></div>');
+    this._openPrintWindow(pages,'請求書まとめて印刷');
+    this.setState({bulkPrintModal:false});
+  }
+
+  makeHanko(fullName) {
+    if (!fullName) return null;
+    const surname = fullName.split(/[\s　]/)[0];
+    const chars = surname.slice(0,3).split('');
+    const size = 38;
+    const cx = size/2, cy = size/2, r = size/2 - 2;
+    const lineH = size * 0.6 / chars.length;
+    const startY = cy - (chars.length-1)*lineH/2;
+    const textNodes = chars.map((ch,i)=>React.createElement('text',{
+      key:i, x:cx, y:startY+i*lineH,
+      textAnchor:'middle', dominantBaseline:'central',
+      fontSize:lineH*0.88,
+      fontFamily:"'游明朝','Yu Mincho','Hiragino Mincho ProN',serif",
+      fill:'#cc0000', fontWeight:'700'
+    },ch));
+    return React.createElement('svg',{
+      width:size, height:size, viewBox:`0 0 ${size} ${size}`,
+      style:{display:'inline-block',verticalAlign:'middle',flexShrink:0}
+    },
+      React.createElement('circle',{cx,cy,r,fill:'none',stroke:'#cc0000',strokeWidth:1.8}),
+      React.createElement('circle',{cx,cy,r:r-2.8,fill:'none',stroke:'#cc0000',strokeWidth:0.7}),
+      ...textNodes
+    );
+  }
+
+  _buildInvoiceHtml(inv, docType, hankoImg) {
+    const org = this.state.orgInfo||{};
+    const orgName = org.name||'新田西口商店会';
+    const no = 'INV-'+(inv.id||'').slice(-6).toUpperCase();
+    const amt = (inv.amount||0).toLocaleString('ja-JP');
+    const item = (inv.type||'会費')+(inv.description?`（${inv.description}）`:'');
+    const hankoHtml = hankoImg?`<img src="${hankoImg}" style="width:72px;height:72px;object-fit:contain;opacity:0.9;" alt="印">` :'';
+    const bankHtml = org.bankName?`<div style="margin-top:10px;background:#F5F6F8;border-radius:6px;padding:10px 14px;font-size:11px;line-height:2;">
+      <div style="font-weight:600;">【振込先】</div>
+      <div>${org.bankName}　${org.bankBranch||''}　${org.bankType||'普通'}　${org.bankAccount||''}</div>
+      <div>口座名義：${org.bankHolder||''}</div></div>`:'';
+    if (docType==='invoice') {
+      return `<div style="font-family:-apple-system,'Hiragino Sans',serif;padding:52px;max-width:640px;margin:0 auto;">
+        <div style="text-align:center;font-size:22px;font-weight:700;letter-spacing:0.1em;margin-bottom:28px;">請　求　書</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:22px;">
+          <div><div style="font-size:15px;font-weight:700;">${inv.memberStore||''}　御中</div><div style="font-size:13px;">${inv.memberName||''}　様</div></div>
+          <div style="text-align:right;font-size:12px;color:#555;line-height:2;">
+            <div>発行日：${inv.issuedDate||''}</div><div>請求番号：${no}</div>
+            <div style="margin-top:6px;font-weight:700;color:#000;">${orgName}</div>
+            <div>${org.address||''}</div><div>${org.phone||''}</div>
+            <div style="font-weight:600;">代表　${org.repName||''}</div>
+            ${hankoHtml}
+          </div>
+        </div>
+        <div style="background:#F5F6F8;border-radius:8px;padding:16px 20px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:13px;color:#666;">ご請求金額</div>
+          <div style="font-size:26px;font-weight:700;">¥${amt}　円</div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
+          <tr style="background:#F5F6F8;border-bottom:2px solid #e5e7eb;"><td style="padding:9px 12px;font-weight:600;color:#666;">件名</td><td style="padding:9px 12px;font-weight:600;color:#666;text-align:right;">金額</td></tr>
+          <tr style="border-bottom:1px solid #E6E8EC;"><td style="padding:11px 12px;">${item}</td><td style="padding:11px 12px;text-align:right;font-weight:600;">¥${amt}　円</td></tr>
+        </table>
+        <div style="font-size:12px;color:#666;line-height:2;border-top:1px solid #e5e7eb;padding-top:14px;">
+          <div>お支払期限：${inv.dueDate||''}</div>
+          ${inv.paymentMethod==='口座振替'?'<div style="margin-top:6px;color:#b45309;font-weight:600;">※ 口座振替の場合は振替日までに口座残高をご確認ください。</div>':''}
+          ${bankHtml}
+        </div>
+      </div>`;
+    } else {
+      return `<div style="font-family:-apple-system,'Hiragino Sans',serif;padding:52px;max-width:640px;margin:0 auto;">
+        <div style="text-align:center;font-size:22px;font-weight:700;letter-spacing:0.1em;margin-bottom:28px;">領　収　書</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:22px;">
+          <div><div style="font-size:15px;font-weight:700;">${inv.memberStore||''}　御中</div><div style="font-size:13px;">${inv.memberName||''}　様</div></div>
+          <div style="text-align:right;font-size:12px;color:#555;line-height:2;">
+            <div>発行日：${inv.paidDate||''}</div><div>領収番号：${no}</div>
+            <div style="margin-top:6px;font-weight:700;color:#000;">${orgName}</div>
+            <div>${org.address||''}</div><div>${org.phone||''}</div>
+            <div style="font-weight:600;">代表　${org.repName||''}</div>
+            ${hankoHtml}
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:8px;padding:16px 20px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;border:1px solid #bbf7d0;">
+          <div style="font-size:13px;color:#166534;">領収金額</div>
+          <div style="font-size:26px;font-weight:700;color:#166534;">¥${amt}　円</div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
+          <tr style="background:#F5F6F8;border-bottom:2px solid #e5e7eb;">
+            <td style="padding:9px 12px;font-weight:600;color:#666;">但し書き</td>
+            <td style="padding:9px 12px;font-weight:600;color:#666;">入金方法</td>
+            <td style="padding:9px 12px;font-weight:600;color:#666;text-align:right;">金額</td>
+          </tr>
+          <tr style="border-bottom:1px solid #E6E8EC;">
+            <td style="padding:11px 12px;">${item}として</td>
+            <td style="padding:11px 12px;color:#666;">${inv.paymentMethod||'—'}</td>
+            <td style="padding:11px 12px;text-align:right;font-weight:600;">¥${amt}　円</td>
+          </tr>
+        </table>
+        <div style="font-size:12px;color:#666;border-top:1px solid #e5e7eb;padding-top:14px;">上記の金額を確かに領収いたしました。</div>
+      </div>`;
+    }
+  }
+
+  // ===== 総会資料メソッド =====
+  markPaid(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const date = prompt('入金日を入力（例: 2026-04-15）', new Date().toISOString().slice(0,10));
+    if (!date) return;
+    const method = prompt('入金方法を入力（現金 / 振込 / 口座振替）', inv.paymentMethod||'現金');
+    const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:inv.memberStore,action:'入金登録',amount:inv.amount,detail:`${method||'—'}　入金日: ${this.fmtD(date)}`};
     this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
+      invoices:s.invoices.map(i=>i.id===id?{...i,status:'入金済',paidDate:date,paymentMethod:method||''}:i),
+      invoiceLogs:[...(s.invoiceLogs||[]),log],
     }),()=>this.persist());
-    this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
+    this.showToast('入金を登録しました');
+  }
+
+  printInvoice(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const pw = prompt('印鑑を押印するにはパスワードを入力してください（スキップ：キャンセル）');
+    const hankoImg = (pw==='2490') ? window.location.href.replace(/\/[^/]*$/, '')+'/uploads/西口商店会_角印.png' : null;
+    this._openPrintWindow(this._buildInvoiceHtml(inv,'invoice',hankoImg),'請求書');
+  }
+
+  printReceipt(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const pw = prompt('印鑑を押印するにはパスワードを入力してください（スキップ：キャンセル）');
+    const hankoImg = (pw==='2490') ? window.location.href.replace(/\/[^/]*$/, '')+'/uploads/西口商店会_角印.png' : null;
+    this._openPrintWindow(this._buildInvoiceHtml(inv,'receipt',hankoImg),'領収書');
+  }
+
+  openInstallmentModal(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const inst = inv.installment||{};
+    this.setState({
+      installmentModal:true,
+      installmentInvoiceId:id,
+      installmentCount:inst.count||12,
+      installmentDebitDay:inst.debitDay||27,
+      installmentStartMonth:inst.startMonth||new Date().toISOString().slice(0,7),
+    });
+  }
+
+  saveInstallment() {
+    const {installmentInvoiceId:id,installmentCount:cnt,installmentDebitDay:day,installmentStartMonth:start} = this.state;
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    const total = inv.amount||0;
+    const perAmt = Math.floor(total/cnt);
+    const lastAmt = total - perAmt*(cnt-1);
+    const payments = Array.from({length:cnt},(_,i)=>{
+      const [y,m] = start.split('-').map(Number);
+      const date = new Date(y, m-1+i, day);
+      // 月末補正
+      const maxDay = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+      const actualDay = Math.min(day,maxDay);
+      const dueDate = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(actualDay).padStart(2,'0')}`;
+      const existing = (inv.installment&&inv.installment.payments&&inv.installment.payments[i])||{};
+      return {seq:i+1,dueDate,amount:i===cnt-1?lastAmt:perAmt,status:existing.status||'未払い',paidDate:existing.paidDate||null};
+    });
+    const installment = {enabled:true,count:cnt,debitDay:day,startMonth:start,payments};
+    const paidAll = payments.every(p=>p.status==='済み');
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>i.id===id?{...i,installment,status:paidAll?'済み':'未払い'}:i),
+      installmentModal:false,
+    }),()=>this.persist());
+    this.showToast('分割払いを設定しました');
+  }
+
+  markInstallmentPaid(invoiceId, seq) {
+    const date = prompt('入金日を入力', new Date().toISOString().slice(0,10));
+    if (!date) return;
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>{
+        if (i.id!==invoiceId||!i.installment) return i;
+        const payments = i.installment.payments.map(p=>p.seq===seq?{...p,status:'済み',paidDate:date}:p);
+        const paidAll = payments.every(p=>p.status==='済み');
+        const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:i.memberStore,action:'入金登録',amount:i.installment.payments.find(p=>p.seq===seq)?.amount||0,detail:`分割 第${seq}回　${this.fmtD(date)}`};
+        this.setState(s2=>({invoiceLogs:[...(s2.invoiceLogs||[]),log]}));
+        return {...i,installment:{...i.installment,payments},status:paidAll?'済み':'未払い',paidDate:paidAll?date:i.paidDate};
+      }),
+    }),()=>this.persist());
+    this.showToast(`第${seq}回の入金を登録しました`);
+  }
+
+  cancelInvoice(id) {
+    const inv = this.state.invoices.find(i=>i.id===id);
+    if (!inv) return;
+    if (!confirm(`「${inv.memberStore}」の請求を取消しますか？`)) return;
+    const log = {id:this.gen(),timestamp:new Date().toISOString(),memberStore:inv.memberStore,action:'取消',amount:inv.amount,detail:`種別: ${inv.type}`};
+    this.setState(s=>({
+      invoices:s.invoices.map(i=>i.id===id?{...i,status:'取消'}:i),
+      invoiceLogs:[...(s.invoiceLogs||[]),log],
+    }),()=>this.persist());
+    this.showToast('請求を取消しました');
+  }
+
+  openBulkModal() {
+    const today = new Date().toISOString().slice(0,10);
+    const existing = new Set(this.state.invoices.filter(i=>i.periodId===this.state.currentPeriodId).map(i=>i.memberId));
+    const allIds = this.state.members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>m.id);
+    this.setState({
+      bulkModal:true,
+      bulkIssuedDate:today,
+      bulkType:'会費',
+      bulkDescription:`${this.calcFiscalYear(today)}商店会会費として`,
+      bulkSelectedIds:allIds.filter(id=>!existing.has(id)),
+    });
+  }
+
+  generateBulkInvoices() {
+    const {currentPeriodId:pid,members,invoices,bulkSelectedIds,bulkIssuedDate,bulkType,bulkDescription} = this.state;
+    const targets = members.filter(m=>bulkSelectedIds.includes(m.id));
+    if (!targets.length) { alert('対象会員が選択されていません'); return; }
+    const newInvs = targets.map(m=>({
+      id:this.gen(),periodId:pid,memberId:m.id,memberName:m.name,memberStore:m.store,
+      type:bulkType||'会費',description:bulkDescription||'',amount:m.fee,status:'未払い',
+      issuedDate:bulkIssuedDate||new Date().toISOString().slice(0,10),
+      paidDate:null,dueDate:'',paymentMethod:'',reminderNote:'',
+    }));
+    const logs = newInvs.map(i=>({id:this.gen(),timestamp:new Date().toISOString(),memberStore:i.memberStore,action:'一括発行',amount:i.amount,detail:`${i.type} / ${i.description||'—'}`}));
+    this.setState(s=>({invoices:[...s.invoices,...newInvs],invoiceLogs:[...(s.invoiceLogs||[]),...logs],bulkModal:false}),()=>this.persist());
+    this.showToast(`${newInvs.length}件の請求書を発行しました`);
+  }
+
+  printInvoiceList() {
+    const pid=this.state.invoicePrintPeriodId||this.state.currentPeriodId;
+    const status=this.state.invoicePrintStatus||'all';
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    let invoices=(this.state.invoices||[]).filter(i=>!pid||i.periodId===pid);
+    if(status==='unpaid') invoices=invoices.filter(i=>i.status==='未払い'||i.status==='未払');
+    if(status==='paid') invoices=invoices.filter(i=>i.status==='済み'||i.status==='入金済');
+    invoices=[...invoices].sort((a,b)=>(a.memberStore||'').localeCompare(b.memberStore||'','ja'));
+    const total=invoices.reduce((s,i)=>s+(i.amount||0),0);
+    const statusLabel={all:'全件',unpaid:'未払いのみ',paid:'入金済みのみ'}[status]||'全件';
+    let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">請　求　一　覧</div>
+      <div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}　${statusLabel}　${esc(orgName)}</div>
+      <div style="font-size:9pt;margin-top:4px;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+      <tr style="border-bottom:1pt solid #000;">
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:24pt;">No.</th>
+        <th style="padding:4pt 7pt;text-align:left;font-weight:600;">店舗名</th>
+        <th style="padding:4pt 7pt;text-align:left;font-weight:600;width:54pt;">種別</th>
+        <th style="padding:4pt 7pt;text-align:right;font-weight:600;width:68pt;">金額</th>
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:60pt;">発行日</th>
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:60pt;">支払期限</th>
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:44pt;">状態</th>
+      </tr>`;
+    invoices.forEach((inv,i)=>{
+      const isPaid=inv.status==='済み'||inv.status==='入金済';
+      html+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 7pt;text-align:center;">${i+1}</td>
+        <td style="padding:4pt 7pt;white-space:nowrap;">${esc(inv.memberStore||'')}</td>
+        <td style="padding:4pt 7pt;">${esc(inv.type||'')}</td>
+        <td style="padding:4pt 7pt;text-align:right;">${fmt(inv.amount)}</td>
+        <td style="padding:4pt 7pt;text-align:center;">${esc(inv.issuedDate||'')}</td>
+        <td style="padding:4pt 7pt;text-align:center;">${esc(inv.dueDate||'')}</td>
+        <td style="padding:4pt 7pt;text-align:center;">${esc(inv.status||'')}</td>
+      </tr>`;
+    });
+    html+=`<tr style="font-weight:700;background:#f0f0f0;">
+      <td style="border:1px solid #999;padding:5px 7px;text-align:center;" colspan="3">合計　${invoices.length}件</td>
+      <td style="border:1px solid #999;padding:5px 7px;text-align:right;">${fmt(total)}</td>
+      <td style="border:1px solid #999;padding:5px 7px;" colspan="3"></td>
+    </tr></table>`;
+    this.setState({invoicePrintModal:false});
+    this._openPrintWindow(html,'請求一覧');
   }
 
 

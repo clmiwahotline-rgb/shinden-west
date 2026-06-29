@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新田西口商店会 管理ポータル</title>
+<title>入出金・予算 — 新田西口商店会</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -371,214 +371,690 @@
     <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
 </sc-if>
-<sc-if value="{{ p.dashboard }}" hint-placeholder-val="{{ true }}">
-      <div style="padding:32px 36px;maxWidth:1000px;">
-        <div style="marginBottom:24px;">
-          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">ダッシュボード</div>
-          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">{{ periodName }}　{{ periodStart }} 〜 {{ periodEnd }}</div>
-        </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:24px;">
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoUnpaid }}" style-hover="box-shadow:0 4px 16px rgba(229,115,115,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">未入金件数</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#E57373;letterSpacing:0.02em;">{{ kpi.unpaidInvoice }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件</div>
+<sc-if value="{{ showTransferModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:220;display:flex;alignItems:center;justifyContent:center;backdropFilter:blur(6px);" onClick="{{ onCloseTransfer }}">
+        <div style="background:#fff;borderRadius:16px;width:500px;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:26px;" onClick="{{ stopProp }}">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:20px;">
+            <div>
+              <div style="fontSize:17px;fontWeight:700;color:#3F414C;">⇄ 振替処理</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:3px;">口座と現金の間の資金移動を記録します</div>
             </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">クリックで確認 →</div>
+            <button onClick="{{ onCloseTransfer }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;padding:0;">×</button>
           </div>
-          <div style="background:#fff;borderRadius:14px;padding:22px 24px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s;" onClick="{{ onGotoTasks }}" style-hover="box-shadow:0 4px 16px rgba(175,195,215,0.15);">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.06em;marginBottom:10px;">タスク状況</div>
-            <div style="display:flex;align-items:baseline;gap:6px;">
-              <div style="fontSize:32px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ kpi.taskOpen }}</div>
-              <div style="fontSize:14px;color:#6B7280;">件 未完了</div>
+          <div style="display:flex;flexDirection:column;gap:14px;">
+            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
+              <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">日付</label>
+                <input value="{{ transferDate }}" onChange="{{ onTransferDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">金額（円）</label>
+                <input value="{{ transferAmount }}" onChange="{{ onTransferAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number" placeholder="0"></div>
             </div>
-            <div style="fontSize:11px;color:#A1A1AA;marginTop:6px;">期限超過 <span style="{{ kpi.taskOverdueStyle }}">{{ kpi.taskOverdue }}件</span> ／ 完了 <span style="color:#7BC095;">{{ kpi.taskDone }}件</span></div>
+            <div style="display:grid;gridTemplateColumns:1fr auto 1fr;gap:8px;alignItems:center;">
+              <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">振替元（減少）</label>
+                <select value="{{ transferFrom }}" onChange="{{ onTransferFromChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+                  <option value="口座">口座</option>
+                  <option value="現金">現金</option>
+                </select></div>
+              <div style="fontSize:20px;color:#A1A1AA;marginTop:18px;">→</div>
+              <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">振替先（増加）</label>
+                <select value="{{ transferTo }}" onChange="{{ onTransferToChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+                  <option value="現金">現金</option>
+                  <option value="口座">口座</option>
+                </select></div>
+            </div>
+            <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">摘要</label>
+              <input value="{{ transferDesc }}" onChange="{{ onTransferDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 現金引き出し"></div>
+            <div style="background:#F5F6F8;borderRadius:8px;padding:12px 14px;fontSize:12px;color:#6B7280;lineHeight:1.8;">
+              <div>{{ transferFrom }} から <strong>{{ transferAmountStr }}</strong> を支出</div>
+              <div>{{ transferTo }} へ <strong>{{ transferAmountStr }}</strong> を収入</div>
+              <div style="color:#A1A1AA;fontSize:11px;marginTop:4px;">合計残高への影響はゼロです</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;paddingTop:18px;borderTop:1px solid rgba(0,0,0,0.07);marginTop:18px;">
+            <button onClick="{{ onCloseTransfer }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+            <button onClick="{{ onSaveTransfer }}" style="border:none;background:#2d3142;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">記録する</button>
           </div>
         </div>
-        <div style="display:grid;gridTemplateColumns:1fr 1.6fr 1fr;gap:16px;">
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;cursor:pointer;" onClick="{{ onGotoTasks }}" style-hover="border-color:#AFC3D7;">
-            <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:14px;">
-              <div style="fontSize:13px;fontWeight:600;color:#3F414C;">タスク状況</div>
-              <div style="fontSize:11px;color:#AFC3D7;fontWeight:600;">管理 →</div>
+      </div>
+    </sc-if>
+<sc-if value="{{ showSettlementModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);zIndex:230;display:flex;alignItems:flex-start;justifyContent:center;backdropFilter:blur(6px);overflowY:auto;padding:24px 0;" onClick="{{ onCloseSettlement }}">
+        <div style="background:#F5F6F8;borderRadius:18px;width:680px;boxShadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;" onClick="{{ stopProp }}">
+          <!-- Header -->
+          <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;alignItems:center;">
+            <div>
+              <div style="fontSize:18px;fontWeight:700;color:#3F414C;">決算処理</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:2px;">{{ settlementPeriodName }}の収支を確定します</div>
             </div>
-            <sc-if value="{{ dashTaskEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:12px 0;">タスクがありません</div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onConfirmSettlement }}" style="border:none;background:#5856d6;color:#fff;padding:9px 20px;borderRadius:9px;fontSize:13px;fontWeight:700;cursor:pointer;">決算確定</button>
+              <button onClick="{{ onCloseSettlement }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:9px 14px;borderRadius:9px;fontSize:13px;cursor:pointer;">閉じる</button>
+            </div>
+          </div>
+          <!-- KPI cards -->
+          <div style="padding:20px 24px 0;">
+            <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;marginBottom:16px;">
+              <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="fontSize:11px;color:#6B7280;marginBottom:4px;">収入合計</div>
+                <div style="fontSize:18px;fontWeight:700;color:#7BC095;">{{ settlementTotalI }}</div>
+              </div>
+              <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="fontSize:11px;color:#6B7280;marginBottom:4px;">支出合計</div>
+                <div style="fontSize:18px;fontWeight:700;color:#E57373;">{{ settlementTotalE }}</div>
+              </div>
+              <div style="textAlign:center;padding:14px;background:#fff;borderRadius:12px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="fontSize:11px;color:#6B7280;marginBottom:4px;">収支差額</div>
+                <div style="fontSize:18px;fontWeight:700;color:#C39425;">{{ settlementNet }}</div>
+              </div>
+            </div>
+          </div>
+          <!-- Formal document -->
+          <div style="margin:0 20px 16px;background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:28px 36px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',HGS明朝E,serif;">
+            <div style="textAlign:center;marginBottom:20px;paddingBottom:14px;borderBottom:2px solid #3F414C;">
+              <div style="fontSize:16px;fontWeight:700;letterSpacing:0.18em;color:#3F414C;">決　算　報　告　書</div>
+              <div style="fontSize:11px;color:#555;marginTop:6px;letterSpacing:0.05em;">{{ settlementPeriodName }}</div>
+              <div style="fontSize:11px;color:#555;marginTop:2px;letterSpacing:0.05em;">自　{{ settlementPeriodStart }}　至　{{ settlementPeriodEnd }}</div>
+              <div style="fontSize:11px;color:#555;marginTop:2px;letterSpacing:0.05em;">{{ stmtOrgName }}</div>
+            </div>
+            <!-- 収支表 -->
+            <table style="width:100%;borderCollapse:collapse;fontSize:12px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',serif;">
+              <thead>
+                <tr style="borderBottom:1px solid #999;">
+                  <th style="textAlign:left;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;">科　目</th>
+                  <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:120px;">予　算　額</th>
+                  <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:120px;">決　算　額</th>
+                  <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:100px;">増　減</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colSpan="4" style="padding:8px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">収　入　の　部</td></tr>
+                <sc-if value="{{ noSettlementInc }}" hint-placeholder-val="{{ false }}">
+                  <tr><td colSpan="4" style="padding:6px 12px;color:#A1A1AA;">（収入データなし）</td></tr>
+                </sc-if>
+                <sc-for list="{{ settlementIncRows }}" as="row" hint-placeholder-count="0">
+                  <tr style="borderBottom:1px solid #efefef;">
+                    <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                  </tr>
+                </sc-for>
+                <tr style="borderTop:2px solid #3F414C;fontWeight:700;">
+                  <td style="padding:7px 8px;">収入合計</td>
+                  <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ settlementBudgetTotalI }}</td>
+                  <td style="padding:7px 8px;textAlign:right;">{{ settlementTotalI }}</td>
+                  <td style="padding:7px 8px;textAlign:right;color:#555;">{{ settlementIDiff }}</td>
+                </tr>
+                <tr><td colSpan="4" style="padding:10px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">支　出　の　部</td></tr>
+                <sc-if value="{{ noSettlementExp }}" hint-placeholder-val="{{ false }}">
+                  <tr><td colSpan="4" style="padding:6px 12px;color:#A1A1AA;">（支出データなし）</td></tr>
+                </sc-if>
+                <sc-for list="{{ settlementExpRows }}" as="row" hint-placeholder-count="0">
+                  <tr style="borderBottom:1px solid #efefef;">
+                    <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                    <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                  </tr>
+                </sc-for>
+                <tr style="borderTop:2px solid #3F414C;fontWeight:700;">
+                  <td style="padding:7px 8px;">支出合計</td>
+                  <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ settlementBudgetTotalE }}</td>
+                  <td style="padding:7px 8px;textAlign:right;">{{ settlementTotalE }}</td>
+                  <td style="padding:7px 8px;textAlign:right;color:#555;">{{ settlementEDiff }}</td>
+                </tr>
+                <tr style="background:#f5f5f5;borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                  <td style="padding:10px 8px;letterSpacing:0.04em;">収支差額（次期繰越金）</td>
+                  <td style="padding:10px 8px;textAlign:right;fontWeight:400;color:#666;">{{ settlementBudgetNet }}</td>
+                  <td style="padding:10px 8px;textAlign:right;">{{ settlementNet }}</td>
+                  <td style="padding:10px 8px;"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 備考 -->
+          <div style="padding:0 20px 20px;">
+            <div style="background:#fff;borderRadius:12px;padding:14px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:6px;">備考・監査メモ</label>
+              <textarea value="{{ settlementNote }}" onChange="{{ onSettlementNote }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="2" placeholder="監査完了、承認日、特記事項など"></textarea>
+            </div>
+            <div style="marginTop:8px;padding:10px 14px;background:rgba(88,86,214,0.06);borderRadius:9px;fontSize:11px;color:#5856d6;">
+              ※「決算確定」を押すと収支内容が確定され、決算書ページに記録されます。
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ showBudgetDraftModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);zIndex:220;display:flex;alignItems:flex-start;justifyContent:center;backdropFilter:blur(6px);overflowY:auto;padding:24px 0;">
+        <div style="background:#F5F6F8;borderRadius:18px;width:900px;boxShadow:0 24px 80px rgba(0,0,0,0.28);overflow:hidden;" onClick="{{ stopProp }}">
+          <!-- Header -->
+          <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.07);display:flex;justify-content:space-between;alignItems:center;">
+            <div>
+              <div style="fontSize:18px;fontWeight:700;color:#3F414C;letterSpacing:0.01em;">翌年度予算作成</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:3px;">{{ budgetDraftTargetName }}　— 今年度実績を参考に翌年度予算を入力してください</div>
+            </div>
+            <div style="display:flex;gap:8px;alignItems:center;">
+              <div style="fontSize:12px;color:{{ budgetDraftSavedColor }};">{{ budgetDraftSavedLabel }}</div>
+              <button onClick="{{ onConfirmBudgetDraft }}" style="border:none;background:#ff9500;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:600;">確定して翌期に反映</button>
+              <button onClick="{{ onCloseBudgetDraft }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:32px;height:32px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
+            </div>
+          </div>
+          <!-- Body -->
+          <div style="padding:20px 28px;">
+            <!-- Income section -->
+            <div style="marginBottom:20px;">
+              <div style="fontSize:13px;fontWeight:700;color:#7BC095;marginBottom:10px;">収入の部</div>
+              <div style="background:#fff;borderRadius:12px;overflow:hidden;boxShadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:9px 16px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+                  <span style="flex:1;">科目</span>
+                  <span style="width:100px;textAlign:right;">今年度予算</span>
+                  <span style="width:100px;textAlign:right;">今年度実績</span>
+                  <span style="width:130px;textAlign:right;">翌年度予算</span>
+                  <span style="flex:1;paddingLeft:12px;">備考・変更理由</span>
+                  <span style="width:36px;" data-noprint=""></span>
+                </div>
+                <sc-for list="{{ draftIncomeRows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;padding:9px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;gap:0;">
+                    <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:500;">{{ row.category }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;color:#6B7280;">{{ row.currentBudgetStr }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;fontWeight:600;color:#7BC095;">{{ row.currentActualStr }}</span>
+                    <span style="width:130px;paddingLeft:10px;">
+                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
+                    </span>
+                    <span style="flex:1;paddingLeft:8px;">
+                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考">
+                    </span>
+                    <span style="width:36px;textAlign:center;" data-noprint="">
+                      <button onClick="{{ row.onDel }}" style="border:none;background:none;color:#A1A1AA;fontSize:14px;cursor:pointer;">×</button>
+                    </span>
+                  </div>
+                </sc-for>
+                <div style="padding:9px 16px;borderTop:1px solid rgba(0,0,0,0.06);display:flex;justifyContent:space-between;alignItems:center;">
+                  <button onClick="{{ onAddDraftIncome }}" style="border:none;background:rgba(123,192,149,0.08);color:#7BC095;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 科目追加</button>
+                  <div style="fontSize:12px;fontWeight:700;color:#3F414C;">翌年度合計: {{ draftIncomeTotalStr }}</div>
+                </div>
+              </div>
+            </div>
+            <!-- Expense section -->
+            <div>
+              <div style="fontSize:13px;fontWeight:700;color:#E57373;marginBottom:10px;">支出の部</div>
+              <div style="background:#fff;borderRadius:12px;overflow:hidden;boxShadow:0 4px 12px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+                <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:9px 16px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+                  <span style="flex:1;">科目</span>
+                  <span style="width:100px;textAlign:right;">今年度予算</span>
+                  <span style="width:100px;textAlign:right;">今年度実績</span>
+                  <span style="width:130px;textAlign:right;">翌年度予算</span>
+                  <span style="flex:1;paddingLeft:12px;">備考・変更理由</span>
+                  <span style="width:36px;" data-noprint=""></span>
+                </div>
+                <sc-for list="{{ draftExpenseRows }}" as="row" hint-placeholder-count="4">
+                  <div style="display:flex;padding:9px 16px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                    <span style="flex:1;fontSize:13px;color:#3F414C;fontWeight:500;">{{ row.category }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;color:#6B7280;">{{ row.currentBudgetStr }}</span>
+                    <span style="width:100px;textAlign:right;fontSize:12px;fontWeight:600;color:#E57373;">{{ row.currentActualStr }}</span>
+                    <span style="width:130px;paddingLeft:10px;">
+                      <input value="{{ row.nextAmountStr }}" onChange="{{ row.onAmountChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;textAlign:right;" type="number" placeholder="0">
+                    </span>
+                    <span style="flex:1;paddingLeft:8px;">
+                      <input value="{{ row.remark }}" onChange="{{ row.onRemarkChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;" placeholder="変更理由・備考">
+                    </span>
+                    <span style="width:36px;textAlign:center;" data-noprint="">
+                      <button onClick="{{ row.onDel }}" style="border:none;background:none;color:#A1A1AA;fontSize:14px;cursor:pointer;">×</button>
+                    </span>
+                  </div>
+                </sc-for>
+                <div style="padding:9px 16px;borderTop:1px solid rgba(0,0,0,0.06);display:flex;justifyContent:space-between;alignItems:center;">
+                  <button onClick="{{ onAddDraftExpense }}" style="border:none;background:rgba(229,115,115,0.06);color:#E57373;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 科目追加</button>
+                  <div style="fontSize:12px;fontWeight:700;color:#3F414C;">翌年度合計: {{ draftExpenseTotalStr }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ cashbookModalShow }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCashbookBgClick }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;">
+        <div onClick="{{ stopProp }}" style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,0.18);overflow:hidden;margin-bottom:40px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(0,0,0,0.07);">
+            <div style="font-size:16px;font-weight:700;color:#3F414C;font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;">現金出納帳 印刷</div>
+            <button onClick="{{ onCloseCashbookModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
+          </div>
+          <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">対象期</label>
+              <select value="{{ cashbookPeriodId }}" onChange="{{ onCashbookPeriodChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="2">
+                  <option value="{{ opt.id }}">{{ opt.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">開始月</label>
+                <select value="{{ cashbookMonthFrom }}" onChange="{{ onCashbookMonthFromChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                  <sc-for list="{{ cashbookMonthOptions }}" as="m" hint-placeholder-count="12">
+                    <option value="{{ m.value }}">{{ m.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+              <div>
+                <label style="display:block;font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px;">終了月</label>
+                <select value="{{ cashbookMonthTo }}" onChange="{{ onCashbookMonthToChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;font-size:14px;background:#fff;">
+                  <sc-for list="{{ cashbookMonthOptions }}" as="m" hint-placeholder-count="12">
+                    <option value="{{ m.value }}">{{ m.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </div>
+            <div style="background:#F5F6F8;border-radius:8px;padding:12px 14px;font-size:12px;color:#C39425;line-height:1.7;">
+              現金・預金それぞれの収入・支出・残高を月別に表示します。<br>単月指定の場合は開始月と終了月を同じに設定してください。
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid rgba(0,0,0,0.07);background:#fafafa;">
+            <button onClick="{{ onCloseCashbookModal }}" style="border:1px solid rgba(0,0,0,0.12);background:#fff;color:#3F414C;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;">キャンセル</button>
+            <button onClick="{{ onPrintCashbook }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">印刷 / PDF</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ p.ledger }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:1080px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:20px;">
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">入出金管理</div>
+          <div style="display:flex;gap:8px;" data-noprint="">
+            <button onClick="{{ onExportTxCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
+            <button onClick="{{ onOpenCashbookModal }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">現金出納帳</button>
+            <button onClick="{{ onAddTransfer }}" style="border:1px solid #6B7280;background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⇄ 振替</button>
+            <button onClick="{{ onAddTx }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 取引追加</button>
+          </div>
+        </div>
+        <!-- KPI cards -->
+        <div style="display:grid;gridTemplateColumns:repeat(5,1fr);gap:12px;marginBottom:18px;">
+          <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+            <div style="fontSize:10px;fontWeight:600;color:#7BC095;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">収入合計</div>
+            <div style="fontSize:18px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ totalIncome }}</div>
+          </div>
+          <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+            <div style="fontSize:10px;fontWeight:600;color:#E57373;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">支出合計</div>
+            <div style="fontSize:18px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ totalExpense }}</div>
+          </div>
+          <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+            <div style="fontSize:10px;fontWeight:600;color:#C39425;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">合計残高</div>
+            <div style="fontSize:18px;fontWeight:700;color:#C39425;letterSpacing:0.02em;">{{ netBalance }}</div>
+          </div>
+          <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+            <div style="fontSize:10px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">現金残高</div>
+            <div style="fontSize:18px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ cashBalance }}</div>
+          </div>
+          <div style="background:#fff;borderRadius:14px;padding:16px 18px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
+            <div style="fontSize:10px;fontWeight:600;color:#6B7280;textTransform:uppercase;letterSpacing:0.05em;marginBottom:5px;">口座残高</div>
+            <div style="fontSize:18px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">{{ bankBalance }}</div>
+          </div>
+        </div>
+        <!-- Year nav + Month tabs -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:14px 18px;marginBottom:14px;">
+          <div style="display:flex;alignItems:center;gap:8px;marginBottom:12px;">
+            <button onClick="{{ onTxPrevYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">←</button>
+            <div style="display:flex;gap:4px;flex:1;justifyContent:center;">
+              <sc-for list="{{ txPeriodTabs }}" as="tab" hint-placeholder-count="3">
+                <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
+              </sc-for>
+            </div>
+            <div style="fontSize:12px;color:#6B7280;minWidth:80px;textAlign:center;">{{ txYearLabel }}</div>
+            <button onClick="{{ onTxNextYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">→</button>
+          </div>
+          <div style="display:flex;gap:4px;flexWrap:wrap;">
+            <sc-for list="{{ txMonthTabs }}" as="tab" hint-placeholder-count="13">
+              <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <!-- Account filter bar -->
+        <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint="">
+          <sc-for list="{{ txFilters }}" as="f" hint-placeholder-count="3">
+            <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <!-- Table -->
+        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+          <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:11px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+            <span style="width:88px;">日付</span>
+            <span style="flex:1;">摘要</span>
+            <span style="width:92px;">科目</span>
+            <span style="width:60px;textAlign:center;">区分</span>
+            <span style="width:88px;textAlign:right;">収入</span>
+            <span style="width:88px;textAlign:right;">支出</span>
+            <span style="width:140px;textAlign:right;">現金残高 / 口座残高</span>
+            <span style="width:72px;" data-noprint=""></span>
+          </div>
+          <sc-for list="{{ txRows }}" as="row" hint-placeholder-count="8">
+            <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+              <span style="width:88px;fontSize:12px;color:#6B7280;">{{ row.dateStr }}</span>
+              <span style="flex:1;minWidth:0;fontSize:13px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">
+                {{ row.description }}&nbsp;
+                <sc-if value="{{ row.isTransfer }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#f1f5f9;color:#475569;padding:1px 6px;borderRadius:6px;whiteSpace:nowrap;">振替</span></sc-if>
+
+              </span>
+              <span style="width:92px;fontSize:11px;color:#A1A1AA;">{{ row.category }}</span>
+              <span style="width:60px;textAlign:center;"><span style="{{ row.accountBadge }}">{{ row.accountType }}</span></span>
+              <span style="{{ row.incStyle }}">{{ row.incStr }}</span>
+              <span style="{{ row.expStyle }}">{{ row.expStr }}</span>
+              <span style="width:140px;textAlign:right;fontSize:11px;lineHeight:1.6;">
+                <div style="fontWeight:600;color:#3F414C;fontSize:11px;">現金 {{ row.cashBalStr }}</div>
+                <div style="color:#6B7280;fontSize:11px;">口座 {{ row.bankBalStr }}</div>
+              </span>
+              <span style="width:72px;display:flex;gap:5px;" data-noprint="">
+                <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">編集</button>
+                <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- 残高チェック -->
+        <div style="marginTop:24px;">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+            <div style="fontSize:15px;fontWeight:700;color:#3F414C;">残高チェック</div>
+            <button onClick="{{ onOpenBalanceCheck }}" style="border:none;background:#E7C15F;color:#3F414C;padding:7px 16px;borderRadius:8px;fontSize:12px;fontWeight:600;" data-noprint="">＋ 残高確認を記録</button>
+          </div>
+          <!-- 入力フォーム -->
+          <sc-if value="{{ showBalanceCheckForm }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:20px;marginBottom:14px;">
+              <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">残高確認入力</div>
+              <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:12px;marginBottom:14px;">
+                <div>
+                  <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">確認日</label>
+                  <input type="date" value="{{ bcDate }}" onChange="{{ onBcDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;">
+                </div>
+                <div>
+                  <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">現金 実際残高（円）</label>
+                  <input type="number" value="{{ bcCashActual }}" onChange="{{ onBcCashActual }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" placeholder="0">
+                </div>
+                <div>
+                  <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">口座 実際残高（円）</label>
+                  <input type="number" value="{{ bcBankActual }}" onChange="{{ onBcBankActual }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;" placeholder="0">
+                </div>
+              </div>
+              <div style="background:#F5F6F8;borderRadius:10px;padding:14px 16px;marginBottom:14px;display:grid;gridTemplateColumns:1fr 1fr;gap:12px;">
+                <div>
+                  <div style="fontSize:11px;color:#6B7280;marginBottom:3px;">現金 帳簿残高</div>
+                  <div style="fontSize:16px;fontWeight:700;color:#3F414C;">{{ bcCashBookStr }}</div>
+                  <div style="{{ bcCashDiffStyle }}">差異：{{ bcCashDiffStr }}</div>
+                </div>
+                <div>
+                  <div style="fontSize:11px;color:#6B7280;marginBottom:3px;">口座 帳簿残高</div>
+                  <div style="fontSize:16px;fontWeight:700;color:#3F414C;">{{ bcBankBookStr }}</div>
+                  <div style="{{ bcBankDiffStyle }}">差異：{{ bcBankDiffStr }}</div>
+                </div>
+              </div>
+              <div style="marginBottom:12px;">
+                <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">メモ</label>
+                <textarea value="{{ bcNote }}" onChange="{{ onBcNote }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;resize:vertical;" rows="2" placeholder="差異の原因など"></textarea>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button onClick="{{ onCancelBalanceCheck }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;">キャンセル</button>
+                <button onClick="{{ onSaveBalanceCheck }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">記録する</button>
+              </div>
+            </div>
+          </sc-if>
+          <!-- ログ一覧 -->
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+            <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+              <span style="width:88px;">確認日</span>
+              <span style="width:110px;textAlign:right;">現金（実際）</span>
+              <span style="width:80px;textAlign:right;">差異</span>
+              <span style="width:110px;textAlign:right;">口座（実際）</span>
+              <span style="width:80px;textAlign:right;">差異</span>
+              <span style="flex:1;">メモ</span>
+              <span style="width:48px;" data-noprint=""></span>
+            </div>
+            <sc-if value="{{ noBalanceLogs }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:24px;textAlign:center;fontSize:13px;color:#A1A1AA;">まだ残高確認の記録がありません</div>
             </sc-if>
-            <sc-for list="{{ dashTaskRows }}" as="dt" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <div style="{{ dt.dotStyle }}"></div>
-                <div style="flex:1;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ dt.title }}</div>
-                <div style="{{ dt.dueLabelStyle }}">{{ dt.dueLabel }}</div>
-              </div>
-            </sc-for>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近の入出金</div>
-            <div style="display:flex;gap:8px;fontSize:11px;color:#A1A1AA;paddingBottom:8px;borderBottom:1px solid rgba(0,0,0,0.05);marginBottom:6px;">
-              <span style="width:54px;">日付</span><span style="flex:1;">摘要</span><span style="width:72px;textAlign:right;">金額</span>
-            </div>
-            <sc-for list="{{ recentTx }}" as="tx" hint-placeholder-count="5">
-              <div style="display:flex;gap:8px;padding:6px 0;fontSize:12px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
-                <span style="width:54px;color:#A1A1AA;">{{ tx.dateStr }}</span>
-                <span style="flex:1;color:#3F414C;">{{ tx.description }}</span>
-                <span style="{{ tx.amtStyle }}">{{ tx.amtStr }}</span>
-              </div>
-            </sc-for>
-          </div>
-          <div style="background:#fff;borderRadius:14px;padding:20px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;">
-            <div style="fontSize:13px;fontWeight:600;color:#3F414C;marginBottom:14px;">直近のイベント</div>
-            <sc-for list="{{ upcomingEvts }}" as="evt" hint-placeholder-count="3">
-              <div style="{{ evt.cardStyle }}">
-                <div style="fontSize:12px;fontWeight:600;color:#3F414C;">{{ evt.name }}</div>
-                <div style="fontSize:11px;color:#6B7280;marginTop:3px;">{{ evt.dateStr }}</div>
+            <sc-for list="{{ balanceLogRows }}" as="row" hint-placeholder-count="3">
+              <div style="display:flex;padding:11px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                <span style="width:88px;fontSize:12px;color:#6B7280;">{{ row.dateStr }}</span>
+                <span style="width:110px;textAlign:right;fontSize:12px;fontWeight:600;color:#3F414C;">{{ row.cashActualStr }}</span>
+                <span style="width:80px;textAlign:right;fontSize:11px;">{{ row.cashDiffStr }}</span>
+                <span style="width:110px;textAlign:right;fontSize:12px;fontWeight:600;color:#3F414C;">{{ row.bankActualStr }}</span>
+                <span style="width:80px;textAlign:right;fontSize:11px;">{{ row.bankDiffStr }}</span>
+                <span style="flex:1;fontSize:11px;color:#6B7280;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;paddingLeft:8px;">{{ row.note }}</span>
+                <span style="width:48px;" data-noprint="">
+                  <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;">削除</button>
+                </span>
               </div>
             </sc-for>
           </div>
         </div>
       </div>
     </sc-if>
-<sc-if value="{{ p.settings }}" hint-placeholder-val="{{ false }}">
-      <div style="padding:32px 36px;maxWidth:580px;">
-        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;marginBottom:28px;">設定</div>
-        <!-- Google Sheets 連携 -->
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          
-          <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:8px;">
-            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">期の管理</div>
-            <button onClick="{{ onAddPeriod }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">＋ 新しい期を追加</button>
-          </div>
-          <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
-            <div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
-              <div style="flex:1;">
-                <div style="fontSize:13px;fontWeight:600;color:#3F414C;">{{ row.name }}</div>
-                <sc-if value="{{ row.isEditing }}" hint-placeholder-val="{{ false }}">
-                  <div style="display:flex;gap:6px;marginTop:6px;alignItems:center;">
-                    <input type="date" value="{{ row.editStart }}" onChange="{{ row.onEditStart }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
-                    <span style="fontSize:11px;color:#6B7280;">〜</span>
-                    <input type="date" value="{{ row.editEnd }}" onChange="{{ row.onEditEnd }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
-                    <button onClick="{{ row.onSaveEdit }}" style="border:none;background:#7BC095;color:#fff;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:600;">保存</button>
-                    <button onClick="{{ row.onCancelEdit }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;padding:4px 8px;borderRadius:6px;fontSize:11px;">取消</button>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ row.isNotEditing }}" hint-placeholder-val="{{ true }}">
-                  <div style="fontSize:11px;color:#A1A1AA;marginTop:2px;">{{ row.startStr }} 〜 {{ row.endStr }}</div>
-                </sc-if>
-              </div>
-              <span style="{{ row.activeBadge }}">{{ row.activeLabel }}</span>
-              <button onClick="{{ row.onEditDate }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 10px;borderRadius:6px;fontSize:11px;" data-noprint="">日付修正</button>
-              <button onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
-            </div>
-          </sc-for>
-        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:16px;">
-            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">代表者・団体情報</div>
-            <button onClick="{{ onSaveOrgInfo }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
-          </div>
-          <div style="display:flex;flexDirection:column;gap:12px;">
-            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">団体名</label>
-                <input value="{{ orgInfo.name }}" onChange="{{ onOrgInput }}" data-field="name" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田西口商店会"></div>
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">代表者名</label>
-                <input value="{{ orgInfo.repName }}" onChange="{{ onOrgInput }}" data-field="repName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="会長名"></div>
-            </div>
-            <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">住所</label>
-              <input value="{{ orgInfo.address }}" onChange="{{ onOrgInput }}" data-field="address" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="例: 埼玉県草加市金明町XX-XX"></div>
-            <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">電話番号</label>
-                <input value="{{ orgInfo.phone }}" onChange="{{ onOrgInput }}" data-field="phone" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
-              <div><label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:3px;">FAX</label>
-                <input value="{{ orgInfo.fax }}" onChange="{{ onOrgInput }}" data-field="fax" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="048-000-0000"></div>
-            </div>
-            <div style="borderTop:1px solid rgba(0,0,0,0.06);paddingTop:12px;">
-              <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:8px;">振込先（請求書に印刷されます）</div>
-              <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;marginBottom:10px;">
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">銀行名</label>
-                  <input value="{{ orgInfo.bankName }}" onChange="{{ onOrgInput }}" data-field="bankName" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="東京東信用金庫"></div>
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">支店名</label>
-                  <input value="{{ orgInfo.bankBranch }}" onChange="{{ onOrgInput }}" data-field="bankBranch" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="新田支店"></div>
-              </div>
-              <div style="display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:10px;">
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座種別</label>
-                  <select value="{{ orgInfo.bankType }}" onChange="{{ onOrgInput }}" data-field="bankType" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;background:#fff;">
-                    <option value="普通">普通</option><option value="当座">当座</option>
-                  </select></div>
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座番号</label>
-                  <input value="{{ orgInfo.bankAccount }}" onChange="{{ onOrgInput }}" data-field="bankAccount" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="0000000"></div>
-                <div><label style="display:block;fontSize:11px;color:#6B7280;marginBottom:3px;">口座名義</label>
-                  <input value="{{ orgInfo.bankHolder }}" onChange="{{ onOrgInput }}" data-field="bankHolder" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:7px;padding:7px 10px;fontSize:13px;" placeholder="ニッタニシグチ"></div>
-              </div>
-            </div>
-          </div>
-        </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
-            <div style="fontSize:14px;fontWeight:600;color:#3F414C;">Google スプレッドシート連携</div>
-            <div style="display:flex;alignItems:center;gap:10px;">
-              <span style="fontSize:12px;fontWeight:600;color:{{ syncStatusColor }};">{{ syncStatusLabel }}</span>
-              <button onClick="{{ onToggleSyncPause }}" style="{{ syncPauseBtnStyle }}">{{ syncPauseBtnLabel }}</button>
-            </div>
-          </div>
-          <div style="fontSize:12px;color:#6B7280;lineHeight:1.7;marginBottom:14px;">
-            Apps Script をデプロイして取得したURLとAPIキーを入力してください。<br>
-            ⚠️ デプロイ時「アクセスできるユーザー：<b>全員（匿名ユーザーを含む）</b>」を選択してください。<br>
-            APIキーはGASの「プロジェクトの設定→スクリプトプロパティ→API_KEY」で確認できます。
-          </div>
-          <div style="display:flex;flexDirection:column;gap:8px;">
-            <input value="{{ scriptUrlInput }}" onChange="{{ onScriptUrlInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="https://script.google.com/macros/s/.../exec">
-            <div style="display:flex;gap:8px;">
-              <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）">
-              <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
-              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
-            </div>
+<sc-if value="{{ p.budget }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:1000px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:28px;">
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">予算管理</div>
+          <div style="display:flex;gap:8px;">
+            <button onClick="{{ onOpenBudgetDraft }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">翌年度予算を作る →</button>
+            <button onClick="{{ onOpenSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:600;" data-noprint="">決算処理 →</button>
+            <button onClick="{{ onPrintBudget }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;" data-noprint="">印刷</button>
           </div>
         </div>
-        <!-- 代表者情報 -->
-        
-        <!-- Google認証設定 -->
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
-          <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:4px;">Googleアカウント認証設定</div>
-          <div style="fontSize:12px;color:#6B7280;lineHeight:1.7;marginBottom:14px;">
-            アクセスを許可するGoogleアカウントのメールアドレスを登録します。<br>
-            空の場合はすべてのGoogleアカウントがアクセス可能です（GitHub Pagesのindex.html内で管理）。
+        <div style="marginBottom:28px;">
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+            <div style="fontSize:14px;fontWeight:600;color:#7BC095;">収入の部</div>
+            <button onClick="{{ onAddIncomeBudget }}" style="border:none;background:rgba(123,192,149,0.1);color:#7BC095;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint="">＋ 科目追加</button>
           </div>
-          <div style="marginBottom:10px;">
-            <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:6px;">許可済みアカウント</div>
-            <sc-if value="{{ noAuthEmails }}" hint-placeholder-val="{{ false }}">
-              <div style="fontSize:12px;color:#A1A1AA;padding:8px 0;">登録なし（全員許可）</div>
-            </sc-if>
-            <sc-for list="{{ authEmailList }}" as="ae" hint-placeholder-count="0">
-              <div style="display:flex;alignItems:center;gap:8px;padding:7px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
-                <sc-if value="{{ ae.hasName }}" hint-placeholder-val="{{ false }}">
-                  <span style="fontSize:12px;fontWeight:600;color:#3F414C;minWidth:90px;">{{ ae.name }}</span>
-                </sc-if>
-                <span style="fontSize:12px;color:#6B7280;flex:1;">{{ ae.email }}</span>
-                <button onClick="{{ ae.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+            <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">達成率</span><span style="width:64px;" data-noprint=""></span>
+            </div>
+            <sc-for list="{{ incomeBudget }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                <span style="flex:1;fontSize:13px;color:#3F414C;">{{ row.category }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;color:#6B7280;">{{ row.budgetStr }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;fontWeight:600;color:#7BC095;">{{ row.actualStr }}</span>
+                <span style="{{ row.diffStyle }}">{{ row.diffStr2 }}</span>
+                <span style="width:130px;padding:0 10px;">
+                  <div style="background:rgba(0,0,0,0.06);borderRadius:3px;height:4px;overflow:hidden;">
+                    <div style="{{ row.barStyle }}"></div>
+                  </div>
+                  <div style="fontSize:10px;color:#A1A1AA;textAlign:right;marginTop:3px;">{{ row.pctStr }}</div>
+                </span>
+                <span style="width:64px;display:flex;gap:4px;" data-noprint="">
+                  <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
+                  <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">×</button>
+                </span>
               </div>
             </sc-for>
-          </div>
-          <div style="display:flex;gap:8px;marginBottom:6px;">
-            <input value="{{ authNameInput }}" onChange="{{ onAuthNameInput }}" style="width:120px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="氏名・役割">
-            <input value="{{ authEmailInput }}" onChange="{{ onAuthEmailInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="example@gmail.com" type="email">
-            <button onClick="{{ onAddAuthEmail }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
-          </div>
-          <div style="marginTop:10px;fontSize:11px;color:#A1A1AA;lineHeight:1.7;">
-            ⚠️ 変更後は「index.htmlを更新して」とお伝えください。新しいindex.htmlをGitHubにアップすると反映されます。
-          </div>
-          <sc-if value="{{ showAuthCopyBtn }}" hint-placeholder-val="{{ false }}">
-            <div style="marginTop:12px;">
-              <div style="fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">index.html用コード（このまま貼り替えてください）</div>
-              <div style="position:relative;">
-                <textarea value="{{ authCopyCode }}" readonly="" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:11px;fontFamily:monospace;resize:none;background:#F5F6F8;color:#3F414C;" rows="2" onClick="{{ onSelectAuthCode }}"></textarea>
-              </div>
-              <div style="fontSize:10px;color:#A1A1AA;marginTop:4px;">テキストをクリックして全選択→コピーしてindex.html内のALLOWED_EMAILSと置き換えてください</div>
+            <div style="display:flex;padding:11px 18px;background:#F5F6F8;borderTop:1px solid rgba(0,0,0,0.06);fontSize:13px;fontWeight:600;">
+              <span style="flex:1;color:#3F414C;">合計</span>
+              <span style="width:92px;textAlign:right;color:#6B7280;">{{ totalBudgetI }}</span>
+              <span style="width:92px;textAlign:right;color:#7BC095;">{{ totalActualI }}</span>
+              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint=""></span>
             </div>
-          </sc-if>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
+            <div style="fontSize:14px;fontWeight:600;color:#E57373;">支出の部</div>
+            <button onClick="{{ onAddExpenseBudget }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;" data-noprint="">＋ 科目追加</button>
+          </div>
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;overflow:hidden;">
+            <div style="display:flex;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.06);padding:10px 18px;fontSize:11px;fontWeight:600;color:#6B7280;letterSpacing:0.04em;">
+              <span style="flex:1;">科目</span><span style="width:92px;textAlign:right;">予算額</span><span style="width:92px;textAlign:right;">実績</span><span style="width:80px;textAlign:right;">差異</span><span style="width:130px;textAlign:center;">進捗</span><span style="width:64px;" data-noprint=""></span>
+            </div>
+            <sc-for list="{{ expenseBudget }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex;padding:12px 18px;borderBottom:1px solid rgba(0,0,0,0.04);alignItems:center;">
+                <span style="flex:1;fontSize:13px;color:#3F414C;">{{ row.category }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;color:#6B7280;">{{ row.budgetStr }}</span>
+                <span style="width:92px;textAlign:right;fontSize:13px;fontWeight:600;color:#E57373;">{{ row.actualStr }}</span>
+                <span style="{{ row.diffStyle }}">{{ row.diffStr2 }}</span>
+                <span style="width:130px;padding:0 10px;">
+                  <div style="background:rgba(0,0,0,0.06);borderRadius:3px;height:4px;overflow:hidden;">
+                    <div style="{{ row.barStyle }}"></div>
+                  </div>
+                  <div style="fontSize:10px;color:#A1A1AA;textAlign:right;marginTop:3px;">{{ row.pctStr }}</div>
+                </span>
+                <span style="width:64px;display:flex;gap:4px;" data-noprint="">
+                  <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
+                  <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">×</button>
+                </span>
+              </div>
+            </sc-for>
+            <div style="display:flex;padding:11px 18px;background:#F5F6F8;borderTop:1px solid rgba(0,0,0,0.06);fontSize:13px;fontWeight:600;">
+              <span style="flex:1;color:#3F414C;">合計</span>
+              <span style="width:92px;textAlign:right;color:#6B7280;">{{ totalBudgetE }}</span>
+              <span style="width:92px;textAlign:right;color:#E57373;">{{ totalActualE }}</span>
+              <span style="width:80px;"></span><span style="width:130px;"></span><span style="width:64px;" data-noprint=""></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+<sc-if value="{{ p.statements }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:32px 36px;maxWidth:820px;">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:24px;" data-noprint="">
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">決算書</div>
+          <button onClick="{{ onGotoBudgetSettlement }}" style="border:1px solid #5856d6;background:rgba(88,86,214,0.06);color:#5856d6;padding:8px 14px;borderRadius:8px;fontSize:12px;fontWeight:600;">決算処理 →</button>
         </div>
 
-        <!-- 期の管理 -->
-        
-        <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;">
-          <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:10px;">データ管理</div>
-          <div style="fontSize:13px;color:#6B7280;lineHeight:1.7;">すべてのデータはブラウザのlocalStorageに保存されています。このブラウザのデータを削除するとすべての情報が失われます。定期的なCSV書き出しをお勧めします。</div>
+        <!-- 未確定の場合 -->
+        <sc-if value="{{ noSettlements }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:48px;textAlign:center;">
+            <div style="fontSize:32px;marginBottom:12px;">📋</div>
+            <div style="fontSize:14px;fontWeight:600;color:#3F414C;marginBottom:6px;">決算書がありません</div>
+            <div style="fontSize:13px;color:#6B7280;">予算管理の「決算処理」から収支を確定すると、ここに決算書が表示されます。</div>
+          </div>
+        </sc-if>
+
+        <!-- 確定済み決算書一覧 -->
+        <sc-for list="{{ settlementDocList }}" as="doc" hint-placeholder-count="0">
+          <div style="background:#fff;borderRadius:16px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;marginBottom:28px;overflow:hidden;">
+            <!-- Doc header -->
+            <div style="display:flex;alignItems:center;gap:10px;padding:16px 24px;background:#F5F6F8;borderBottom:1px solid rgba(0,0,0,0.07);" data-noprint="">
+              <span style="background:#5856d6;color:#fff;fontSize:11px;fontWeight:700;padding:3px 10px;borderRadius:10px;">確定済み</span>
+              <span style="fontSize:14px;fontWeight:700;color:#3F414C;flex:1;">{{ doc.periodName }}</span>
+              <span style="fontSize:12px;color:#6B7280;">{{ doc.confirmedAt }}確定</span>
+              <sc-if value="{{ doc.hasAudit }}" hint-placeholder-val="{{ false }}">
+                <span style="background:#7BC095;color:#fff;fontSize:11px;fontWeight:700;padding:3px 10px;borderRadius:10px;">監査済み</span>
+              </sc-if>
+              <button onClick="{{ doc.onAudit }}" style="{{ doc.auditBtnStyle }}">{{ doc.auditBtnLabel }}</button>
+              <button onClick="{{ doc.onPrintDoc }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:6px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;">印刷</button>
+              <button onClick="{{ doc.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;padding:6px 10px;borderRadius:7px;fontSize:12px;">削除</button>
+            </div>
+            <!-- 収支決算書（明朝体フォーマル） -->
+            <div class="stmt-card-body" style="padding:40px 52px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',serif;maxWidth:680px;margin:0 auto;">
+              <div style="textAlign:center;marginBottom:24px;paddingBottom:16px;borderBottom:2px solid #3F414C;">
+                <div style="fontSize:18px;fontWeight:700;letterSpacing:0.18em;">決　算　報　告　書</div>
+                <div style="fontSize:12px;color:#555;marginTop:6px;letterSpacing:0.05em;">{{ doc.periodName }}</div>
+                <div style="fontSize:12px;color:#555;marginTop:2px;letterSpacing:0.05em;">自　{{ doc.periodStart }}　至　{{ doc.periodEnd }}</div>
+                <div style="fontSize:12px;color:#555;marginTop:2px;">{{ stmtOrgName }}</div>
+              </div>
+              <!-- 収支表 -->
+              <table style="width:100%;borderCollapse:collapse;fontSize:12px;fontFamily:'游明朝','Yu Mincho','Hiragino Mincho ProN',serif;">
+                <thead>
+                  <tr style="borderBottom:1px solid #999;">
+                    <th style="textAlign:left;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;">科　目</th>
+                    <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:130px;">予　算　額</th>
+                    <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:130px;">決　算　額</th>
+                    <th style="textAlign:right;padding:4px 8px;fontWeight:400;color:#888;fontSize:10px;fontFamily:sans-serif;width:110px;">増　減</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colSpan="4" style="padding:8px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">収　入　の　部</td></tr>
+                  <sc-for list="{{ doc.incRows }}" as="row" hint-placeholder-count="0">
+                    <tr style="borderBottom:1px solid #efefef;">
+                      <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                    </tr>
+                  </sc-for>
+                  <tr style="borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                    <td style="padding:7px 8px;">収入合計</td>
+                    <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ doc.budgetTotalI }}</td>
+                    <td style="padding:7px 8px;textAlign:right;">{{ doc.totalIncomeStr }}</td>
+                    <td style="padding:7px 8px;textAlign:right;color:#555;">{{ doc.diffTotalI }}</td>
+                  </tr>
+                  <tr><td colSpan="4" style="padding:10px 8px 3px;fontSize:11px;fontWeight:700;letterSpacing:0.08em;borderBottom:1px solid #3F414C;">支　出　の　部</td></tr>
+                  <sc-for list="{{ doc.expRows }}" as="row" hint-placeholder-count="0">
+                    <tr style="borderBottom:1px solid #efefef;">
+                      <td style="padding:6px 8px 6px 20px;">{{ row.cat }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#666;">{{ row.budgetStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;fontWeight:600;">{{ row.amtStr }}</td>
+                      <td style="padding:6px 8px;textAlign:right;color:#555;">{{ row.diffStr }}</td>
+                    </tr>
+                  </sc-for>
+                  <tr style="borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                    <td style="padding:7px 8px;">支出合計</td>
+                    <td style="padding:7px 8px;textAlign:right;fontWeight:400;color:#666;">{{ doc.budgetTotalE }}</td>
+                    <td style="padding:7px 8px;textAlign:right;">{{ doc.totalExpenseStr }}</td>
+                    <td style="padding:7px 8px;textAlign:right;color:#555;">{{ doc.diffTotalE }}</td>
+                  </tr>
+                  <tr style="background:#f5f5f5;borderTop:2px solid #3F414C;fontWeight:700;fontSize:13px;">
+                    <td style="padding:10px 8px;letterSpacing:0.04em;">収支差額（次期繰越金）</td>
+                    <td style="padding:10px 8px;textAlign:right;fontWeight:400;color:#666;">{{ doc.budgetNet }}</td>
+                    <td style="padding:10px 8px;textAlign:right;">{{ doc.netStr }}</td>
+                    <td style="padding:10px 8px;"></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- 監査報告書（2ページ目） -->
+              <sc-if value="{{ doc.hasAudit }}" hint-placeholder-val="{{ false }}">
+                <div class="audit-report-section" style="paddingTop:40px;">
+                  <div style="textAlign:center;fontSize:15px;fontWeight:700;letterSpacing:0.15em;marginBottom:16px;">監　査　報　告　書</div>
+                  <div style="fontSize:13px;lineHeight:2.2;color:#333;">
+                    　私は{{ doc.periodName }}における収支決算書を監査した結果、収支の状況が正確に記載されていることを確認しました。<br>
+                    <div style="marginTop:8px;fontSize:12px;color:#555;">監査日：{{ doc.auditDate }}　　{{ doc.auditNote }}</div>
+                  </div>
+                  <div style="display:flex;justifyContent:flex-end;marginTop:20px;gap:12px;fontSize:12px;color:#555;alignItems:center;">
+                    <span>監査人　{{ doc.auditorName }}</span>
+                    {{ doc.auditorHanko }}
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+<sc-if value="{{ showAuditModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);zIndex:230;display:flex;alignItems:center;justifyContent:center;backdropFilter:blur(6px);" onClick="{{ onCloseAudit }}">
+        <div style="background:#F5F6F8;borderRadius:18px;width:500px;boxShadow:0 24px 80px rgba(0,0,0,0.28);" onClick="{{ stopProp }}">
+          <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.08);borderRadius:18px 18px 0 0;display:flex;justify-content:space-between;alignItems:center;">
+            <div>
+              <div style="fontSize:16px;fontWeight:700;color:#3F414C;">監査報告</div>
+              <div style="fontSize:12px;color:#6B7280;marginTop:2px;">{{ auditTargetName }}</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ onConfirmAudit }}" style="border:none;background:#7BC095;color:#fff;padding:8px 18px;borderRadius:9px;fontSize:13px;fontWeight:700;cursor:pointer;">監査完了</button>
+              <button onClick="{{ onCloseAudit }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:8px 14px;borderRadius:9px;fontSize:13px;cursor:pointer;">閉じる</button>
+            </div>
+          </div>
+          <div style="padding:24px 28px;display:flex;flexDirection:column;gap:14px;">
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">監査人（役員から選択）</label>
+              <select value="{{ auditName }}" onChange="{{ onAuditName }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+                <option value="">— 役員を選択 —</option>
+                <sc-for list="{{ auditOfficerOptions }}" as="opt" hint-placeholder-count="5">
+                  <option value="{{ opt.value }}">{{ opt.label }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">監査日</label>
+              <input type="date" value="{{ auditDate }}" onChange="{{ onAuditDate }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;">
+            </div>
+            <div>
+              <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">監査結果・特記事項</label>
+              <textarea value="{{ auditNote }}" onChange="{{ onAuditNote }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="3" placeholder="特記事項があれば入力してください"></textarea>
+            </div>
+            <div style="background:rgba(123,192,149,0.06);borderRadius:10px;padding:10px 14px;fontSize:12px;color:#166534;">
+              ✓ 監査完了すると決算書に監査報告書と監査人の印鑑が自動で記載されます。
+            </div>
+          </div>
         </div>
       </div>
     </sc-if>
@@ -857,7 +1333,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    page: 'dashboard',
+    page: 'ledger',
     periods: [], currentPeriodId: null,
     officers: [], members: [], invoices: [],
     transactions: [], budgetItems: [], events: [],
@@ -941,7 +1417,7 @@ class Component extends DCLogic {
 
   _portalInit = (() => {
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
-    this._myPages = ["dashboard","settings"];
+    this._myPages = ["ledger","budget","statements"];
   })();
 
 
@@ -1038,24 +1514,409 @@ class Component extends DCLogic {
   }
 
 
-  savePeriod() {
-    const {formData:f,events,currentPeriodId} = this.state;
-    const newPid = this.gen();
-    const p = {id:newPid,name:f.name||'新期',startDate:f.startDate||'',endDate:f.endDate||''};
-    // 翌期引継：現在の期の未来イベント（翌期以降）を新期にコピー
-    const today = new Date().toISOString().slice(0,10);
-    const cp = this.state.periods.find(pp=>pp.id===currentPeriodId)||{};
-    const periodEnd = cp.endDate||'9999-12-31';
-    const carryOver = events
-      .filter(e=>e.periodId===currentPeriodId && e.date > periodEnd)
-      .map(e=>({...e, id:this.gen(), periodId:newPid}));
-    this.setState(s=>({
-      periods:[...s.periods,p],
-      currentPeriodId:newPid,
-      events:[...s.events,...carryOver],
-    }),()=>this.persist());
+  saveTx() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const amt = parseFloat(f.amount)||0;
+    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',accountType:f.accountType||'口座',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
+    if (m.editId) this.setState(s=>({transactions:s.transactions.map(t=>t.id===m.editId?{...t,...rec}:t)}),()=>this.persist());
+    else this.setState(s=>({transactions:[...s.transactions,{id:this.gen(),...rec}]}),()=>this.persist());
     this.closeModal();
-    this.showToast(`新しい期を追加しました${carryOver.length>0?`（${carryOver.length}件の予定を引き継ぎました）`:''}`);
+  }
+
+  saveTxAndNext() {
+    const {formData:f,currentPeriodId:pid} = this.state;
+    const amt = parseFloat(f.amount)||0;
+    if (!amt) { alert('金額を入力してください'); return; }
+    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',accountType:f.accountType||'口座',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
+    this.setState(s=>({transactions:[...s.transactions,{id:this.gen(),...rec}]}),()=>{
+      this.persist();
+      this.showToast('追加しました。次の取引を入力してください。');
+      // 同じ日付・区分・科目を引き継いで次を開く
+      this.openModal('transaction',null,{txType:f.txType,date:f.date,category:f.category,accountType:f.accountType||'口座',description:'',amount:''});
+    });
+  }
+  delTx(id) {
+    if (!confirm('この取引を削除しますか？')) return;
+    this.setState(s=>({transactions:s.transactions.filter(t=>t.id!==id)}),()=>this.persist());
+  }
+
+  saveTransfer() {
+    const {transferDate:d,transferAmount:a,transferFrom:fr,transferTo:to,transferDesc:desc,currentPeriodId:pid} = this.state;
+    const amt = parseFloat(a)||0;
+    if (!amt) { alert('金額を入力してください'); return; }
+    const gid = this.gen();
+    const t1 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:0,expense:amt,accountType:fr,groupId:gid,groupType:'振替'};
+    const t2 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:amt,expense:0,accountType:to,groupId:gid,groupType:'振替'};
+    this.setState(s=>({transactions:[...s.transactions,t1,t2],transferModal:false}),()=>this.persist());
+    this.showToast(`振替を記録しました（${this.fmt(amt)}）`);
+  }
+
+  saveBalanceCheck() {
+    const { bcDate, bcCashActual, bcBankActual, bcNote } = this.state;
+    const cashBook = this.state.transactions.filter(t=>(t.accountType||'口座')==='現金').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+    const bankBook = this.state.transactions.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+    const log = {
+      id: 'bc_'+Date.now(),
+      date: bcDate,
+      cashActual: Number(bcCashActual)||0,
+      cashBook,
+      cashDiff: (Number(bcCashActual)||0) - cashBook,
+      bankActual: Number(bcBankActual)||0,
+      bankBook,
+      bankDiff: (Number(bcBankActual)||0) - bankBook,
+      note: bcNote,
+    };
+    this.setState(s=>({
+      balanceLogs: [log, ...(s.balanceLogs||[])],
+      showBalanceCheckForm: false,
+      bcCashActual: '', bcBankActual: '', bcNote: '',
+    }), ()=>this.persist());
+    this.showToast('残高確認を記録しました');
+  }
+
+  exportTxCSV() {
+    const pid = this.state.currentPeriodId;
+    const rows = this.state.transactions.filter(t=>t.periodId===pid).sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[
+      t.date||'',t.description||'',t.category||'',t.income||0,t.expense||0,t.accountType||'口座',t.notes||''
+    ]);
+    this.exportCSV('入出金一覧.csv',['日付','摘要','科目','収入','支出','口座種別','備考'],rows);
+  }
+
+  openCashbookModal() {
+    const cp=(this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const sm=cp.startDate?parseInt(cp.startDate.slice(5,7)):4;
+    const em=cp.endDate?parseInt(cp.endDate.slice(5,7)):3;
+    this.setState({cashbookModal:true,cashbookPeriodId:this.state.currentPeriodId,cashbookMonthFrom:sm,cashbookMonthTo:em});
+  }
+
+  printCashbook() {
+    const pid=this.state.cashbookPeriodId||this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const mFrom=this.state.cashbookMonthFrom||1;
+    const mTo=this.state.cashbookMonthTo||12;
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    // 対象取引を期間で絞り込み
+    const txs=(this.state.transactions||[]).filter(t=>{
+      if(t.periodId&&t.periodId!==pid) return false;
+      if(!t.date) return false;
+      const m=parseInt(t.date.slice(5,7));
+      return m>=mFrom&&m<=mTo;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+    // 月ごとに集計
+    const months=[];
+    for(let m=mFrom;m<=mTo;m++) months.push(m);
+    let cashBal=0,bankBal=0;
+    // 期開始からmFrom-1月末までの繰越残高
+    const prevTxs=(this.state.transactions||[]).filter(t=>{
+      if(t.periodId&&t.periodId!==pid) return false;
+      if(!t.date) return false;
+      const m=parseInt(t.date.slice(5,7));
+      return m<mFrom;
+    });
+    prevTxs.forEach(t=>{
+      if((t.accountType||'口座')==='現金'){cashBal+=(t.income||0)-(t.expense||0);}
+      else{bankBal+=(t.income||0)-(t.expense||0);}
+    });
+    const thS='border:1px solid #999;padding:5px 7px;text-align:right;width:68px;font-size:8.5pt;';
+    const thSL='border:1px solid #999;padding:5px 7px;text-align:left;font-size:8.5pt;';
+    const tdA='border:1px solid #ccc;padding:3px 7px;text-align:right;font-size:8.5pt;';
+    const tdL='border:1px solid #ccc;padding:3px 7px;font-size:8.5pt;';
+    let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:17pt;font-weight:700;letter-spacing:0.1em;">現　金　出　納　帳</div>
+      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　${mFrom}月〜${mTo}月　${esc(orgName)}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
+      <tr style="background:#E6E8EC;">
+        <th style="${thSL}width:44px;" rowspan="2">日付</th>
+        <th style="${thSL}" rowspan="2">摘要 / 科目</th>
+        <th style="${thS}" colspan="3">現　金</th>
+        <th style="${thS}" colspan="3">預　金</th>
+      </tr>
+      <tr style="background:#E6E8EC;">
+        <th style="${thS}">収入</th>
+        <th style="${thS}">支出</th>
+        <th style="${thS}">残高</th>
+        <th style="${thS}">収入</th>
+        <th style="${thS}">支出</th>
+        <th style="${thS}">残高</th>
+      </tr>
+      <tr style="font-weight:700;background:#F5F6F8;">
+        <td style="${tdL}" colspan="2">繰越残高</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">${fmt(cashBal)}</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">${fmt(bankBal)}</td>
+      </tr>`;
+    txs.forEach(t=>{
+      const isCash=(t.accountType||'口座')==='現金';
+      const inc=t.income||0; const exp=t.expense||0;
+      if(isCash){cashBal+=inc-exp;}else{bankBal+=inc-exp;}
+      const d=t.date||'';
+      const ds=d?`${parseInt(d.slice(5,7))}/${parseInt(d.slice(8,10))}`:'';
+      const desc=esc(t.description||'');
+      const cat=esc(t.category||'');
+      html+=`<tr>
+        <td style="${tdL}vertical-align:top;">${esc(ds)}</td>
+        <td style="${tdL}">
+          <div style="font-weight:500;">${desc}</div>
+          <div style="font-size:7.5pt;color:#555;margin-top:1px;">${cat}</div>
+        </td>
+        <td style="${tdA}">${isCash&&inc>0?fmt(inc):'—'}</td>
+        <td style="${tdA}">${isCash&&exp>0?fmt(exp):'—'}</td>
+        <td style="${tdA}font-weight:600;">${isCash?fmt(cashBal):'—'}</td>
+        <td style="${tdA}">${!isCash&&inc>0?fmt(inc):'—'}</td>
+        <td style="${tdA}">${!isCash&&exp>0?fmt(exp):'—'}</td>
+        <td style="${tdA}font-weight:600;">${!isCash?fmt(bankBal):'—'}</td>
+      </tr>`;
+    });
+    html+=`<tr style="font-weight:700;background:#E6E8EC;">
+      <td style="border:1px solid #999;padding:4px 7px;" colspan="2">合計残高</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">${fmt(cashBal)}</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
+      <td style="border:1px solid #999;padding:4px 7px;text-align:right;">${fmt(bankBal)}</td>
+    </tr></table>
+    <div style="font-size:9pt;text-align:right;margin-top:8px;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>`;
+    this.setState({cashbookModal:false});
+    this._openPrintWindow(html,'現金出納帳');
+  }
+
+  openBudgetDraft() {
+    const {currentPeriodId,budgetItems,transactions,periods} = this.state;
+    const cp = periods.find(p=>p.id===currentPeriodId)||{};
+    // Find or create next period
+    const nextPeriod = periods.find(p=>p.id!==currentPeriodId&&p.startDate>cp.startDate)||null;
+    const targetPeriodId = nextPeriod?nextPeriod.id:null;
+    const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
+    const pTx = transactions.filter(t=>t.periodId===currentPeriodId);
+    const calcActual = (cat,type)=>pTx.reduce((s,t)=>s+(t.category===cat?(type==='収入'?t.income:t.expense)||0:0),0);
+    // Load existing draft or build from current period
+    const existing = this.state.budgetDraft;
+    const existingItems = (existing&&existing.targetPeriodId===targetPeriodId)?existing.items:null;
+    const items = existingItems || pBudget.map(b=>({
+      id:this.gen(), category:b.category, type:b.type,
+      currentBudget:b.amount, currentActual:calcActual(b.category,b.type),
+      nextAmount:b.amount, remark:'',
+    }));
+    this.setState({budgetDraftModal:true, budgetDraft:{targetPeriodId, items, savedAt:existing?.savedAt||null}});
+  }
+
+  updateDraftItem(id, field, value) {
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      const items = draft.items.map(item=>item.id===id?{...item,[field]:value}:item);
+      return {budgetDraft:{...draft,items,savedAt:new Date().toISOString()}};
+    },()=>this.persist());
+  }
+
+  addDraftItem(type) {
+    const cat = prompt(`新しい科目名を入力（${type}）`,'');
+    if (!cat) return;
+    const item = {id:this.gen(),category:cat,type,currentBudget:0,currentActual:0,nextAmount:0,remark:''};
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      return {budgetDraft:{...draft,items:[...draft.items,item],savedAt:new Date().toISOString()}};
+    },()=>this.persist());
+  }
+
+  delDraftItem(id) {
+    this.setState(s=>{
+      const draft = s.budgetDraft;
+      if (!draft) return {};
+      return {budgetDraft:{...draft,items:draft.items.filter(i=>i.id!==id)}};
+    },()=>this.persist());
+  }
+
+  confirmBudgetDraft() {
+    const {budgetDraft,periods,currentPeriodId} = this.state;
+    if (!budgetDraft) return;
+    const {targetPeriodId,items} = budgetDraft;
+    if (!targetPeriodId) {
+      alert('翌期が設定されていません。先に設定ページで翌期を追加してください。');
+      return;
+    }
+    if (!confirm(`翌期（${periods.find(p=>p.id===targetPeriodId)?.name||'翌期'}）の予算として確定しますか？\n既存の予算は上書きされます。`)) return;
+    const newItems = items.map(item=>({
+      id:this.gen(), periodId:targetPeriodId, type:item.type,
+      category:item.category, amount:parseInt(item.nextAmount)||0, remark:item.remark||'',
+    }));
+    this.setState(s=>({
+      budgetItems:[...s.budgetItems.filter(b=>b.periodId!==targetPeriodId),...newItems],
+      budgetDraftModal:false,
+    }),()=>this.persist());
+    this.showToast('翌年度予算を確定しました');
+  }
+
+  saveBudget() {
+    const {formData:f,modal:m,currentPeriodId:pid} = this.state;
+    const rec = {type:f.type||'収入',category:f.category||'',amount:parseInt(f.amount)||0,periodId:pid};
+    if (m.editId) this.setState(s=>({budgetItems:s.budgetItems.map(b=>b.id===m.editId?{...b,...rec}:b)}),()=>this.persist());
+    else this.setState(s=>({budgetItems:[...s.budgetItems,{id:this.gen(),...rec}]}),()=>this.persist());
+    this.closeModal();
+  }
+  delBudget(id) {
+    if (!confirm('この科目を削除しますか？')) return;
+    this.setState(s=>({budgetItems:s.budgetItems.filter(b=>b.id!==id)}),()=>this.persist());
+  }
+
+  confirmAudit() {
+    const sid = this.state.auditTargetId;
+    if (!sid) return;
+    this.setState(s=>({
+      settlements:(s.settlements||[]).map(st=>st.id===sid?{
+        ...st,
+        audit:{name:s.auditName,date:s.auditDate,note:s.auditNote,doneAt:new Date().toISOString().slice(0,10)},
+      }:st),
+      auditModal:false, auditName:'', auditNote:'',
+    }),()=>this.persist());
+    this.showToast('監査報告を記録しました');
+  }
+
+  confirmSettlement() {
+    const cp = (this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const pid = cp.id;
+    const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid);
+    const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===pid);
+    const totalI = txs.reduce((s,t)=>s+(t.income||0),0);
+    const totalE = txs.reduce((s,t)=>s+(t.expense||0),0);
+    // 実績集計
+    const incActMap={}, expActMap={};
+    txs.forEach(t=>{
+      if((t.income||0)>0){const k=t.category||'その他';incActMap[k]=(incActMap[k]||0)+(t.income||0);}
+      if((t.expense||0)>0){const k=t.category||'その他';expActMap[k]=(expActMap[k]||0)+(t.expense||0);}
+    });
+    const budMap={}; budgets.forEach(b=>{budMap[b.category]=(b.amount||0);});
+    // 予算科目ベースで全科目（¥0含む）＋実績のみ科目も含める
+    const incCats=[...new Set([...budgets.filter(b=>b.type==='収入').map(b=>b.category),...Object.keys(incActMap)])];
+    const expCats=[...new Set([...budgets.filter(b=>b.type==='支出').map(b=>b.category),...Object.keys(expActMap)])];
+    const categories=[
+      ...incCats.map(cat=>({cat,type:'収入',amt:incActMap[cat]||0,budget:budMap[cat]||0})),
+      ...expCats.map(cat=>({cat,type:'支出',amt:expActMap[cat]||0,budget:budMap[cat]||0})),
+    ];
+    const rec = {
+      id:'stl_'+Date.now(),
+      periodId:pid,
+      periodName:cp.name||'',
+      periodStart:cp.startDate||'',
+      periodEnd:cp.endDate||'',
+      confirmedAt:new Date().toISOString().slice(0,10),
+      totalIncome:totalI,
+      totalExpense:totalE,
+      net:totalI-totalE,
+      categories,
+      note:this.state.settlementNote||'',
+    };
+    this.setState(s=>({
+      settlements:[rec,...(s.settlements||[]).filter(s=>s.periodId!==pid)],
+      settlementModal:false,
+      settlementNote:'',
+    }),()=>this.persist());
+    this.showToast('決算を確定しました');
+  }
+
+  printSettlementDoc(s) {
+    const orgInfo = this.state.orgInfo||{};
+    const orgName = orgInfo.name||'新田西口商店会';
+    const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===s.periodId);
+    const budMap={}; budgets.forEach(b=>{budMap[b.category]=(b.amount||0);});
+    const cats = s.categories||[];
+    const incRows = cats.filter(c=>c.type==='収入');
+    const expRows = cats.filter(c=>c.type==='支出');
+    const fmt = n=>n!=null?'¥'+Number(n).toLocaleString('ja-JP'):'—';
+    const dif = (a,b)=>{const d=a-b;return d===0?'—':(d>0?'＋':'▲')+Math.abs(d).toLocaleString('ja-JP');};
+    const rowsHtml = rows=>rows.map(c=>`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${c.cat}</td><td style="padding:4pt 8pt;text-align:right;">${c.budget?fmt(c.budget):'—'}</td><td style="padding:4pt 8pt;text-align:right;font-weight:600;">${fmt(c.amt||0)}</td><td style="padding:4pt 8pt;text-align:right;">${dif(c.amt||0,c.budget||0)}</td></tr>`).join('');
+    const budTotalI=budgets.filter(b=>b.type==='収入').reduce((a,b)=>a+(b.amount||0),0);
+    const budTotalE=budgets.filter(b=>b.type==='支出').reduce((a,b)=>a+(b.amount||0),0);
+    const audit=s.audit;
+    const auditSection=audit?`<div style="page-break-before:always;break-before:page;padding-top:60px;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:0.18em;margin-bottom:28px;">監　査　報　告　書</div><div style="font-size:13px;line-height:2.4;margin-bottom:24px;">　私は${s.periodName}における決算報告書を監査した結果、収支の状況が正確に記載されていることを確認しました。</div><div style="font-size:12px;color:#555;margin-bottom:16px;">監査日：${audit.date||''}</div><sc-if value="false"><span>${audit.note||''}</span></sc-if><div style="text-align:right;font-size:12px;margin-top:32px;">監査人　${audit.name||''}</div></div>`:'';
+    const bodyHtml=[
+      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">決　算　報　告　書</div><div style="font-size:11pt;margin-top:8px;">${s.periodName}</div><div style="font-size:10pt;color:#333;margin-top:4px;">自　${s.periodStart||''}　至　${s.periodEnd||''}</div><div style="font-size:10pt;color:#333;margin-top:2px;">${orgName}</div></div>`,
+      '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:16pt;"><thead><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:left;font-weight:400;">科　目</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:90pt;">予　算　額</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:90pt;">決　算　額</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:70pt;">増　減</th></tr></thead><tbody>',
+      `<tr><td colspan="4" style="padding:8pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">収　入　の　部</td></tr>${rowsHtml(incRows)}`,
+      `<tr style="border-top:1.5pt solid #000;font-weight:700;"><td style="padding:5pt 8pt;">収入合計</td><td style="padding:5pt 8pt;text-align:right;">${budTotalI?fmt(budTotalI):'—'}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(s.totalIncome)}</td><td style="padding:5pt 8pt;text-align:right;">${dif(s.totalIncome,budTotalI)}</td></tr>`,
+      `<tr><td colspan="4" style="padding:10pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">支　出　の　部</td></tr>${rowsHtml(expRows)}`,
+      `<tr style="border-top:1.5pt solid #000;font-weight:700;"><td style="padding:5pt 8pt;">支出合計</td><td style="padding:5pt 8pt;text-align:right;">${budTotalE?fmt(budTotalE):'—'}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(s.totalExpense)}</td><td style="padding:5pt 8pt;text-align:right;">${dif(s.totalExpense,budTotalE)}</td></tr>`,
+      `<tr style="border-top:2pt solid #000;font-weight:700;background:#f5f5f5;"><td style="padding:6pt 8pt;">収支差額（次期繰越金）</td><td style="padding:6pt 8pt;text-align:right;">${budTotalI||budTotalE?fmt(budTotalI-budTotalE):'—'}</td><td style="padding:6pt 8pt;text-align:right;">${fmt(s.net)}</td><td></td></tr>`,
+      '</tbody></table>',
+      auditSection,
+    ].join('');
+    this._openPrintWindow(bodyHtml,'決算報告書');
+  }
+
+  printBudgetProgress() {
+    const pid=this.state.currentPeriodId;
+    const cp=(this.state.periods||[]).find(p=>p.id===pid)||{};
+    const orgName=((this.state.orgInfo||{}).name)||'新田西口商店会';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt=n=>(n||0).toLocaleString('ja-JP');
+    const fmtWa=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+    const today=new Date().toISOString().slice(0,10);
+    const budItems=(this.state.budgetItems||[]).filter(b=>b.periodId===pid);
+    const txs=(this.state.transactions||[]).filter(t=>t.periodId===pid);
+    const txMap={};
+    txs.forEach(t=>{
+      if(t.income>0) txMap[t.category]=(txMap[t.category]||{income:0,expense:0}), txMap[t.category].income=(txMap[t.category].income||0)+t.income;
+      if(t.expense>0) txMap[t.category]=(txMap[t.category]||{income:0,expense:0}), txMap[t.category].expense=(txMap[t.category].expense||0)+t.expense;
+    });
+    const inc=budItems.filter(b=>b.type==='収入');
+    const exp=budItems.filter(b=>b.type==='支出');
+    const thS='padding:4pt 8pt;text-align:right;width:72pt;font-weight:600;';
+    const thSL='padding:4pt 8pt;text-align:left;font-weight:600;';
+    let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
+      <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
+      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}　（${esc(fmtWa(cp.startDate))}〜${esc(fmtWa(cp.endDate))}）</div>
+      <div style="font-size:10pt;color:#333;margin-top:4px;">作成日：${esc(fmtWa(today))}　　${esc(orgName)}</div>
+    </div>`;
+    const buildSection=(rows,label,isIncome)=>{
+      let total_b=0,total_a=0;
+      let sec=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:18px;">
+        <tr style="border-bottom:1pt solid #000;">
+          <th style="${thSL}">科目</th>
+          <th style="${thS}">予算額</th>
+          <th style="${thS}">実績額</th>
+          <th style="${thS}">差引</th>
+          <th style="padding:4pt 8pt;text-align:center;font-weight:600;width:46pt;">達成率</th>
+        </tr>
+        <tr><td colspan="5" style="padding:6pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">【${label}の部】</td></tr>`;
+      rows.forEach(b=>{
+        const bud=b.amount||0;
+        const actObj=txMap[b.category]||{income:0,expense:0};
+        const act=isIncome?(actObj.income||0):(actObj.expense||0);
+        const diff=isIncome?(act-bud):(bud-act);
+        const pct=bud?Math.round(act/bud*100):0;
+        const diffStr=diff===0?'―':(diff>0?'＋':'')+fmt(diff);
+        total_b+=bud; total_a+=act;
+        sec+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${esc(b.category)}</td><td style="padding:4pt 8pt;text-align:right;">${fmt(bud)}</td><td style="padding:4pt 8pt;text-align:right;">${fmt(act)}</td><td style="padding:4pt 8pt;text-align:right;">${diffStr}</td><td style="padding:4pt 8pt;text-align:center;">${pct}%</td></tr>`;
+      });
+      const tDiff=isIncome?(total_a-total_b):(total_b-total_a);
+      const tPct=total_b?Math.round(total_a/total_b*100):0;
+      sec+=`<tr style="font-weight:700;border-top:1.5pt solid #000;"><td style="padding:5pt 8pt;">${label}合計</td><td style="padding:5pt 8pt;text-align:right;">${fmt(total_b)}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(total_a)}</td><td style="padding:5pt 8pt;text-align:right;">${(tDiff>=0?'＋':'')+fmt(tDiff)}</td><td style="padding:5pt 8pt;text-align:center;">${tPct}%</td></tr></table>`;
+      return {html:sec, totalB:total_b, totalA:total_a};
+    };
+    const incSec=buildSection(inc,'収入',true);
+    const expSec=buildSection(exp,'支出',false);
+    html+=incSec.html+expSec.html;
+    const bal_b=incSec.totalB-expSec.totalB;
+    const bal_a=incSec.totalA-expSec.totalA;
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:24px;">
+      <tr style="font-weight:700;border-top:2pt solid #000;background:#f5f5f5;">
+        <td style="padding:5pt 8pt;">収支差引</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${fmt(bal_b)}</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${fmt(bal_a)}</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${((bal_a-bal_b)>=0?'＋':'')+fmt(bal_a-bal_b)}</td>
+        <td style="padding:5pt 8pt;width:46pt;"></td>
+      </tr>
+    </table>`;
+    this._openPrintWindow(html,'予算進捗');
   }
 
 
