@@ -1443,7 +1443,6 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
-    // portal-shared.js mixin（helm外ロードのため再適用）
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
     const _hash = window.location.hash.slice(1);
     if (_hash && this._myPages && this._myPages.includes(_hash)) this.setState({page:_hash});

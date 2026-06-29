@@ -1050,7 +1050,6 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
-    // portal-shared.js mixin（helm外ロードのため再適用）
     if (window.PortalMethods) Object.assign(this, window.PortalMethods);
     const _hash = window.location.hash.slice(1);
     if (_hash && this._myPages && this._myPages.includes(_hash)) this.setState({page:_hash});
@@ -1309,13 +1308,13 @@ class Component extends DCLogic {
     const expRows=cats.filter(c=>c.type==='支出');
     const diffStr=d=>d===0?'—':(d>0?'＋':'▲')+Math.abs(d).toLocaleString('ja-JP');
     let html=`<div style="font-size:11pt;margin-bottom:12px;">会計年度：${esc(fmtWa(cp.startDate))}〜${esc(fmtWa(cp.endDate))}</div>`;
-    html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:20px;"><tr style="background:#E6E8EC;"><th style="border:1px solid #999;padding:5px 8px;text-align:left;">科目</th><th style="border:1px solid #999;padding:5px 8px;text-align:right;width:88px;">予算額</th><th style="border:1px solid #999;padding:5px 8px;text-align:right;width:88px;">決算額</th><th style="border:1px solid #999;padding:5px 8px;text-align:right;width:76px;">増減</th></tr><tr><td colspan="4" style="border:1px solid #999;padding:4px 8px;background:#f7f7f7;font-weight:700;">【収入の部】</td></tr>`;
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:20px;"><tr style="border-bottom:1pt solid #000;"><th style="padding:5pt 8pt;text-align:left;">科目</th><th style="padding:5pt 8pt;text-align:right;width:88px;">予算額</th><th style="padding:5pt 8pt;text-align:right;width:88px;">決算額</th><th style="padding:5pt 8pt;text-align:right;width:76px;">増減</th></tr><tr><td colspan="4" style="padding:4pt 8pt;font-weight:700;background:#f5f5f5;border-top:1pt solid #000;border-bottom:0.5pt solid #000;">【収入の部】</td></tr>`;
     let tI=0,tBI=0;
-    incRows.forEach(c=>{const bud=c.budget!=null?c.budget:(budMap[c.cat]||0);const act=c.amt||0;tI+=act;tBI+=bud;html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(c.cat)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(bud)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(act)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${diffStr(act-bud)}</td></tr>`;});
-    html+=`<tr style="font-weight:700;"><td style="border:1px solid #999;padding:4px 8px;">収入合計</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tBI)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tI)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${diffStr(tI-tBI)}</td></tr><tr><td colspan="4" style="border:1px solid #999;padding:4px 8px;background:#f7f7f7;font-weight:700;">【支出の部】</td></tr>`;
+    incRows.forEach(c=>{const bud=c.budget!=null?c.budget:(budMap[c.cat]||0);const act=c.amt||0;tI+=act;tBI+=bud;html+=`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(c.cat)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(bud)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(act)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${diffStr(act-bud)}</td></tr>`;});
+    html+=`<tr style="font-weight:700;"><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">収入合計</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tBI)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tI)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${diffStr(tI-tBI)}</td></tr><tr><td colspan="4" style="padding:4pt 8pt;font-weight:700;background:#f5f5f5;border-top:1pt solid #000;border-bottom:0.5pt solid #000;">【支出の部】</td></tr>`;
     let tE=0,tBE=0;
-    expRows.forEach(c=>{const bud=c.budget!=null?c.budget:(budMap[c.cat]||0);const act=c.amt||0;tE+=act;tBE+=bud;html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(c.cat)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(bud)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(act)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${diffStr(act-bud)}</td></tr>`;});
-    html+=`<tr style="font-weight:700;"><td style="border:1px solid #999;padding:4px 8px;">支出合計</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tBE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${diffStr(tE-tBE)}</td></tr><tr style="font-weight:700;background:#E6E8EC;"><td style="border:1px solid #999;padding:4px 8px;">収支差引</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tBI-tBE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tI-tE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${diffStr((tI-tE)-(tBI-tBE))}</td></tr></table>`;
+    expRows.forEach(c=>{const bud=c.budget!=null?c.budget:(budMap[c.cat]||0);const act=c.amt||0;tE+=act;tBE+=bud;html+=`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(c.cat)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(bud)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(act)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${diffStr(act-bud)}</td></tr>`;});
+    html+=`<tr style="font-weight:700;"><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">支出合計</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tBE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${diffStr(tE-tBE)}</td></tr><tr style="font-weight:700;background:#E6E8EC;"><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">収支差引</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tBI-tBE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tI-tE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${diffStr((tI-tE)-(tBI-tBE))}</td></tr></table>`;
     if(s.audit){const a=s.audit;html+=`<div style="page-break-before:always;padding-top:4mm;"><div style="font-size:14pt;font-weight:700;border-bottom:2pt solid #000;padding-bottom:8px;margin-bottom:22px;">監査報告書</div><div style="font-size:11pt;line-height:2.2;margin-bottom:20px;">上記${esc(cp.name||'')}の収支決算書を監査した結果、<br>適正であることを報告いたします。</div>${a.note?`<div style="font-size:11pt;margin-bottom:20px;">${esc(a.note)}</div>`:''}<div style="font-size:11pt;text-align:right;line-height:2.4;margin-top:48px;"><div>監査日：${esc(fmtWa(a.date))}</div><div>監事　${esc(a.name)}</div></div></div>`;}
     return html;
   }
@@ -1332,8 +1331,8 @@ class Component extends DCLogic {
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const fmtWa=d=>{ if(!d) return ''; try{const [y,m,dd]=d.split('-');return `令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;} };
     if(!events.length) return `<p style="font-size:11pt;color:#555;">${isNext?'翌期の事業計画が登録されていません。':'当期の事業記録がありません。'}</p>`;
-    let html=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="background:#E6E8EC;"><th style="border:1px solid #999;padding:5px 8px;text-align:left;width:96px;">日付</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">事業名</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;width:70px;">参加者</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">備考</th></tr>`;
-    events.forEach(e=>{html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(fmtWa(e.date))}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(e.name)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(e.participants||'')}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(e.notes||'')}</td></tr>`;});
+    let html=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="border-bottom:1pt solid #000;"><th style="padding:5pt 8pt;text-align:left;width:96px;">日付</th><th style="padding:5pt 8pt;text-align:left;">事業名</th><th style="padding:5pt 8pt;text-align:left;width:70px;">参加者</th><th style="padding:5pt 8pt;text-align:left;">備考</th></tr>`;
+    events.forEach(e=>{html+=`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(fmtWa(e.date))}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(e.name)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(e.participants||'')}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(e.notes||'')}</td></tr>`;});
     return html+'</table>';
   }
 
@@ -1359,37 +1358,37 @@ class Component extends DCLogic {
     });
     const inc=draft.items.filter(i=>i.type==='収入');
     const exp=draft.items.filter(i=>i.type==='支出');
-    const thStyle='border:1px solid #999;padding:5px 8px;text-align:right;width:80px;';
-    const thStyleL='border:1px solid #999;padding:5px 8px;text-align:left;';
+    const thStyle='padding:5pt 8pt;text-align:right;width:80px;border-bottom:1pt solid #000;';
+    const thStyleL='padding:5pt 8pt;text-align:left;border-bottom:1pt solid #000;';
     let html=`<table style="width:100%;border-collapse:collapse;font-size:9.5pt;">
-      <tr style="background:#E6E8EC;">
+      <tr style="border-bottom:1pt solid #000;">
         <th style="${thStyleL}">科目</th>
         <th style="${thStyle}">${esc(curName)}予算</th>
         <th style="${thStyle}">${esc(curName)}実績</th>
         <th style="${thStyle}">${esc(nxtName)}予算</th>
         <th style="${thStyleL}width:auto;">備考</th>
       </tr>
-      <tr><td colspan="5" style="border:1px solid #999;padding:4px 8px;background:#f7f7f7;font-weight:700;">【収入の部】</td></tr>`;
+      <tr><td colspan="5" style="padding:4pt 8pt;font-weight:700;background:#f5f5f5;border-top:1pt solid #000;border-bottom:0.5pt solid #000;">【収入の部】</td></tr>`;
     let tCB=0,tCA=0,tNI=0;
     inc.forEach(item=>{
       const cb=item.currentBudget!=null?item.currentBudget:(budMap[item.category]||0);
       const ca=item.currentActual!=null?item.currentActual:(txMap[item.category]||0);
       const na=parseInt(item.nextAmount)||0;
       tCB+=cb; tCA+=ca; tNI+=na;
-      html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(item.category)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(cb)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(ca)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(na)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(item.remark||'')}</td></tr>`;
+      html+=`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(item.category)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(cb)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(ca)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(na)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(item.remark||'')}</td></tr>`;
     });
-    html+=`<tr style="font-weight:700;"><td style="border:1px solid #999;padding:4px 8px;">収入合計</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tCB)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tCA)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tNI)}</td><td style="border:1px solid #999;padding:4px 8px;"></td></tr>
-      <tr><td colspan="5" style="border:1px solid #999;padding:4px 8px;background:#f7f7f7;font-weight:700;">【支出の部】</td></tr>`;
+    html+=`<tr style="font-weight:700;"><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">収入合計</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tCB)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tCA)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tNI)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;"></td></tr>
+      <tr><td colspan="5" style="padding:4pt 8pt;font-weight:700;background:#f5f5f5;border-top:1pt solid #000;border-bottom:0.5pt solid #000;">【支出の部】</td></tr>`;
     let tCBE=0,tCAE=0,tNE=0;
     exp.forEach(item=>{
       const cb=item.currentBudget!=null?item.currentBudget:(budMap[item.category]||0);
       const ca=item.currentActual!=null?item.currentActual:(txMap[item.category]||0);
       const na=parseInt(item.nextAmount)||0;
       tCBE+=cb; tCAE+=ca; tNE+=na;
-      html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(item.category)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(cb)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(ca)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(na)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(item.remark||'')}</td></tr>`;
+      html+=`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(item.category)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(cb)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(ca)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(na)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(item.remark||'')}</td></tr>`;
     });
-    html+=`<tr style="font-weight:700;"><td style="border:1px solid #999;padding:4px 8px;">支出合計</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tCBE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tCAE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tNE)}</td><td style="border:1px solid #999;padding:4px 8px;"></td></tr>
-      <tr style="font-weight:700;background:#E6E8EC;"><td style="border:1px solid #999;padding:4px 8px;">収支差引</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tCB-tCBE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tCA-tCAE)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(tNI-tNE)}</td><td style="border:1px solid #999;padding:4px 8px;"></td></tr>
+    html+=`<tr style="font-weight:700;"><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">支出合計</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tCBE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tCAE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tNE)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;"></td></tr>
+      <tr style="font-weight:700;background:#E6E8EC;"><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">収支差引</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tCB-tCBE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tCA-tCAE)}</td><td style="padding:4pt 8pt;text-align:right;border-bottom:0.5pt solid #ddd;">${fmt(tNI-tNE)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;"></td></tr>
     </table>`;
     return html;
   }
@@ -1419,8 +1418,8 @@ class Component extends DCLogic {
     if(cd.body) html+=`<div style="font-size:11pt;line-height:2.0;white-space:pre-wrap;margin-bottom:20px;">${esc(cd.body)}</div>`;
     const rows=cd.tableRows||[];
     if(rows.length){
-      html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="background:#E6E8EC;"><th style="border:1px solid #999;padding:5px 8px;text-align:left;">${esc(cd.col1Header||'項目')}</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">${esc(cd.col2Header||'内容')}</th></tr>`;
-      rows.forEach(r=>{html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(r.col1||'')}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(r.col2||'')}</td></tr>`;});
+      html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="border-bottom:1pt solid #000;"><th style="padding:5pt 8pt;text-align:left;">${esc(cd.col1Header||'項目')}</th><th style="padding:5pt 8pt;text-align:left;">${esc(cd.col2Header||'内容')}</th></tr>`;
+      rows.forEach(r=>{html+=`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(r.col1||'')}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(r.col2||'')}</td></tr>`;});
       html+='</table>';
     }
     if(!html) html='<p style="font-size:11pt;color:#555;">（内容が入力されていません）</p>';
@@ -1438,7 +1437,7 @@ class Component extends DCLogic {
     const rowsHtml = evts.map(e=>{
       const dateStr = fmtD(e.date)+(e.endDate?'〜'+fmtD(e.endDate):'');
       const sched = (e.date && e.date>today) ? '<span style="font-size:10px;color:#555;">（予定）</span>' : '';
-      return `<tr style="border-bottom:1px solid #efefef;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
+      return `<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
     }).join('');
     const bodyHtml = [
       `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">事　業　進　捗　報　告</div><div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}</div><div style="font-size:10pt;color:#333;margin-top:4px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:10pt;color:#333;margin-top:2px;">${esc(orgName)}</div></div>`,
