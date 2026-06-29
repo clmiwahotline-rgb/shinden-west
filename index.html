@@ -336,12 +336,12 @@
         </select>
       </div>
     </div>
-    <div style="flex:1;overflowY:auto;padding:4px 8px 8px;">
+    <div style="flex:1;minHeight:0;overflowY:auto;padding:4px 8px 8px;">
       <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="10">
         <div onClick="{{ item.onClick }}" style="{{ item.navStyle }}">{{ item.label }}</div>
       </sc-for>
     </div>
-    <div style="padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
+    <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
         <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
@@ -707,10 +707,10 @@
       </div>
     </sc-if>
 
-    <!-- COMPOSITE MODAL -->
-    <sc-if value="{{ showCompositeModal }}" hint-placeholder-val="{{ false }}">
-      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.4);zIndex:220;display:flex;alignItems:flex-start;justifyContent:center;backdropFilter:blur(6px);overflowY:auto;padding:24px 0;" onClick="{{ onCloseComposite }}">
-        <div style="background:#F5F6F8;borderRadius:18px;width:820px;boxShadow:0 24px 80px rgba(0,0,0,0.25);overflow:hidden;" onClick="{{ stopProp }}">
+    <!-- COMPOSITE MODAL REMOVED -->
+    <sc-if value="{{ false }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div>
           <div style="background:#fff;padding:20px 28px;borderBottom:1px solid rgba(0,0,0,0.07);display:flex;justify-content:space-between;alignItems:center;">
             <div>
               <div style="fontSize:17px;fontWeight:700;color:#3F414C;">⊞ 複合処理</div>
@@ -1376,7 +1376,6 @@
             <button onClick="{{ onExportTxCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
             <button onClick="{{ onOpenCashbookModal }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">現金出納帳</button>
             <button onClick="{{ onAddTransfer }}" style="border:1px solid #6B7280;background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⇄ 振替</button>
-            <button onClick="{{ onAddComposite }}" style="border:1px solid #6B7280;background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">⊞ 複合処理</button>
             <button onClick="{{ onAddTx }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 取引追加</button>
           </div>
         </div>
@@ -1445,7 +1444,7 @@
               <span style="flex:1;minWidth:0;fontSize:13px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">
                 {{ row.description }}&nbsp;
                 <sc-if value="{{ row.isTransfer }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#f1f5f9;color:#475569;padding:1px 6px;borderRadius:6px;whiteSpace:nowrap;">振替</span></sc-if>
-                <sc-if value="{{ row.isComposite }}" hint-placeholder-val="{{ false }}"><span style="fontSize:10px;fontWeight:600;background:#ede9fe;color:#5b21b6;padding:1px 6px;borderRadius:6px;whiteSpace:nowrap;">複合</span></sc-if>
+
               </span>
               <span style="width:92px;fontSize:11px;color:#A1A1AA;">{{ row.category }}</span>
               <span style="width:60px;textAlign:center;"><span style="{{ row.accountBadge }}">{{ row.accountType }}</span></span>
@@ -2498,10 +2497,6 @@ class Component extends DCLogic {
     transferFrom: '口座',
     transferTo: '現金',
     transferDesc: '',
-    compositeModal: false,
-    compositeDate: new Date().toISOString().slice(0,10),
-    compositeGroupName: '',
-    compositeLines: [],
     budgetDraftModal: false,
     settlementModal: false,
     settlementNote: '',
@@ -2716,6 +2711,8 @@ class Component extends DCLogic {
       authEmails:    d.authEmails||[],
       orgInfo:       (Array.isArray(d.orgInfo)?d.orgInfo[0]:d.orgInfo)||{},
       budgetDraft:   (()=>{try{return typeof d.budgetDraft==='string'?JSON.parse(d.budgetDraft||'null'):(d.budgetDraft||null);}catch(e){return null;}})(),
+      assemblyDoc:   (()=>{try{return typeof d.assemblyDoc==='string'?JSON.parse(d.assemblyDoc||'null'):(d.assemblyDoc||null);}catch(e){return null;}})(),
+      tasks:         d.tasks||[],
       currentPeriodId: d.currentPeriodId||null,
     };
   }
@@ -3141,30 +3138,23 @@ class Component extends DCLogic {
     const expRows = cats.filter(c=>c.type==='支出');
     const fmt = n=>n!=null?'¥'+Number(n).toLocaleString('ja-JP'):'—';
     const dif = (a,b)=>{const d=a-b;return d===0?'—':(d>0?'＋':'▲')+Math.abs(d).toLocaleString('ja-JP');};
-    const rowsHtml = rows=>rows.map(c=>`<tr style="border-bottom:1px solid #efefef;"><td style="padding:5px 8px 5px 20px;">${c.cat}</td><td style="padding:5px 8px;text-align:right;color:#666;">${c.budget?fmt(c.budget):'—'}</td><td style="padding:5px 8px;text-align:right;font-weight:600;">${fmt(c.amt||0)}</td><td style="padding:5px 8px;text-align:right;color:#555;">${dif(c.amt||0,c.budget||0)}</td></tr>`).join('');
+    const rowsHtml = rows=>rows.map(c=>`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${c.cat}</td><td style="padding:4pt 8pt;text-align:right;">${c.budget?fmt(c.budget):'—'}</td><td style="padding:4pt 8pt;text-align:right;font-weight:600;">${fmt(c.amt||0)}</td><td style="padding:4pt 8pt;text-align:right;">${dif(c.amt||0,c.budget||0)}</td></tr>`).join('');
     const budTotalI=budgets.filter(b=>b.type==='収入').reduce((a,b)=>a+(b.amount||0),0);
     const budTotalE=budgets.filter(b=>b.type==='支出').reduce((a,b)=>a+(b.amount||0),0);
     const audit=s.audit;
     const auditSection=audit?`<div style="page-break-before:always;break-before:page;padding-top:60px;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:0.18em;margin-bottom:28px;">監　査　報　告　書</div><div style="font-size:13px;line-height:2.4;margin-bottom:24px;">　私は${s.periodName}における決算報告書を監査した結果、収支の状況が正確に記載されていることを確認しました。</div><div style="font-size:12px;color:#555;margin-bottom:16px;">監査日：${audit.date||''}</div><sc-if value="false"><span>${audit.note||''}</span></sc-if><div style="text-align:right;font-size:12px;margin-top:32px;">監査人　${audit.name||''}</div></div>`:'';
-    const htmlParts=[
-      '<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>決算報告書</title>',
-      '<style>@page{size:A4 portrait;margin:20mm 18mm;}@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:counter(page);font-size:9pt;font-family:serif}@bottom-right{content:""}}body{font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",serif;font-size:13px;}table{width:100%;border-collapse:collapse;}</style></head>',
-      '<body>',
-      `<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #3F414C;"><div style="font-size:18px;font-weight:700;letter-spacing:0.18em;">決　算　報　告　書</div><div style="font-size:12px;color:#555;margin-top:6px;">${s.periodName}</div><div style="font-size:12px;color:#555;margin-top:2px;">自　${s.periodStart||''}　至　${s.periodEnd||''}</div><div style="font-size:12px;color:#555;margin-top:2px;">${orgName}</div></div>`,
-      '<table><thead><tr style="border-bottom:1px solid #999;"><th style="text-align:left;padding:4px 8px;font-weight:400;color:#888;font-size:10px;">科　目</th><th style="text-align:right;padding:4px 8px;font-weight:400;color:#888;font-size:10px;width:130px;">予　算　額</th><th style="text-align:right;padding:4px 8px;font-weight:400;color:#888;font-size:10px;width:130px;">決　算　額</th><th style="text-align:right;padding:4px 8px;font-weight:400;color:#888;font-size:10px;width:100px;">増　減</th></tr></thead><tbody>',
-      `<tr><td colspan="4" style="padding:8px 8px 3px;font-size:11px;font-weight:700;border-bottom:1px solid #3F414C;">収　入　の　部</td></tr>${rowsHtml(incRows)}`,
-      `<tr style="border-top:2px solid #3F414C;font-weight:700;"><td style="padding:7px 8px;">収入合計</td><td style="padding:7px 8px;text-align:right;font-weight:400;color:#666;">${budTotalI?fmt(budTotalI):'—'}</td><td style="padding:7px 8px;text-align:right;">${fmt(s.totalIncome)}</td><td style="padding:7px 8px;text-align:right;">${dif(s.totalIncome,budTotalI)}</td></tr>`,
-      `<tr><td colspan="4" style="padding:10px 8px 3px;font-size:11px;font-weight:700;border-bottom:1px solid #3F414C;">支　出　の　部</td></tr>${rowsHtml(expRows)}`,
-      `<tr style="border-top:2px solid #3F414C;font-weight:700;"><td style="padding:7px 8px;">支出合計</td><td style="padding:7px 8px;text-align:right;font-weight:400;color:#666;">${budTotalE?fmt(budTotalE):'—'}</td><td style="padding:7px 8px;text-align:right;">${fmt(s.totalExpense)}</td><td style="padding:7px 8px;text-align:right;">${dif(s.totalExpense,budTotalE)}</td></tr>`,
-      `<tr style="background:#f5f5f5;border-top:2px solid #3F414C;font-weight:700;"><td style="padding:10px 8px;">収支差額（次期繰越金）</td><td style="padding:10px 8px;text-align:right;font-weight:400;color:#666;">${budTotalI||budTotalE?fmt(budTotalI-budTotalE):'—'}</td><td style="padding:10px 8px;text-align:right;">${fmt(s.net)}</td><td></td></tr>`,
+    const bodyHtml=[
+      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">決　算　報　告　書</div><div style="font-size:11pt;margin-top:8px;">${s.periodName}</div><div style="font-size:10pt;color:#333;margin-top:4px;">自　${s.periodStart||''}　至　${s.periodEnd||''}</div><div style="font-size:10pt;color:#333;margin-top:2px;">${orgName}</div></div>`,
+      '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:16pt;"><thead><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:left;font-weight:400;">科　目</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:90pt;">予　算　額</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:90pt;">決　算　額</th><th style="padding:4pt 8pt;text-align:right;font-weight:400;width:70pt;">増　減</th></tr></thead><tbody>',
+      `<tr><td colspan="4" style="padding:8pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">収　入　の　部</td></tr>${rowsHtml(incRows)}`,
+      `<tr style="border-top:1.5pt solid #000;font-weight:700;"><td style="padding:5pt 8pt;">収入合計</td><td style="padding:5pt 8pt;text-align:right;">${budTotalI?fmt(budTotalI):'—'}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(s.totalIncome)}</td><td style="padding:5pt 8pt;text-align:right;">${dif(s.totalIncome,budTotalI)}</td></tr>`,
+      `<tr><td colspan="4" style="padding:10pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">支　出　の　部</td></tr>${rowsHtml(expRows)}`,
+      `<tr style="border-top:1.5pt solid #000;font-weight:700;"><td style="padding:5pt 8pt;">支出合計</td><td style="padding:5pt 8pt;text-align:right;">${budTotalE?fmt(budTotalE):'—'}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(s.totalExpense)}</td><td style="padding:5pt 8pt;text-align:right;">${dif(s.totalExpense,budTotalE)}</td></tr>`,
+      `<tr style="border-top:2pt solid #000;font-weight:700;background:#f5f5f5;"><td style="padding:6pt 8pt;">収支差額（次期繰越金）</td><td style="padding:6pt 8pt;text-align:right;">${budTotalI||budTotalE?fmt(budTotalI-budTotalE):'—'}</td><td style="padding:6pt 8pt;text-align:right;">${fmt(s.net)}</td><td></td></tr>`,
       '</tbody></table>',
       auditSection,
-      '</body></html>',
-    ];
-    const w=window.open('','_blank','width=820,height=1060');
-    w.document.write(htmlParts.join(''));
-    w.document.close();
-    setTimeout(()=>w.print(),600);
+    ].join('');
+    this._openPrintWindow(bodyHtml,'決算報告書');
   }
 
   printEventsDoc() {
@@ -3181,7 +3171,7 @@ class Component extends DCLogic {
       return `<tr style="border-bottom:1px solid #efefef;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
     }).join('');
     const bodyHtml = [
-      `<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #3F414C;"><div style="font-size:18px;font-weight:700;letter-spacing:0.18em;">事　業　進　捗　報　告</div><div style="font-size:12px;color:#555;margin-top:6px;">${esc(cp.name||'')}</div><div style="font-size:12px;color:#555;margin-top:2px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:12px;color:#555;margin-top:2px;">${esc(orgName)}</div></div>`,
+      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">事　業　進　捗　報　告</div><div style="font-size:11pt;margin-top:8px;">${esc(cp.name||'')}</div><div style="font-size:10pt;color:#333;margin-top:4px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:10pt;color:#333;margin-top:2px;">${esc(orgName)}</div></div>`,
       `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #3F414C;"><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:96px;">開　催　日</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">事　業　名</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:78px;">種　別</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:92px;">参　加　者</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">備　考　・　記　録</th></tr></thead><tbody>${rowsHtml}<tr style="border-top:2px solid #3F414C;font-weight:700;"><td colspan="5" style="padding:8px;text-align:right;">事業件数　${evts.length}　件</td></tr></tbody></table>`,
       `<div style="margin-top:52px;font-size:12px;text-align:right;line-height:1.9;">${esc(orgName)}<br>会長　${esc(orgInfo.repName||'')}</div>`,
     ].join('');
@@ -3613,8 +3603,8 @@ class Component extends DCLogic {
     const officers=(this.state.officers||[]).filter(o=>o.periodId===pid);
     if(!officers.length) return '<p style="font-size:11pt;color:#555;">役員が登録されていません。</p>';
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    let html=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="background:#E6E8EC;"><th style="border:1px solid #999;padding:5px 8px;text-align:left;width:100px;">役職</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">氏名</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">店舗名</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">備考</th></tr>`;
-    officers.forEach(o=>{const mb=(this.state.members||[]).find(m=>m.id===o.memberId)||{};html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(o.role)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(mb.name||'')}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(mb.store||'')}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(o.memo||'')}</td></tr>`;});
+    let html=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:left;font-weight:600;width:90pt;">役職</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">氏名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">店舗名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">備考</th></tr>`;
+    officers.forEach(o=>{const mb=(this.state.members||[]).find(m=>m.id===o.memberId)||{};html+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${esc(o.role)}</td><td style="padding:4pt 8pt;">${esc(mb.name||'')}</td><td style="padding:4pt 8pt;">${esc(mb.store||'')}</td><td style="padding:4pt 8pt;">${esc(o.memo||'')}</td></tr>`;});
     return html+'</table>';
   }
 
@@ -3622,8 +3612,8 @@ class Component extends DCLogic {
     const members=(this.state.members||[]).filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍'));
     if(!members.length) return '<p style="font-size:11pt;color:#555;">会員が登録されていません。</p>';
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    let html=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="background:#E6E8EC;"><th style="border:1px solid #999;padding:5px 8px;text-align:center;width:36px;">No.</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">店舗名</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">氏名</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">会員種別</th><th style="border:1px solid #999;padding:5px 8px;text-align:left;">電話</th></tr>`;
-    [...members].sort((a,b)=>(a.no||999)-(b.no||999)).forEach((m,i)=>{html+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;text-align:center;">${m.no||i+1}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(m.store)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(m.name)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(m.type)}</td><td style="border:1px solid #ccc;padding:4px 8px;">${esc(m.phone||'')}</td></tr>`;});
+    let html=`<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:center;font-weight:600;width:32pt;">No.</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">店舗名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">氏名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">会員種別</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">電話</th></tr>`;
+    [...members].sort((a,b)=>(a.no||999)-(b.no||999)).forEach((m,i)=>{html+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;text-align:center;">${m.no||i+1}</td><td style="padding:4pt 8pt;">${esc(m.store)}</td><td style="padding:4pt 8pt;">${esc(m.name)}</td><td style="padding:4pt 8pt;">${esc(m.type)}</td><td style="padding:4pt 8pt;">${esc(m.phone||'')}</td></tr>`;});
     return html+`</table><div style="font-size:10pt;text-align:right;margin-top:6px;">計 ${members.length}名</div>`;
   }
 
@@ -3661,26 +3651,26 @@ class Component extends DCLogic {
       <div style="font-size:9pt;margin-top:4px;">作成日：${esc(fmtWa(new Date().toISOString().slice(0,10)))}</div>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:10pt;">
-      <tr style="background:#f0f0f0;">
-        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:28px;">No.</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:left;">店舗名</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:left;width:72px;">氏名</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:left;width:64px;">種別</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:right;width:80px;">金額</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:72px;">発行日</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:72px;">支払期限</th>
-        <th style="border:1px solid #999;padding:5px 7px;text-align:center;width:52px;">状態</th>
+      <tr style="border-bottom:1pt solid #000;">
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:24pt;">No.</th>
+        <th style="padding:4pt 7pt;text-align:left;font-weight:600;">店舗名</th>
+        <th style="padding:4pt 7pt;text-align:left;font-weight:600;width:60pt;">氏名</th>
+        <th style="padding:4pt 7pt;text-align:left;font-weight:600;width:54pt;">種別</th>
+        <th style="padding:4pt 7pt;text-align:right;font-weight:600;width:68pt;">金額</th>
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:60pt;">発行日</th>
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:60pt;">支払期限</th>
+        <th style="padding:4pt 7pt;text-align:center;font-weight:600;width:44pt;">状態</th>
       </tr>`;
     invoices.forEach((inv,i)=>{
       const isPaid=inv.status==='済み'||inv.status==='入金済';
-      html+=`<tr><td style="border:1px solid #ccc;padding:4px 7px;text-align:center;">${i+1}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;">${esc(inv.memberStore||'')}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;">${esc(inv.memberName||'')}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;">${esc(inv.type||'')}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">${fmt(inv.amount)}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:center;">${esc(inv.issuedDate||'')}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:center;">${esc(inv.dueDate||'')}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:center;${isPaid?'color:#22863a;':'color:#c0392b;'}">${esc(inv.status||'')}</td>
+      html+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 7pt;text-align:center;">${i+1}</td>
+        <td style="padding:4pt 7pt;">${esc(inv.memberStore||'')}</td>
+        <td style="padding:4pt 7pt;">${esc(inv.memberName||'')}</td>
+        <td style="padding:4pt 7pt;">${esc(inv.type||'')}</td>
+        <td style="padding:4pt 7pt;text-align:right;">${fmt(inv.amount)}</td>
+        <td style="padding:4pt 7pt;text-align:center;">${esc(inv.issuedDate||'')}</td>
+        <td style="padding:4pt 7pt;text-align:center;">${esc(inv.dueDate||'')}</td>
+        <td style="padding:4pt 7pt;text-align:center;">${esc(inv.status||'')}</td>
       </tr>`;
     });
     html+=`<tr style="font-weight:700;background:#f0f0f0;">
@@ -3863,8 +3853,8 @@ class Component extends DCLogic {
     });
     const inc=budItems.filter(b=>b.type==='収入');
     const exp=budItems.filter(b=>b.type==='支出');
-    const thS='border:1px solid #999;padding:5px 8px;text-align:right;width:82px;';
-    const thSL='border:1px solid #999;padding:5px 8px;text-align:left;';
+    const thS='padding:4pt 8pt;text-align:right;width:72pt;font-weight:600;';
+    const thSL='padding:4pt 8pt;text-align:left;font-weight:600;';
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
       <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}　（${esc(fmtWa(cp.startDate))}〜${esc(fmtWa(cp.endDate))}）</div>
@@ -3873,14 +3863,14 @@ class Component extends DCLogic {
     const buildSection=(rows,label,isIncome)=>{
       let total_b=0,total_a=0;
       let sec=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:18px;">
-        <tr style="background:#E6E8EC;">
+        <tr style="border-bottom:1pt solid #000;">
           <th style="${thSL}">科目</th>
           <th style="${thS}">予算額</th>
           <th style="${thS}">実績額</th>
           <th style="${thS}">差引</th>
-          <th style="border:1px solid #999;padding:5px 8px;text-align:center;width:50px;">達成率</th>
+          <th style="padding:4pt 8pt;text-align:center;font-weight:600;width:46pt;">達成率</th>
         </tr>
-        <tr><td colspan="5" style="border:1px solid #999;padding:4px 8px;background:#f7f7f7;font-weight:700;">【${label}の部】</td></tr>`;
+        <tr><td colspan="5" style="padding:6pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">【${label}の部】</td></tr>`;
       rows.forEach(b=>{
         const bud=b.amount||0;
         const actObj=txMap[b.category]||{income:0,expense:0};
@@ -3889,11 +3879,11 @@ class Component extends DCLogic {
         const pct=bud?Math.round(act/bud*100):0;
         const diffStr=diff===0?'―':(diff>0?'＋':'')+fmt(diff);
         total_b+=bud; total_a+=act;
-        sec+=`<tr><td style="border:1px solid #ccc;padding:4px 8px;">${esc(b.category)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(bud)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${fmt(act)}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:right;">${diffStr}</td><td style="border:1px solid #ccc;padding:4px 8px;text-align:center;">${pct}%</td></tr>`;
+        sec+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">${esc(b.category)}</td><td style="padding:4pt 8pt;text-align:right;">${fmt(bud)}</td><td style="padding:4pt 8pt;text-align:right;">${fmt(act)}</td><td style="padding:4pt 8pt;text-align:right;">${diffStr}</td><td style="padding:4pt 8pt;text-align:center;">${pct}%</td></tr>`;
       });
       const tDiff=isIncome?(total_a-total_b):(total_b-total_a);
       const tPct=total_b?Math.round(total_a/total_b*100):0;
-      sec+=`<tr style="font-weight:700;background:#E6E8EC;"><td style="border:1px solid #999;padding:4px 8px;">${label}合計</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(total_b)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${fmt(total_a)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:right;">${(tDiff>=0?'＋':'')+fmt(tDiff)}</td><td style="border:1px solid #999;padding:4px 8px;text-align:center;">${tPct}%</td></tr></table>`;
+      sec+=`<tr style="font-weight:700;border-top:1.5pt solid #000;"><td style="padding:5pt 8pt;">${label}合計</td><td style="padding:5pt 8pt;text-align:right;">${fmt(total_b)}</td><td style="padding:5pt 8pt;text-align:right;">${fmt(total_a)}</td><td style="padding:5pt 8pt;text-align:right;">${(tDiff>=0?'＋':'')+fmt(tDiff)}</td><td style="padding:5pt 8pt;text-align:center;">${tPct}%</td></tr></table>`;
       return {html:sec, totalB:total_b, totalA:total_a};
     };
     const incSec=buildSection(inc,'収入',true);
@@ -3902,12 +3892,12 @@ class Component extends DCLogic {
     const bal_b=incSec.totalB-expSec.totalB;
     const bal_a=incSec.totalA-expSec.totalA;
     html+=`<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-bottom:24px;">
-      <tr style="font-weight:700;background:#e8e8e8;">
-        <td style="border:1px solid #999;padding:5px 10px;">収支差引</td>
-        <td style="border:1px solid #999;padding:5px 8px;text-align:right;width:82px;">${fmt(bal_b)}</td>
-        <td style="border:1px solid #999;padding:5px 8px;text-align:right;width:82px;">${fmt(bal_a)}</td>
-        <td style="border:1px solid #999;padding:5px 8px;text-align:right;width:82px;">${((bal_a-bal_b)>=0?'＋':'')+fmt(bal_a-bal_b)}</td>
-        <td style="border:1px solid #999;padding:5px 8px;width:50px;"></td>
+      <tr style="font-weight:700;border-top:2pt solid #000;background:#f5f5f5;">
+        <td style="padding:5pt 8pt;">収支差引</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${fmt(bal_b)}</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${fmt(bal_a)}</td>
+        <td style="padding:5pt 8pt;text-align:right;width:72pt;">${((bal_a-bal_b)>=0?'＋':'')+fmt(bal_a-bal_b)}</td>
+        <td style="padding:5pt 8pt;width:46pt;"></td>
       </tr>
     </table>`;
     this._openPrintWindow(html,'予算進捗');
@@ -4091,35 +4081,6 @@ class Component extends DCLogic {
     const t2 = {id:this.gen(),periodId:pid,date:d,description:`【振替】${desc||fr+'→'+to}`,category:'振替',income:amt,expense:0,accountType:to,groupId:gid,groupType:'振替'};
     this.setState(s=>({transactions:[...s.transactions,t1,t2],transferModal:false}),()=>this.persist());
     this.showToast(`振替を記録しました（${this.fmt(amt)}）`);
-  }
-
-  saveComposite() {
-    const {compositeDate:d,compositeGroupName:gn,compositeLines:lines,currentPeriodId:pid} = this.state;
-    const valid = lines.filter(l=>parseFloat(l.amount)>0);
-    if (!valid.length) { alert('明細を1件以上入力してください'); return; }
-    const gid = this.gen();
-    const txs = valid.map(l=>({
-      id:this.gen(),periodId:pid,date:d,
-      description:`【複合】${gn||'複合処理'}${l.description?'_'+l.description:''}`,
-      category:l.category||'',income:l.txType==='収入'?parseFloat(l.amount)||0:0,
-      expense:l.txType==='支出'?parseFloat(l.amount)||0:0,
-      accountType:l.accountType||'口座',groupId:gid,groupType:'複合',
-    }));
-    this.setState(s=>({transactions:[...s.transactions,...txs],compositeModal:false,compositeLines:[]}),()=>this.persist());
-    this.showToast(`${txs.length}件の複合処理を記録しました`);
-  }
-
-  addCompositeLine() {
-    const line = {id:this.gen(),txType:'収入',category:'',description:'',amount:0,accountType:'口座'};
-    this.setState(s=>({compositeLines:[...s.compositeLines,line]}));
-  }
-
-  updateCompositeLine(id,field,value) {
-    this.setState(s=>({compositeLines:s.compositeLines.map(l=>l.id===id?{...l,[field]:value}:l)}));
-  }
-
-  delCompositeLine(id) {
-    this.setState(s=>({compositeLines:s.compositeLines.filter(l=>l.id!==id)}));
   }
 
   openBudgetDraft() {
@@ -4949,29 +4910,6 @@ class Component extends DCLogic {
       onTransferToChange:(e)=>this.setState({transferTo:e.target.value}),
       onTransferDescChange:(e)=>this.setState({transferDesc:e.target.value}),
 
-      // Composite modal
-      showCompositeModal:this.state.compositeModal||false,
-      onAddComposite:()=>this.setState({compositeModal:true,compositeDate:new Date().toISOString().slice(0,10),compositeGroupName:'',compositeLines:[{id:this.gen(),txType:'収入',category:'',description:'',amount:0,accountType:'口座'},{id:this.gen(),txType:'支出',category:'',description:'',amount:0,accountType:'口座'}]}),
-      onCloseComposite:()=>this.setState({compositeModal:false}),
-      onSaveComposite:()=>this.saveComposite(),
-      onAddCompositeLine:()=>this.addCompositeLine(),
-      compositeDate:this.state.compositeDate||new Date().toISOString().slice(0,10),
-      compositeGroupName:this.state.compositeGroupName||'',
-      onCompositeDateChange:(e)=>this.setState({compositeDate:e.target.value}),
-      onCompositeGroupChange:(e)=>this.setState({compositeGroupName:e.target.value}),
-      compositeLines:(this.state.compositeLines||[]).map(l=>({
-        ...l,
-        amount:String(l.amount||0),
-        onTypeChange:(e)=>this.updateCompositeLine(l.id,'txType',e.target.value),
-        onCatChange:(e)=>this.updateCompositeLine(l.id,'category',e.target.value),
-        onDescChange:(e)=>this.updateCompositeLine(l.id,'description',e.target.value),
-        onAccChange:(e)=>this.updateCompositeLine(l.id,'accountType',e.target.value),
-        onAmtChange:(e)=>this.updateCompositeLine(l.id,'amount',e.target.value),
-        onDel:()=>this.delCompositeLine(l.id),
-      })),
-      compositeTotalIncome:this.fmt((this.state.compositeLines||[]).filter(l=>l.txType==='収入').reduce((s,l)=>s+(parseFloat(l.amount)||0),0)),
-      compositeTotalExpense:this.fmt((this.state.compositeLines||[]).filter(l=>l.txType==='支出').reduce((s,l)=>s+(parseFloat(l.amount)||0),0)),
-      compositeNet:this.fmt((this.state.compositeLines||[]).reduce((s,l)=>s+(l.txType==='収入'?1:-1)*(parseFloat(l.amount)||0),0)),
       incomeBudget, expenseBudget,
       totalBudgetI:this.fmt(pBudget.filter(b=>b.type==='収入').reduce((s,b)=>s+b.amount,0)),
       totalBudgetE:this.fmt(pBudget.filter(b=>b.type==='支出').reduce((s,b)=>s+b.amount,0)),
@@ -4994,7 +4932,8 @@ class Component extends DCLogic {
       settlementNet:this.fmt(totalIncome-totalExpense),
       ...(() => {
         const pid = this.state.currentPeriodId;
-        const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid);
+        // 振替処理は予算管理に反映しない
+        const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid && t.groupType!=='振替');
         const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===pid);
         // 実績集計
         const incActMap={}, expActMap={};
