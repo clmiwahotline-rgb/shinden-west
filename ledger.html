@@ -154,6 +154,7 @@
 #g_id_signin{display:flex;justify-content:center;}
 .auto-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:12px;color:#6B7280;}
 </style>
+</head>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -1444,7 +1445,6 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
-    // ハッシュによるページ初期化（_myPagesはクラスフィールドで設定済み）
     const _hash = window.location.hash.slice(1);
     if (_hash && this._myPages && this._myPages.includes(_hash)) this.setState({page:_hash});
 
@@ -2030,7 +2030,7 @@ class Component extends DCLogic {
       isTransfer:t.groupType==='振替',
       isComposite:t.groupType==='複合',
       onEdit:()=>this.openModal('transaction',t.id,{...t,txType:t.income>0?'収入':'支出',amount:t.income||t.expense,accountType:t.accountType||'口座'}),
-      onDel:()=>this.delTx(t.id),
+      onDel:()=>this.delTx?.(t.id),
     }));
 
     // Budget category options split by type
@@ -2055,7 +2055,7 @@ class Component extends DCLogic {
         barStyle:{background:isGood?'#7BC095':'#E57373',width:Math.min(pct,100)+'%',height:'100%',borderRadius:'3px'},
         pctStr:pct+'%',
         onEdit:()=>this.openModal('budget',b.id,{...b}),
-        onDel:()=>this.delBudget(b.id),
+        onDel:()=>this.delBudget?.(b.id),
       };
     };
     const incomeBudget=pBudget.filter(b=>b.type==='収入').map(mkBRow);
@@ -2072,7 +2072,7 @@ class Component extends DCLogic {
         memo: o.memo || '',
         badgeStyle: badge(rolePalette[o.role]),
         onEdit: ()=>this.openModal('officer',o.id,{role:o.role,memberId:o.memberId||'',memo:o.memo||''}),
-        onDel: ()=>this.delOfficer(o.id),
+        onDel: ()=>this.delOfficer?.(o.id),
       };
     });
 
@@ -2099,7 +2099,7 @@ class Component extends DCLogic {
       statusBadge:bsStatus[m.status||'在籍']||bsStatus['在籍'],
       rowBg:m.status==='退会'?'background:rgba(0,0,0,0.015);':'',
       onEdit:()=>this.openModal('member',m.id,{type:m.type||'正会員',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
-      onStatus:()=>this.recordMemberStatus(m.id,m.name),
+      onStatus:()=>this.recordMemberStatus?.(m.id,m.name),
     }));
     const totalMemberPages = Math.max(1,Math.ceil(allMemberRows.length/PAGE_SIZE));
     const memberRows = allMemberRows.slice(memberPage*PAGE_SIZE,(memberPage+1)*PAGE_SIZE);
@@ -2178,15 +2178,15 @@ class Component extends DCLogic {
       statusBadge:badge((i.status==='入金済'||i.status==='済み')?['#dcfce7','#166534']:i.status==='取消'?['#f1f5f9','#6B7280']:['#fee2e2','#b91c1c']),
       rowBg:(i.status==='未払'||i.status==='未払い')?'background:#fffafa;':'',
       markPaidStyle:i.status==='未払い'?btnPay:btnPayDone,
-      onMarkPaid:(i.status==='未払'||i.status==='未払い')?()=>this.markPaid(i.id):()=>{},
+      onMarkPaid:(i.status==='未払'||i.status==='未払い')?()=>this.markPaid?.(i.id):()=>{},
       markPaidStyle:(i.status==='未払'||i.status==='未払い')?{border:'none',background:'rgba(123,192,149,0.12)',color:'#7BC095',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'default'},
       onEdit:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
-      onPrintInvoice:()=>this.printInvoice(i.id),
-      onPrintReceipt:i.status==='済み'?()=>this.printReceipt(i.id):()=>{},
+      onPrintInvoice:()=>this.printInvoice?.(i.id),
+      onPrintReceipt:i.status==='済み'?()=>this.printReceipt?.(i.id):()=>{},
       receiptStyle:(i.status==='入金済'||i.status==='済み')?{border:'none',background:'rgba(123,192,149,0.08)',color:'#7BC095',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'},
       cancelStyle:i.status==='取消'?{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'}:{border:'none',background:'rgba(229,115,115,0.08)',color:'#E57373',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'},
-      onCancel:i.status!=='取消'?()=>this.cancelInvoice(i.id):()=>{},
-      onInstallment:()=>this.openInstallmentModal(i.id),
+      onCancel:i.status!=='取消'?()=>this.cancelInvoice?.(i.id):()=>{},
+      onInstallment:()=>this.openInstallmentModal?.(i.id),
       hasReminder:!!(i.reminderNote),
       noReminder:!(i.reminderNote),
       onReminder:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
@@ -2210,7 +2210,7 @@ class Component extends DCLogic {
       isBeyondPeriod: e.date > periodEnd,
       cardStyle:{...(evtCardBg[e.type]||{background:'#f9fafb',borderLeft:'3px solid #d1d5db'}),padding:'10px 13px',borderRadius:'8px',marginBottom:'10px'},
       onEdit:()=>this.openModal('event',e.id,{...e}),
-      onDel:()=>this.delEvent(e.id),
+      onDel:()=>this.delEvent?.(e.id),
     }));
 
     // Nav
@@ -2353,15 +2353,15 @@ class Component extends DCLogic {
             comments, commentCount:comments.length,
             commentInput:(this.state.taskCommentInputs||{})[task.id]||'',
             onCommentInput:(e)=>this.setState(s=>({taskCommentInputs:{...(s.taskCommentInputs||{}),[task.id]:e.target.value}})),
-            onAddComment:()=>this.addTaskComment(task.id),
+            onAddComment:()=>this.addTaskComment?.(task.id),
             toggleIcon:done?'✓':'○',
             toggleStyle:done
               ?{border:'none',width:'26px',height:'26px',borderRadius:'50%',background:'#C7D2C5',color:'#3F414C',fontSize:'13px',fontWeight:'700',cursor:'pointer',flexShrink:'0',padding:'0',lineHeight:'1.8'}
               :{border:'2px solid #DDDEE2',width:'26px',height:'26px',borderRadius:'50%',background:'transparent',color:'transparent',fontSize:'13px',cursor:'pointer',flexShrink:'0',padding:'0',lineHeight:'1'},
             titleStyle:{fontSize:'13px',color:done?'#A1A1AA':'#3F414C',fontWeight:done?'400':'500',textDecoration:done?'line-through':'none'},
-            onToggle:()=>this.toggleTask(task.id),
+            onToggle:()=>this.toggleTask?.(task.id),
             onEdit:()=>this.openModal('task',task.id,{...task}),
-            onDel:()=>this.delTask(task.id),
+            onDel:()=>this.delTask?.(task.id),
           };
         });
       })(),
@@ -2390,8 +2390,8 @@ class Component extends DCLogic {
       onInvoicePrintBgClick:(e)=>{if(e.target===e.currentTarget)this.setState({invoicePrintModal:false});},
       onInvoicePrintPeriodChange:(e)=>this.setState({invoicePrintPeriodId:e.target.value}),
       onInvoicePrintStatusChange:(e)=>this.setState({invoicePrintStatus:e.target.value}),
-      onPrintInvoiceList:()=>this.printInvoiceList(),
-      onOpenCashbookModal:()=>this.openCashbookModal(),
+      onPrintInvoiceList:()=>this.printInvoiceList?.(),
+      onOpenCashbookModal:()=>this.openCashbookModal?.(),
       cashbookModalShow:!!this.state.cashbookModal,
       cashbookPeriodId:this.state.cashbookPeriodId||this.state.currentPeriodId||'',
       cashbookMonthFrom:this.state.cashbookMonthFrom||1,
@@ -2402,7 +2402,7 @@ class Component extends DCLogic {
       onCashbookMonthToChange:(e)=>this.setState({cashbookMonthTo:parseInt(e.target.value)}),
       onCashbookBgClick:(e)=>{if(e.target===e.currentTarget)this.setState({cashbookModal:false});},
       onCloseCashbookModal:()=>this.setState({cashbookModal:false}),
-      onPrintCashbook:()=>this.printCashbook(),
+      onPrintCashbook:()=>this.printCashbook?.(),
       memberRows,
       memberCount:members.filter(m=>m.type!=='その他').length,
       activeMemberCount:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).length,
@@ -2420,8 +2420,8 @@ class Component extends DCLogic {
       paidCount:filteredInvoices.filter(i=>isPaid(i.status)).length,
       unpaidCount:unpaidInMonth,
       totalInvoiceAmt:this.fmt(filteredInvoices.reduce((s,i)=>s+i.amount,0)),
-      onGenerateInvoices:()=>this.generateInvoices(),
-      onOpenBulk:()=>this.openBulkModal(),
+      onGenerateInvoices:()=>this.generateInvoices?.(),
+      onOpenBulk:()=>this.openBulkModal?.(),
       onAddInvoice:()=>this.openModal('invoice',null,{type:'会費',status:'未払',issuedDate:new Date().toISOString().slice(0,10),paidDate:'',amount:0,memberStore:'',memberName:'',memberId:'',paymentMethod:'',reminderNote:''}),
       onInvoiceMemberSelect:(e)=>{
         const mb = members.find(m=>m.id===e.target.value);
@@ -2476,7 +2476,7 @@ class Component extends DCLogic {
         this.setState({bulkSelectedIds:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>m.id)});
       },
       onBulkClearAll:()=>this.setState({bulkSelectedIds:[]}),
-      onBulkGenerate:()=>this.generateBulkInvoices(),
+      onBulkGenerate:()=>this.generateBulkInvoices?.(),
       bulkSelectedCount:(this.state.bulkSelectedIds||[]).length,
       bulkMemberList:members.filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍')).map(m=>{
         const sel=(this.state.bulkSelectedIds||[]).includes(m.id);
@@ -2497,7 +2497,7 @@ class Component extends DCLogic {
       // Installment modal
       showInstallmentModal:this.state.installmentModal||false,
       onCloseInstallment:()=>this.setState({installmentModal:false}),
-      onSaveInstallment:()=>this.saveInstallment(),
+      onSaveInstallment:()=>this.saveInstallment?.(),
       onInstallmentCountChange:(e)=>this.setState({installmentCount:parseInt(e.target.value)||12}),
       onInstallmentDebitDayChange:(e)=>this.setState({installmentDebitDay:parseInt(e.target.value)||27}),
       onInstallmentStartChange:(e)=>this.setState({installmentStartMonth:e.target.value}),
@@ -2532,7 +2532,7 @@ class Component extends DCLogic {
             status,
             statusBadge:{...bBase2,background:status==='済み'?'#dcfce7':'#fee2e2',color:status==='済み'?'#166534':'#991b1b'},
             markPaidStyle:status==='未払い'?{border:'none',background:'rgba(123,192,149,0.12)',color:'#7BC095',padding:'3px 8px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 8px',borderRadius:'5px',fontSize:'10px',cursor:'default'},
-            onMarkPaid:status==='未払い'?()=>this.markInstallmentPaid(invId,i+1):()=>{},
+            onMarkPaid:status==='未払い'?()=>this.markInstallmentPaid?.(invId,i+1):()=>{},
           };
         });
         const paidCount = schedule.filter(s=>s.status==='済み').length;
@@ -2567,7 +2567,7 @@ class Component extends DCLogic {
       showBalanceCheckForm: this.state.showBalanceCheckForm||false,
       onOpenBalanceCheck: ()=>this.setState({showBalanceCheckForm:true, bcDate:new Date().toISOString().slice(0,10)}),
       onCancelBalanceCheck: ()=>this.setState({showBalanceCheckForm:false}),
-      onSaveBalanceCheck: ()=>this.saveBalanceCheck(),
+      onSaveBalanceCheck: ()=>this.saveBalanceCheck?.(),
       bcDate: this.state.bcDate||new Date().toISOString().slice(0,10),
       bcCashActual: this.state.bcCashActual||'',
       bcBankActual: this.state.bcBankActual||'',
@@ -2605,13 +2605,13 @@ class Component extends DCLogic {
         onDel: ()=>{ if(confirm('この記録を削除しますか？')) this.setState(s=>({balanceLogs:(s.balanceLogs||[]).filter(x=>x.id!==l.id)}),()=>this.persist()); },
       })),
       onAddTx:()=>this.openModal('transaction',null,{txType:'収入',date:new Date().toISOString().slice(0,10),description:'',category:'',amount:0,accountType:'口座'}),
-      onExportTxCSV:()=>this.exportTxCSV(),
-      onExportInvoicesCSV:()=>this.exportInvoicesCSV(),
-      onExportMembersCSV:()=>this.exportMembersCSV(),
-      onBulkPrintAll:()=>this.bulkPrintAll(),
+      onExportTxCSV:()=>this.exportTxCSV?.(),
+      onExportInvoicesCSV:()=>this.exportInvoicesCSV?.(),
+      onExportMembersCSV:()=>this.exportMembersCSV?.(),
+      onBulkPrintAll:()=>this.bulkPrintAll?.(),
       showBulkPrintModal:this.state.bulkPrintModal||false,
       onCloseBulkPrint:()=>this.setState({bulkPrintModal:false}),
-      onDoBulkPrint:()=>this.doBulkPrint(),
+      onDoBulkPrint:()=>this.doBulkPrint?.(),
       onBulkCheckAll:()=>{const c={};(this.state.bulkPrintDocs||[]).forEach(i=>{c[i.id]=true;});this.setState({bulkChecked:c});},
       onBulkUncheckAll:()=>this.setState({bulkChecked:{}}),
       bulkPrintCount:(this.state.bulkPrintDocs||[]).length,
@@ -2639,7 +2639,7 @@ class Component extends DCLogic {
       showTransferModal:this.state.transferModal||false,
       onAddTransfer:()=>this.setState({transferModal:true,transferDate:new Date().toISOString().slice(0,10),transferAmount:0,transferFrom:'口座',transferTo:'現金',transferDesc:''}),
       onCloseTransfer:()=>this.setState({transferModal:false}),
-      onSaveTransfer:()=>this.saveTransfer(),
+      onSaveTransfer:()=>this.saveTransfer?.(),
       transferDate:this.state.transferDate||new Date().toISOString().slice(0,10),
       transferAmount:String(this.state.transferAmount||0),
       transferFrom:this.state.transferFrom||'口座',
@@ -2658,12 +2658,12 @@ class Component extends DCLogic {
       totalActualI:this.fmt(totalIncome), totalActualE:this.fmt(totalExpense),
       onAddIncomeBudget:()=>this.openModal('budget',null,{type:'収入',category:'',amount:0}),
       onAddExpenseBudget:()=>this.openModal('budget',null,{type:'支出',category:'',amount:0}),
-      onOpenBudgetDraft:()=>this.openBudgetDraft(),
+      onOpenBudgetDraft:()=>this.openBudgetDraft?.(),
       onOpenSettlement:()=>this.setState({settlementModal:true,settlementNote:''}),
       // Settlement modal
       showSettlementModal:this.state.settlementModal||false,
       onCloseSettlement:()=>this.setState({settlementModal:false}),
-      onConfirmSettlement:()=>{ if(confirm('収支を確定します。よろしいですか？')) this.confirmSettlement(); },
+      onConfirmSettlement:()=>{ if(confirm('収支を確定します。よろしいですか？')) this.confirmSettlement?.(); },
       settlementNote:this.state.settlementNote||'',
       onSettlementNote:(e)=>this.setState({settlementNote:e.target.value}),
       settlementPeriodName:cp.name||'',
@@ -2721,9 +2721,9 @@ class Component extends DCLogic {
       // Budget draft modal
       showBudgetDraftModal:this.state.budgetDraftModal||false,
       onCloseBudgetDraft:()=>this.setState({budgetDraftModal:false}),
-      onConfirmBudgetDraft:()=>this.confirmBudgetDraft(),
-      onAddDraftIncome:()=>this.addDraftItem('収入'),
-      onAddDraftExpense:()=>this.addDraftItem('支出'),
+      onConfirmBudgetDraft:()=>this.confirmBudgetDraft?.(),
+      onAddDraftIncome:()=>this.addDraftItem?.('収入'),
+      onAddDraftExpense:()=>this.addDraftItem?.('支出'),
       ...(() => {
         const draft = this.state.budgetDraft;
         if (!draft) return {
@@ -2739,9 +2739,9 @@ class Component extends DCLogic {
           currentActualStr:this.fmt(item.currentActual||0),
           nextAmountStr:String(item.nextAmount||0),
           remark:item.remark||'',
-          onAmountChange:(e)=>this.updateDraftItem(item.id,'nextAmount',parseInt(e.target.value)||0),
-          onRemarkChange:(e)=>this.updateDraftItem(item.id,'remark',e.target.value),
-          onDel:()=>this.delDraftItem(item.id),
+          onAmountChange:(e)=>this.updateDraftItem?.(item.id,'nextAmount',parseInt(e.target.value)||0),
+          onRemarkChange:(e)=>this.updateDraftItem?.(item.id,'remark',e.target.value),
+          onDel:()=>this.delDraftItem?.(item.id),
         });
         const draftIncomeRows = draft.items.filter(i=>i.type==='収入').map(mkDraftRow);
         const draftExpenseRows = draft.items.filter(i=>i.type==='支出').map(mkDraftRow);
@@ -2764,7 +2764,7 @@ class Component extends DCLogic {
         const nextStart=(()=>{try{if(cp.endDate){const d=new Date(cp.endDate);d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}return new Date(new Date().getFullYear()+1,3,1).toISOString().slice(0,10);}catch(e){return new Date().toISOString().slice(0,10);}})();
         return ()=>this.openModal('event',null,{name:'',type:'総会・会議',date:nextStart,endDate:'',participants:'',notes:''});
       })(),
-      onPrintEvents:()=>this.printEventsDoc(),
+      onPrintEvents:()=>this.printEventsDoc?.(),
       // ===== 総会資料 =====
       assemblyNoDoc: !this.state.assemblyDoc,
       assemblyHasDoc: !!this.state.assemblyDoc,
@@ -2786,15 +2786,15 @@ class Component extends DCLogic {
             noLabelStyle:isAgenda
               ?{background:'#F5F6F8',color:'#C39425',borderRadius:'6px',padding:'3px 11px',fontSize:'12px',fontWeight:'700',whiteSpace:'nowrap',flexShrink:'0'}
               :{background:'#f1f5f9',color:'#64748b',borderRadius:'6px',padding:'3px 11px',fontSize:'12px',fontWeight:'700',whiteSpace:'nowrap',flexShrink:'0'},
-            label:this._getAgendaLabel(ag.preset,ag.customData),
+            label:this._getAgendaLabel?.(ag.preset,ag.customData),
             typeLabel:ag.preset==='custom'?'カスタム':'データ連携',
           };
         });
       })(),
       mainScrollRef: this._mainScrollRef,
       showLoader: !!this.state.loading,
-      onOpenAssemblyModal:()=>this.openAssemblyModal(),
-      onPrintAssembly:()=>this.printAssemblyDoc(),
+      onOpenAssemblyModal:()=>this.openAssemblyModal?.(),
+      onPrintAssembly:()=>this.printAssemblyDoc?.(),
       assemblyModalShow:this.state.assemblyModal||false,
       assemblyTabIsCover:(this.state.assemblyModalTab||'cover')==='cover',
       assemblyTabIsAgendas:(this.state.assemblyModalTab||'cover')==='agendas',
@@ -2806,7 +2806,7 @@ class Component extends DCLogic {
       onAssemblyInput:(e)=>this.setState(s=>({assemblyForm:{...(s.assemblyForm||{}),[e.target.dataset.field]:e.target.value}})),
       onAssemblyModalBgClick:(e)=>{ if(e.target===e.currentTarget) this.setState({assemblyModal:false}); },
       onCloseAssemblyModal:()=>this.setState({assemblyModal:false}),
-      onSaveAssembly:()=>this.saveAssemblyDoc(),
+      onSaveAssembly:()=>this.saveAssemblyDoc?.(),
       assemblyModalAgendaRows:(()=>{
         let agNo=0;
         const activeBtn={border:'none',padding:'4px 10px',fontSize:'11px',fontWeight:'700',cursor:'pointer',background:'#E7C15F',color:'#3F414C'};
@@ -2824,32 +2824,32 @@ class Component extends DCLogic {
             preset:ag.preset, isCustom:ag.preset==='custom',
             kindAgendaStyle:isAgenda?activeBtn:inactiveBtn,
             kindResourceStyle:!isAgenda?activeBtn:inactiveBtn,
-            onSetAgenda:()=>this.changeAgendaKind(ag.id,'agenda'),
-            onSetResource:()=>this.changeAgendaKind(ag.id,'resource'),
-            onPresetChange:(e)=>this.changeAgendaPreset(ag.id,e.target.value),
-            onEditCustom:()=>this.openCustomAgendaModal(ag.id),
-            onMoveUp:()=>this.moveAgendaItem(ag.id,-1),
-            onMoveDown:()=>this.moveAgendaItem(ag.id,1),
-            onDel:()=>this.removeAgendaItem(ag.id),
+            onSetAgenda:()=>this.changeAgendaKind?.(ag.id,'agenda'),
+            onSetResource:()=>this.changeAgendaKind?.(ag.id,'resource'),
+            onPresetChange:(e)=>this.changeAgendaPreset?.(ag.id,e.target.value),
+            onEditCustom:()=>this.openCustomAgendaModal?.(ag.id),
+            onMoveUp:()=>this.moveAgendaItem?.(ag.id,-1),
+            onMoveDown:()=>this.moveAgendaItem?.(ag.id,1),
+            onDel:()=>this.removeAgendaItem?.(ag.id),
           };
         });
       })(),
-      onAddAgendaItem:()=>this.addAgendaItem(),
+      onAddAgendaItem:()=>this.addAgendaItem?.(),
       customAgendaModalShow:this.state.customAgendaModal||false,
       customAgendaForm:{...{title:'',body:'',col1Header:'項目',col2Header:'内容',tableRows:[]},...(this.state.customAgendaForm||{})},
       customAgendaNoRows:!((this.state.customAgendaForm||{}).tableRows||[]).length,
       customAgendaTableRows:((this.state.customAgendaForm||{}).tableRows||[]).map((row,i)=>({
         col1:row.col1||'', col2:row.col2||'',
-        onCol1:(e)=>this.updateCustomTableCell(i,'col1',e.target.value),
-        onCol2:(e)=>this.updateCustomTableCell(i,'col2',e.target.value),
-        onDel:()=>this.removeCustomTableRow(i),
+        onCol1:(e)=>this.updateCustomTableCell?.(i,'col1',e.target.value),
+        onCol2:(e)=>this.updateCustomTableCell?.(i,'col2',e.target.value),
+        onDel:()=>this.removeCustomTableRow?.(i),
       })),
       onCustomAgendaTitleChange:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),title:e.target.value}})),
       onCustomAgendaBodyChange:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),body:e.target.value}})),
       onCustomTableH1Change:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),col1Header:e.target.value}})),
       onCustomTableH2Change:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),col2Header:e.target.value}})),
-      onAddCustomTableRow:()=>this.addCustomTableRow(),
-      onSaveCustomAgenda:()=>this.saveCustomAgenda(),
+      onAddCustomTableRow:()=>this.addCustomTableRow?.(),
+      onSaveCustomAgenda:()=>this.saveCustomAgenda?.(),
       onCloseCustomAgenda:()=>this.setState({customAgendaModal:false,customAgendaEditId:null}),
       onCustomAgendaBgClick:(e)=>{ if(e.target===e.currentTarget) this.setState({customAgendaModal:false,customAgendaEditId:null}); },
       stmtOrgName:(this.state.orgInfo||{}).name||'新田西口商店会',
@@ -2861,7 +2861,7 @@ class Component extends DCLogic {
       hasSettlements:(this.state.settlements||[]).length>0,
       settlementDocList:(()=>{
         const repName = (this.state.orgInfo||{}).repName||'';
-        const repHankoSvg = this.makeHanko(repName);
+        const repHankoSvg = this.makeHanko?.(repName);
         const budgets = this.state.budgetItems||[];
         const periods = this.state.periods||[];
         const diffStr=(d)=>d===0?'—':(d>0?'＋':d<0?'▲':'')+Math.abs(d).toLocaleString('ja-JP');
@@ -2884,7 +2884,7 @@ class Component extends DCLogic {
           const budTotalI = bds.filter(b=>b.type==='収入').reduce((a,b)=>a+(b.amount||0),0);
           const budTotalE = bds.filter(b=>b.type==='支出').reduce((a,b)=>a+(b.amount||0),0);
           const audit = s.audit||null;
-          const auditorHankoSvg = audit ? this.makeHanko(audit.name||'') : '';
+          const auditorHankoSvg = audit ? this.makeHanko?.(audit.name||'') : '';
           return {
             ...s,
             periodStart: pd.startDate||'', periodEnd: pd.endDate||'',
@@ -2906,7 +2906,7 @@ class Component extends DCLogic {
             auditBtnLabel:audit?'監査済み':'監査報告入力',
             auditBtnStyle:audit?{border:'none',background:'rgba(123,192,149,0.1)',color:'#7BC095',padding:'6px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600'}:{border:'none',background:'rgba(0,0,0,0.05)',color:'#3F414C',padding:'6px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'500'},
             onAudit:()=>this.setState({auditModal:true,auditTargetId:s.id,auditName:'',auditDate:new Date().toISOString().slice(0,10),auditNote:''}),
-            onPrintDoc:()=>this.printSettlementDoc(s),
+            onPrintDoc:()=>this.printSettlementDoc?.(s),
             onDel:()=>{ if(confirm('この決算書を削除しますか？')) this.setState(st=>({settlements:(st.settlements||[]).filter(x=>x.id!==s.id)}),()=>this.persist()); },
           };
         });
@@ -2918,7 +2918,7 @@ class Component extends DCLogic {
       auditDate:this.state.auditDate||new Date().toISOString().slice(0,10),
       auditNote:this.state.auditNote||'',
       onCloseAudit:()=>this.setState({auditModal:false}),
-      onConfirmAudit:()=>this.confirmAudit(),
+      onConfirmAudit:()=>this.confirmAudit?.(),
       onAuditName:(e)=>this.setState({auditName:e.target.value}),
       auditOfficerOptions:(()=>{
         const pid = this.state.currentPeriodId;
@@ -2980,7 +2980,7 @@ class Component extends DCLogic {
           printBankHolder:(this.state.orgInfo||{}).bankHolder||'',
           printDocTitle:pd.docType==='invoice'?'請求書':'領収書',
           onClosePrint:()=>this.setState({printDoc:null}),
-          onPrintInvoiceDoc:()=>{ const pd=this.state.printDoc; if(pd){ const pw=prompt('印鑑を押印するにはパスワードを入力（スキップ：キャンセル）'); const hi=(pw==='2490')?window.location.href.replace(/\/[^/]*$/,'')+'/uploads/西口商店会_角印.png':null; this._openPrintWindow(this._buildInvoiceHtml(pd,pd.docType,hi),pd.docType==='invoice'?'請求書':'領収書'); this.setState({printDoc:null}); } },
+          onPrintInvoiceDoc:()=>{ const pd=this.state.printDoc; if(pd){ const pw=prompt('印鑑を押印するにはパスワードを入力（スキップ：キャンセル）'); const hi=(pw==='2490')?window.location.href.replace(/\/[^/]*$/,'')+'/uploads/西口商店会_角印.png':null; this._openPrintWindow(this._buildInvoiceHtml?.(pd,pd.docType,hi),pd.docType==='invoice'?'請求書':'領収書'); this.setState({printDoc:null}); } },
           stopProp:(e)=>e.stopPropagation(),
         };
       })(),

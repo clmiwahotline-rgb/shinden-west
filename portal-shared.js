@@ -105,7 +105,7 @@
           this.setState({ syncStatus: 'ok', loading: false });
           this.showToast('SSにデータが見つかりません。ローカルデータを使用中（SS未書込）');
         } else {
-          const assemblyDoc = this._restoreAssemblyDoc(parsed);
+          const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
           const merged = {...parsed, assemblyDoc};
           this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true });
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
@@ -136,7 +136,7 @@
       .then(d=>{
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length===0) { if(!silent) this.showToast('SSにデータがありません'); return; }
-        const assemblyDoc = this._restoreAssemblyDoc(parsed);
+        const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
         const merged = {...parsed, assemblyDoc};
         this.setState({...merged, syncStatus:'ok', ssReady:true});
         localStorage.setItem('nitta_v5', JSON.stringify(merged));
@@ -157,7 +157,7 @@
       .then(d=>{
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length===0) throw new Error('SSにデータがありません');
-        const assemblyDoc = this._restoreAssemblyDoc(parsed);
+        const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
         const merged = {...parsed, assemblyDoc};
         this.setState({...merged, loading:false, syncStatus:'ok', ssReady:true});
         localStorage.setItem('nitta_v5', JSON.stringify(merged));
