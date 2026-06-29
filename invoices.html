@@ -1159,7 +1159,6 @@ class Component extends DCLogic {
     this._myPages = ["invoices"];
   })();
 
-
   componentWillUnmount() {
     if (this._autoRefreshTimer) clearInterval(this._autoRefreshTimer);
     if (this._inactivityTimer) clearInterval(this._inactivityTimer);
@@ -1297,7 +1296,7 @@ class Component extends DCLogic {
     const hankoImg = (pw==='2490') ? window.location.href.replace(/\/[^/]*$/, '')+'/uploads/西口商店会_角印.png' : null;
     const pages = docs.map(inv=>this._buildInvoiceHtml(inv,'invoice',hankoImg))
       .join('<div style="page-break-before:always;break-before:page;"></div>');
-    this._openPrintWindow(pages,'請求書まとめて印刷');
+    this._openPrintWindow(pages,'請求書まとめて印刷', true);
     this.setState({bulkPrintModal:false});
   }
 

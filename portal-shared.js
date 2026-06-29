@@ -377,16 +377,17 @@
     this.setState({toast:msg,_tt:t});
   },
 
-  _openPrintWindow(bodyHtml, title) {
+  _openPrintWindow(bodyHtml, title, noPageNum) {
+    const pageNumCss = noPageNum
+      ? '@page{size:A4 portrait;margin:15mm 18mm;}@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:""}@bottom-right{""}}'
+      : '@page{size:A4 portrait;margin:15mm 18mm;}@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:counter(page);font-size:9pt;font-family:serif}@bottom-right{content:""}}';
     const printCss = [
-      '@page{size:A4 portrait;margin:15mm 18mm;}@page{@top-left{content:""}@top-center{content:""}@top-right{content:""}@bottom-left{content:""}@bottom-center{content:counter(page);font-size:9pt;font-family:serif}@bottom-right{content:""}}',
+      pageNumCss,
       'body{margin:0;background:#fff;color:#000;font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;}',
       '*{color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
       'td,th,div,span,p{color:#000!important;}',
       'table{border-collapse:collapse;}',
       'tr,td,th{border-color:#000!important;}',
-      '[style*="border-bottom"]{border-bottom-width:0.5pt!important;border-bottom-color:#000!important;}',
-      '[style*="border-top"]{border-top-width:0.5pt!important;border-top-color:#000!important;}',
       '[style*="border:1px"]{border:0.5pt solid #000!important;}',
       '[style*="color:#555"],[style*="color:#666"],[style*="color:#888"],[style*="color:#999"],[style*="color:#A1A1AA"],[style*="color:#6B7280"]{color:#000!important;}',
       'img{-webkit-print-color-adjust:exact;}',
@@ -402,6 +403,25 @@
     setTimeout(()=>w.print(),600);
   },
 
+
+  _buildOfficersAgendaHtml() {
+    const pid=this.state.currentPeriodId;
+    const officers=(this.state.officers||[]).filter(o=>o.periodId===pid);
+    if(!officers.length) return '<p style="font-size:11pt;color:#555;">役員が登録されていません。</p>';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    let html='<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:left;font-weight:600;width:90pt;">役職</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">氏名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">店舗名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">備考</th></tr>';
+    officers.forEach(o=>{const mb=(this.state.members||[]).find(m=>m.id===o.memberId)||{};html+='<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;">'+esc(o.role)+'</td><td style="padding:4pt 8pt;">'+esc(mb.name||'')+'</td><td style="padding:4pt 8pt;">'+esc(mb.store||'')+'</td><td style="padding:4pt 8pt;">'+esc(o.memo||'')+'</td></tr>';});
+    return html+'</table>';
+  },
+
+  _buildMembersAgendaHtml() {
+    const members=(this.state.members||[]).filter(m=>m.type!=='その他'&&(!m.status||m.status==='在籍'));
+    if(!members.length) return '<p style="font-size:11pt;color:#555;">会員が登録されていません。</p>';
+    const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    let html='<table style="width:100%;border-collapse:collapse;font-size:10pt;"><tr style="border-bottom:1pt solid #000;"><th style="padding:4pt 8pt;text-align:center;font-weight:600;width:32pt;">No.</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">店舗名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">氏名</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">会員種別</th><th style="padding:4pt 8pt;text-align:left;font-weight:600;">電話</th></tr>';
+    [...members].sort((a,b)=>(a.no||999)-(b.no||999)).forEach((m,i)=>{html+='<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 8pt;text-align:center;">'+(m.no||i+1)+'</td><td style="padding:4pt 8pt;">'+esc(m.store)+'</td><td style="padding:4pt 8pt;">'+esc(m.name)+'</td><td style="padding:4pt 8pt;">'+esc(m.type)+'</td><td style="padding:4pt 8pt;">'+esc(m.phone||'')+'</td></tr>';});
+    return html+'</table><div style="font-size:10pt;text-align:right;margin-top:6px;">計 '+members.length+'名</div>';
+  },
   calcFiscalYear(dateStr) {
     const d = dateStr ? new Date(dateStr) : new Date();
     const y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear()-1; // 4月以降が新年度

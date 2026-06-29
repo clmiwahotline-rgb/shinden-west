@@ -859,7 +859,6 @@ class Component extends DCLogic {
     this._myPages = ["officers","members"];
   })();
 
-
   componentWillUnmount() {
     if (this._autoRefreshTimer) clearInterval(this._autoRefreshTimer);
     if (this._inactivityTimer) clearInterval(this._inactivityTimer);
