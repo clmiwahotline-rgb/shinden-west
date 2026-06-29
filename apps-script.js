@@ -4,20 +4,13 @@
  * ===== デプロイ設定 =====
  * 1. スプレッドシートを開く → 拡張機能 → Apps Script
  * 2. このコードを貼り付けて保存
- * 3. 「デプロイ」→「新しいデプロイ」
- *    - 種類: ウェブアプリ
- *    - 次のユーザーとして実行: 自分
- *    ★ アクセスできるユーザー: 全員（匿名ユーザーを含む）← ここが重要！
- * 4. デプロイ → URLをコピー
- * 5. ポータルの設定ページに貼り付け
+ * 3. 「デプロイ」→「既存のデプロイを管理」→ バージョン更新
  *
- * ===== セキュリティ =====
- * APIキーで保護します。初回アクセス時にスクリプトプロパティへ自動設定されます。
- * ポータルの設定ページでAPIキーを確認・変更できます。
- *
- * ===== APIキー確認方法 =====
- * Apps Script エディタ → プロジェクトの設定 → スクリプトプロパティ
- * → API_KEY の値を確認してポータルに入力
+ * ===== キャッシュ設計 =====
+ * - CacheService（スクリプトキャッシュ）でデータを最大1時間キャッシュ
+ * - 保存時にキャッシュを無効化 + lastModifiedタイムスタンプを更新
+ * - Portal側は lastModified を比較し、変更なければ処理をスキップ
+ * - 効果: GASレスポンス 2〜4秒 → キャッシュヒット時 0.2〜0.5秒
  */
 
 const SHEETS = [
@@ -27,18 +20,15 @@ const SHEETS = [
   'balanceLogs','settlements','authEmails','tasks'
 ];
 
-// ===== CORS ヘッダー =====
-function corsHeaders() {
-  return ContentService.createTextOutput()
-    .setMimeType(ContentService.MimeType.JSON);
-}
+const CACHE_KEY = 'PORTAL_DATA_V1';
+const CACHE_TTL = 3600; // 1時間
 
+// ===== レスポンス =====
 function jsonOk(data) {
   return ContentService
     .createTextOutput(JSON.stringify({ ok: true, ...data }))
     .setMimeType(ContentService.MimeType.JSON);
 }
-
 function jsonErr(msg) {
   return ContentService
     .createTextOutput(JSON.stringify({ ok: false, error: msg }))
@@ -50,32 +40,80 @@ function getApiKey() {
   const props = PropertiesService.getScriptProperties();
   let key = props.getProperty('API_KEY');
   if (!key) {
-    // 初回：ランダムキーを自動生成
     key = Utilities.getUuid().replace(/-/g, '').slice(0, 16);
     props.setProperty('API_KEY', key);
   }
   return key;
 }
-
 function checkApiKey(key) {
   if (!key) return false;
   return key === getApiKey();
 }
 
-// ===== GETリクエスト（データ読み込み） =====
+// ===== lastModified管理 =====
+function getLastModified() {
+  return PropertiesService.getScriptProperties().getProperty('LAST_MODIFIED') || '0';
+}
+function updateLastModified() {
+  const ts = String(Date.now());
+  PropertiesService.getScriptProperties().setProperty('LAST_MODIFIED', ts);
+  return ts;
+}
+
+// ===== キャッシュ管理 =====
+function getCachedData() {
+  try {
+    const cache = CacheService.getScriptCache();
+    const cached = cache.get(CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch(e) {}
+  return null;
+}
+function setCachedData(data) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const json = JSON.stringify(data);
+    // CacheServiceの上限は100KB。超えたらキャッシュしない
+    if (json.length < 95000) {
+      cache.put(CACHE_KEY, json, CACHE_TTL);
+    }
+  } catch(e) {}
+}
+function invalidateCache() {
+  try {
+    CacheService.getScriptCache().remove(CACHE_KEY);
+  } catch(e) {}
+}
+
+// ===== GETリクエスト =====
 function doGet(e) {
   try {
     const params = e.parameter || {};
     const action = params.action || 'load';
     const key = params.key || '';
+    const clientTs = params.ts || '0';
 
-    // APIキー確認
-    if (!checkApiKey(key)) {
-      return jsonErr('APIキーが無効です');
-    }
+    if (!checkApiKey(key)) return jsonErr('APIキーが無効です');
 
     if (action === 'load') {
-      return jsonOk(loadAllData());
+      const serverTs = getLastModified();
+
+      // クライアントが持っているtsと一致 → 変更なし
+      if (clientTs !== '0' && clientTs === serverTs) {
+        return jsonOk({ modified: false, lastModified: serverTs });
+      }
+
+      // キャッシュヒット確認
+      const cached = getCachedData();
+      if (cached) {
+        return jsonOk({ ...cached, lastModified: serverTs, fromCache: true });
+      }
+
+      // キャッシュミス → SSから全読込
+      const data = loadAllData();
+      setCachedData(data);
+      return jsonOk({ ...data, lastModified: serverTs });
+
     } else if (action === 'getKey') {
       return jsonOk({ key: getApiKey() });
     }
@@ -86,23 +124,26 @@ function doGet(e) {
   }
 }
 
-// ===== POSTリクエスト（データ保存） =====
+// ===== POSTリクエスト =====
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents || '{}');
     const key = body.key || '';
-
-    if (!checkApiKey(key)) {
-      return jsonErr('APIキーが無効です');
-    }
+    if (!checkApiKey(key)) return jsonErr('APIキーが無効です');
 
     const action = body.action || 'save';
 
     if (action === 'save') {
-      return jsonOk(saveAllData(body.data || {}));
+      const result = saveAllData(body.data || {});
+      // キャッシュ無効化 + lastModified更新
+      invalidateCache();
+      const newTs = updateLastModified();
+      return jsonOk({ ...result, lastModified: newTs });
+
     } else if (action === 'resetKey') {
       const newKey = Utilities.getUuid().replace(/-/g, '').slice(0, 16);
       PropertiesService.getScriptProperties().setProperty('API_KEY', newKey);
+      invalidateCache();
       return jsonOk({ newKey });
     }
 
@@ -122,20 +163,16 @@ function loadAllData() {
     result[name] = readSheet(ss, name);
   });
 
-  // meta → currentPeriodId
   const meta = readSheet(ss, 'meta');
   result.currentPeriodId = (meta.length > 0 && meta[0].currentPeriodId)
     ? String(meta[0].currentPeriodId) : null;
 
-  // orgInfo: 配列→オブジェクト
   result.orgInfo = (result.orgInfo && result.orgInfo.length > 0)
     ? result.orgInfo[0] : {};
 
-  // budgetDraft
   const draft = props.getProperty('BUDGET_DRAFT');
   result.budgetDraft = draft ? JSON.parse(draft) : null;
 
-  // assemblyDoc（総会資料 — 複雑なJSONのためScriptPropertyに保存）
   const aDoc = props.getProperty('ASSEMBLY_DOC');
   result.assemblyDoc = aDoc ? JSON.parse(aDoc) : null;
 
@@ -172,7 +209,6 @@ function saveAllData(data) {
     }
   }
 
-  // assemblyDoc（総会資料）
   if (data.assemblyDoc !== undefined) {
     if (data.assemblyDoc) {
       props.setProperty('ASSEMBLY_DOC', JSON.stringify(data.assemblyDoc));
@@ -199,7 +235,6 @@ function readSheet(ss, name) {
         if (v === '' || v === null || v === undefined) {
           obj[h] = null;
         } else if (v instanceof Date) {
-          // JST基準でYYYY-MM-DD形式に変換（UTC変換しない）
           const jst = new Date(v.getTime() + 9 * 60 * 60 * 1000);
           obj[h] = jst.toISOString().slice(0, 10);
         } else {
@@ -220,7 +255,6 @@ function writeSheet(ss, name, rows) {
     return headers.map(function(h) {
       const v = r[h];
       if (v === null || v === undefined) return '';
-      // ネストされた配列・オブジェクトはJSON文字列として保存
       if (typeof v === 'object') return JSON.stringify(v);
       return v;
     });

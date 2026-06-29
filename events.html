@@ -35,6 +35,11 @@
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
     /* ローディング進捗バー */
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    body.portal-ready { animation: fadeInPage 0.18s ease-out both; }
     @keyframes progress-indeterminate {
       0%   { transform: translateX(-100%) scaleX(0.5); }
       50%  { transform: translateX(0%)    scaleX(0.8); }
@@ -1008,7 +1013,7 @@ class Component extends DCLogic {
       return{...t,_cashBal:filtCashBal,_bankBal:filtBankBal,_fbal:filtCashBal+filtBankBal};
     });
     const bBase3={padding:'1px 6px',borderRadius:'8px',fontSize:'10px',fontWeight:'500',display:'inline-block'};
-    const txRows = [...txSortedFiltered].reverse().map(t=>({
+    const txRows = page === 'ledger' ? [...txSortedFiltered].reverse().map(t=>({
       ...t,
       dateStr:this.fmtD(t.date),
       incStr:t.income>0?this.fmt(t.income):'—',
@@ -1024,7 +1029,7 @@ class Component extends DCLogic {
       isComposite:t.groupType==='複合',
       onEdit:()=>this.openModal('transaction',t.id,{...t,txType:t.income>0?'収入':'支出',amount:t.income||t.expense,accountType:t.accountType||'口座'}),
       onDel:()=>this.delTx?.(t.id),
-    }));
+    })) : [];
 
     // Budget category options split by type
     const budgetCategoryOptions = pBudget.map(b=>({value:b.category,label:`[${b.type}] ${b.category}`}));
@@ -1055,7 +1060,7 @@ class Component extends DCLogic {
     const expenseBudget=pBudget.filter(b=>b.type==='支出').map(mkBRow);
 
     // Officer rows — look up member data by memberId
-    const officerRows = pOfficers.map(o=>{
+    const officerRows = page === 'officers' ? pOfficers.map(o=>{
       const mb = members.find(m=>m.id===o.memberId)||{};
       return {
         ...o,
@@ -1067,7 +1072,7 @@ class Component extends DCLogic {
         onEdit: ()=>this.openModal('officer',o.id,{role:o.role,memberId:o.memberId||'',memo:o.memo||''}),
         onDel: ()=>this.delOfficer?.(o.id),
       };
-    });
+    }) : [];
 
     // Member rows
     // Member rows with pagination & new fields
@@ -1083,7 +1088,7 @@ class Component extends DCLogic {
       onEdit:()=>this.openModal('member',m.id,{type:m.type||'その他',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
       onDel:()=>{ if(!confirm(`「${m.name}」を削除しますか？`)) return; this.setState(s=>({members:s.members.filter(mb=>mb.id!==m.id)}),()=>this.persist()); this.showToast('削除しました'); },
     }));
-    const allMemberRows = members.filter(m=>m.type!=='その他').map(m=>({
+    const allMemberRows = page === 'members' ? members.filter(m=>m.type!=='その他').map(m=>({
       ...m, feeStr:this.fmt(m.fee),
       faxStr:m.fax?`FAX: ${m.fax}`:'',
       address:m.address||'',
@@ -1093,7 +1098,7 @@ class Component extends DCLogic {
       rowBg:m.status==='退会'?'background:rgba(0,0,0,0.015);':'',
       onEdit:()=>this.openModal('member',m.id,{type:m.type||'正会員',fax:m.fax||'',address:m.address||'',joinDate:m.joinDate||'',...m}),
       onStatus:()=>this.recordMemberStatus?.(m.id,m.name),
-    }));
+    })) : [];
     const totalMemberPages = Math.max(1,Math.ceil(allMemberRows.length/PAGE_SIZE));
     const memberRows = allMemberRows.slice(memberPage*PAGE_SIZE,(memberPage+1)*PAGE_SIZE);
     const btnPage = {padding:'6px 14px',borderRadius:'7px',fontSize:'12px',fontWeight:'500',border:'1px solid rgba(0,0,0,0.1)'};
@@ -1159,7 +1164,7 @@ class Component extends DCLogic {
     const filteredInvoices = invoiceFilter==='全て'?invMonthFiltered:invoiceFilter==='未払'?invMonthFiltered.filter(i=>isUnpaid(i.status)):invoiceFilter==='入金済'?invMonthFiltered.filter(i=>isPaid(i.status)):invMonthFiltered.filter(i=>i.status===invoiceFilter);
     const btnPay = {border:'none',background:'rgba(123,192,149,0.12)',color:'#7BC095',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'};
     const btnPayDone = {border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'default'};
-    const invoiceRows = filteredInvoices.map((i,idx)=>({
+    const invoiceRows = page === 'invoices' ? filteredInvoices.map((i,idx)=>({
       ...i,
       amountStr:this.fmt(i.amount),
       issuedStr:this.fmtD(i.issuedDate),
@@ -1183,7 +1188,7 @@ class Component extends DCLogic {
       hasReminder:!!(i.reminderNote),
       noReminder:!(i.reminderNote),
       onReminder:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
-    }));
+    })) : [];
 
     // Event rows
     const periodEnd = cp.endDate||'9999-12-31';
@@ -1245,7 +1250,7 @@ class Component extends DCLogic {
     const periodOptions = periods.map(p=>({...p}));
     const editingPeriodId = this.state.editingPeriodId||null;
     const editingDates = this.state.editingDates||{};
-    const periodRows = periods.map(p=>({
+    const periodRows = page === 'settings' ? periods.map(p=>({
       ...p,
       startStr:this.fmtD(p.startDate), endStr:this.fmtD(p.endDate),
       isEditing: editingPeriodId===p.id,
@@ -1271,7 +1276,7 @@ class Component extends DCLogic {
       activeLabel:p.id===currentPeriodId?'現在の期':'',
       activeBadge:p.id===currentPeriodId?{...bBase,background:'#dcfce7',color:'#166534'}:{...bBase,background:'transparent',color:'transparent'},
       onSelect:()=>this.setState({currentPeriodId:p.id}),
-    }));
+    })) : [];
 
     // Modal
     const TITLES={task:modal.editId?'タスクを編集':'タスクを追加',officer:modal.editId?'役員を編集':'役員を追加',member:modal.editId?'会員情報を編集':'新規会員登録',memberStatus:'退会・訂正の記録',invoice:modal.editId?'請求書を編集':'請求書を追加',transaction:modal.editId?'取引を編集':'取引を追加',budget:modal.editId?'予算科目を編集':'予算科目を追加',event:modal.editId?'事業を編集':'事業を追加',period:'新しい期を追加'};
@@ -2078,7 +2083,7 @@ function getAuthEmails(){
   const local=(()=>{try{const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');return(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email);}catch(e){return[];}})();
   return [...new Set([...local,...__gasAuthEmails])];
 }
-function showPortal(){document.getElementById('auth-overlay').classList.add('hidden');}
+function showPortal(){document.getElementById('auth-overlay').classList.add('hidden');document.body.classList.add('portal-ready');}
 function handleCredential(response){
   try{
     const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
