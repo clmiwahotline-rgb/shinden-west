@@ -744,7 +744,7 @@
                     </select>
                   </span>
                   <span style="width:130px;paddingLeft:6px;">
-                    <input value="{{ line.category }}" onChange="{{ line.onCatChange }}" style="width:118px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="科目">
+                    <input value="{{ line.category }}" onChange="{{ line.onCatChange }}" list="composite-cat-list" style="width:118px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="科目">
                   </span>
                   <span style="flex:1;paddingLeft:6px;">
                     <input value="{{ line.description }}" onChange="{{ line.onDescChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 7px;fontSize:12px;" placeholder="摘要">
@@ -763,6 +763,11 @@
                   </span>
                 </div>
               </sc-for>
+              <datalist id="composite-cat-list">
+                <sc-for list="{{ budgetCategoryOptions }}" as="copt" hint-placeholder-count="0">
+                  <option value="{{ copt.value }}"></option>
+                </sc-for>
+              </datalist>
               <div style="padding:8px 14px;display:flex;justify-content:space-between;alignItems:center;borderTop:1px solid rgba(0,0,0,0.06);">
                 <button onClick="{{ onAddCompositeLine }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">＋ 明細追加</button>
                 <div style="fontSize:12px;color:#6B7280;display:flex;gap:16px;">
@@ -1431,7 +1436,7 @@
             <span style="width:60px;textAlign:center;">区分</span>
             <span style="width:88px;textAlign:right;">収入</span>
             <span style="width:88px;textAlign:right;">支出</span>
-            <span style="width:96px;textAlign:right;">残高</span>
+            <span style="width:140px;textAlign:right;">現金残高 / 口座残高</span>
             <span style="width:72px;" data-noprint=""></span>
           </div>
           <sc-for list="{{ txRows }}" as="row" hint-placeholder-count="8">
@@ -1446,7 +1451,10 @@
               <span style="width:60px;textAlign:center;"><span style="{{ row.accountBadge }}">{{ row.accountType }}</span></span>
               <span style="{{ row.incStyle }}">{{ row.incStr }}</span>
               <span style="{{ row.expStyle }}">{{ row.expStr }}</span>
-              <span style="width:96px;textAlign:right;fontSize:12px;fontWeight:600;color:#3F414C;">{{ row.balStr }}</span>
+              <span style="width:140px;textAlign:right;fontSize:11px;lineHeight:1.6;">
+                <div style="fontWeight:600;color:#3F414C;fontSize:11px;">現金 {{ row.cashBalStr }}</div>
+                <div style="color:#6B7280;fontSize:11px;">口座 {{ row.bankBalStr }}</div>
+              </span>
               <span style="width:72px;display:flex;gap:5px;" data-noprint="">
                 <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
@@ -2453,6 +2461,9 @@
 
       <div style="display:flex;justify-content:flex-end;gap:8px;paddingTop:20px;borderTop:1px solid rgba(0,0,0,0.07);marginTop:20px;">
         <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+        <sc-if value="{{ isTxNew }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ onSaveAndNext }}" style="border:1px solid #AFC3D7;background:#fff;color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">追加して次へ</button>
+        </sc-if>
         <button onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
       </div>
     </div>
@@ -3767,32 +3778,37 @@ class Component extends DCLogic {
       if((t.accountType||'口座')==='現金'){cashBal+=(t.income||0)-(t.expense||0);}
       else{bankBal+=(t.income||0)-(t.expense||0);}
     });
-    const thS='border:1px solid #999;padding:5px 7px;text-align:right;width:72px;font-size:9pt;';
-    const thSL='border:1px solid #999;padding:5px 7px;text-align:left;font-size:9pt;';
+    const thS='border:1px solid #999;padding:5px 7px;text-align:right;width:68px;font-size:8.5pt;';
+    const thSL='border:1px solid #999;padding:5px 7px;text-align:left;font-size:8.5pt;';
+    const tdA='border:1px solid #ccc;padding:3px 7px;text-align:right;font-size:8.5pt;';
+    const tdL='border:1px solid #ccc;padding:3px 7px;font-size:8.5pt;';
     let html=`<div style="text-align:center;margin-bottom:24px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:17pt;font-weight:700;letter-spacing:0.1em;">現　金　出　納　帳</div>
       <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　${mFrom}月〜${mTo}月　${esc(orgName)}</div>
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:9pt;">
+    <table style="width:100%;border-collapse:collapse;font-size:8.5pt;">
       <tr style="background:#E6E8EC;">
-        <th style="${thSL}width:52px;">日付</th>
-        <th style="${thSL}">摘要</th>
-        <th style="${thSL}width:60px;">科目</th>
-        <th style="${thS}">現金収入</th>
-        <th style="${thS}">現金支出</th>
-        <th style="${thS}">現金残高</th>
-        <th style="${thS}">預金収入</th>
-        <th style="${thS}">預金支出</th>
-        <th style="${thS}">預金残高</th>
+        <th style="${thSL}width:44px;" rowspan="2">日付</th>
+        <th style="${thSL}" rowspan="2">摘要 / 科目</th>
+        <th style="${thS}" colspan="3">現　金</th>
+        <th style="${thS}" colspan="3">預　金</th>
+      </tr>
+      <tr style="background:#E6E8EC;">
+        <th style="${thS}">収入</th>
+        <th style="${thS}">支出</th>
+        <th style="${thS}">残高</th>
+        <th style="${thS}">収入</th>
+        <th style="${thS}">支出</th>
+        <th style="${thS}">残高</th>
       </tr>
       <tr style="font-weight:700;background:#F5F6F8;">
-        <td style="border:1px solid #ccc;padding:4px 7px;" colspan="3">繰越残高</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">${fmt(cashBal)}</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">—</td>
-        <td style="border:1px solid #ccc;padding:4px 7px;text-align:right;">${fmt(bankBal)}</td>
+        <td style="${tdL}" colspan="2">繰越残高</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">${fmt(cashBal)}</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">—</td>
+        <td style="${tdA}">${fmt(bankBal)}</td>
       </tr>`;
     txs.forEach(t=>{
       const isCash=(t.accountType||'口座')==='現金';
@@ -3800,20 +3816,24 @@ class Component extends DCLogic {
       if(isCash){cashBal+=inc-exp;}else{bankBal+=inc-exp;}
       const d=t.date||'';
       const ds=d?`${parseInt(d.slice(5,7))}/${parseInt(d.slice(8,10))}`:'';
+      const desc=esc(t.description||'');
+      const cat=esc(t.category||'');
       html+=`<tr>
-        <td style="border:1px solid #ccc;padding:3px 7px;">${esc(ds)}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;">${esc(t.description||t.category||'')}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;">${esc(t.category||'')}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${isCash&&inc>0?fmt(inc):'—'}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${isCash&&exp>0?fmt(exp):'—'}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${isCash?fmt(cashBal):'—'}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${!isCash&&inc>0?fmt(inc):'—'}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${!isCash&&exp>0?fmt(exp):'—'}</td>
-        <td style="border:1px solid #ccc;padding:3px 7px;text-align:right;">${!isCash?fmt(bankBal):'—'}</td>
+        <td style="${tdL}vertical-align:top;">${esc(ds)}</td>
+        <td style="${tdL}">
+          <div style="font-weight:500;">${desc}</div>
+          <div style="font-size:7.5pt;color:#555;margin-top:1px;">${cat}</div>
+        </td>
+        <td style="${tdA}">${isCash&&inc>0?fmt(inc):'—'}</td>
+        <td style="${tdA}">${isCash&&exp>0?fmt(exp):'—'}</td>
+        <td style="${tdA}font-weight:600;">${isCash?fmt(cashBal):'—'}</td>
+        <td style="${tdA}">${!isCash&&inc>0?fmt(inc):'—'}</td>
+        <td style="${tdA}">${!isCash&&exp>0?fmt(exp):'—'}</td>
+        <td style="${tdA}font-weight:600;">${!isCash?fmt(bankBal):'—'}</td>
       </tr>`;
     });
     html+=`<tr style="font-weight:700;background:#E6E8EC;">
-      <td style="border:1px solid #999;padding:4px 7px;" colspan="3">合計残高</td>
+      <td style="border:1px solid #999;padding:4px 7px;" colspan="2">合計残高</td>
       <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
       <td style="border:1px solid #999;padding:4px 7px;text-align:right;">—</td>
       <td style="border:1px solid #999;padding:4px 7px;text-align:right;">${fmt(cashBal)}</td>
@@ -4039,10 +4059,23 @@ class Component extends DCLogic {
   saveTx() {
     const {formData:f,modal:m,currentPeriodId:pid} = this.state;
     const amt = parseFloat(f.amount)||0;
-    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
+    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',accountType:f.accountType||'口座',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
     if (m.editId) this.setState(s=>({transactions:s.transactions.map(t=>t.id===m.editId?{...t,...rec}:t)}),()=>this.persist());
     else this.setState(s=>({transactions:[...s.transactions,{id:this.gen(),...rec}]}),()=>this.persist());
     this.closeModal();
+  }
+
+  saveTxAndNext() {
+    const {formData:f,currentPeriodId:pid} = this.state;
+    const amt = parseFloat(f.amount)||0;
+    if (!amt) { alert('金額を入力してください'); return; }
+    const rec = {date:f.date||'',description:f.description||'',category:f.category||'',accountType:f.accountType||'口座',periodId:pid,income:f.txType==='収入'?amt:0,expense:f.txType==='支出'?amt:0};
+    this.setState(s=>({transactions:[...s.transactions,{id:this.gen(),...rec}]}),()=>{
+      this.persist();
+      this.showToast('追加しました。次の取引を入力してください。');
+      // 同じ日付・区分・科目を引き継いで次を開く
+      this.openModal('transaction',null,{txType:f.txType,date:f.date,category:f.category,accountType:f.accountType||'口座',description:'',amount:''});
+    });
   }
   delTx(id) {
     if (!confirm('この取引を削除しますか？')) return;
@@ -4289,8 +4322,12 @@ class Component extends DCLogic {
     const bankBal = pTx.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
 
     // Running balance for filtered view
-    let filtBal=0;
-    const txSortedFiltered = [...filteredTx].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{filtBal+=(t.income||0)-(t.expense||0);return{...t,_fbal:filtBal};});
+    let filtCashBal=0,filtBankBal=0;
+    const txSortedFiltered = [...filteredTx].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{
+      const isCashTx=(t.accountType||'口座')==='現金';
+      if(isCashTx){filtCashBal+=(t.income||0)-(t.expense||0);}else{filtBankBal+=(t.income||0)-(t.expense||0);}
+      return{...t,_cashBal:filtCashBal,_bankBal:filtBankBal,_fbal:filtCashBal+filtBankBal};
+    });
     const bBase3={padding:'1px 6px',borderRadius:'8px',fontSize:'10px',fontWeight:'500',display:'inline-block'};
     const txRows = [...txSortedFiltered].reverse().map(t=>({
       ...t,
@@ -4298,6 +4335,8 @@ class Component extends DCLogic {
       incStr:t.income>0?this.fmt(t.income):'—',
       expStr:t.expense>0?this.fmt(t.expense):'—',
       balStr:this.fmt(t._fbal),
+      cashBalStr:this.fmt(t._cashBal),
+      bankBalStr:this.fmt(t._bankBal),
       accountType:t.accountType||'口座',
       accountBadge:{...bBase3,background:(t.accountType||'口座')==='現金'?'#fff3cd':'#dbeafe',color:(t.accountType||'口座')==='現金'?'#856404':'#1d4ed8'},
       incStyle:{width:'88px',textAlign:'right',fontSize:'12px',fontWeight:t.income>0?'600':'400',color:t.income>0?'#7BC095':'#A1A1AA'},
@@ -5226,6 +5265,8 @@ class Component extends DCLogic {
       isTask:modal.type==='task',
       isOfficer:modal.type==='officer', isMember:modal.type==='member', isMemberStatus:modal.type==='memberStatus',
       isInvoice:modal.type==='invoice', isTx:modal.type==='transaction',
+      isTxNew:modal.type==='transaction'&&!modal.editId,
+      onSaveAndNext:()=>this.saveTxAndNext(),
       isBudget:modal.type==='budget', isEvent:modal.type==='event', isPeriod:modal.type==='period',
       toast, showToast:!!toast,
 
