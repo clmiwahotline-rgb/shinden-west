@@ -66,81 +66,34 @@
       background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);
       animation:progress-indeterminate 1.4s ease-in-out infinite;
     }
+    /* 印刷オーバーレイ（通常時は非表示） */
+    #_portal_print_overlay { display:none; }
     @media print {
-      /* ===== 基本設定 ===== */
-      @page { size:A4 portrait; margin:15mm 18mm; }
-      @page {
-        @top-left   { content:""; }
-        @top-center { content:""; }
-        @top-right  { content:""; }
-        @bottom-left  { content:""; }
-        @bottom-center { content:counter(page); font-size:9pt; font-family:serif; }
-        @bottom-right { content:""; }
-      }
-      html, body { height:auto!important; overflow:visible!important; background:#fff!important; zoom:1!important; }
-
-      /* ===== UI非表示 ===== */
-      #nav-sidebar { display:none!important; }
-      [data-noprint] { display:none!important; }
-
-      /* ===== 外側ラッパーをリセット ===== */
-      body > * > *,
-      [style*="height:100vh"] {
-        height:auto!important;
-        overflow:visible!important;
+      /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
+      @page { size:A4 portrait; margin:0; }
+      body > *:not(#_portal_print_overlay) { display:none!important; }
+      #_portal_print_overlay {
         display:block!important;
-        background:#fff!important;
-        max-width:none!important;
-        box-shadow:none!important;
+        padding:15mm 18mm;
+        box-sizing:border-box;
+        font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;
+        background:#fff;
+        color:#000;
       }
-
-      /* ===== メインコンテンツ展開 ===== */
-      #main-scroll {
-        height:auto!important;
-        max-height:none!important;
-        overflow:visible!important;
-        background:#fff!important;
-        padding:0!important;
-        flex:none!important;
-      }
-
-      /* ===== 固定要素・モーダル非表示 ===== */
-      [style*="position:fixed"] { display:none!important; }
-
-      /* ===== 請求書・領収書モーダル印刷 ===== */
-      #print-modal-visible { display:block!important; position:static!important; }
-      #print-doc {
-        position:static!important;
-        margin:0!important;
-        padding:16mm 0 0!important;
-        box-shadow:none!important;
-        border-radius:0!important;
-        max-width:none!important;
-      }
-
-      /* ===== 決算書・報告書 ===== */
-      table { page-break-inside:avoid; width:100%!important; }
-      tr { page-break-inside:avoid; }
-      .stmt-doc { page-break-inside:avoid; }
-
-      /* ===== 余白・シャドウ除去 ===== */
-      * {
-        box-shadow:none!important;
+      #_portal_print_overlay * {
+        color:#000!important;
         -webkit-print-color-adjust:exact;
         print-color-adjust:exact;
+        box-shadow:none!important;
       }
-
-      /* ===== ページ区切り ===== */
-      .print-page-break { page-break-before:always!important; }
-      .audit-report-section { page-break-before:always!important; break-before:page!important; display:block!important; }
-
-      /* ===== 一覧ページは全幅・左寄せ（A4はみ出し防止） ===== */
-      #main-scroll > div { max-width:none!important; width:100%!important; }
-      #main-scroll > div > div { max-width:none!important; }
-      .stmt-card-body { margin:0 auto!important; max-width:680px!important; }
-
-      /* ===== 帳票（.stmt-card-body）は中央寄せ、それ以外は全幅 ===== */
-      #main-scroll { display:block!important; }
+      #_portal_print_overlay table { border-collapse:collapse; width:100%; }
+      #_portal_print_overlay tr,
+      #_portal_print_overlay td,
+      #_portal_print_overlay th { border-color:#000!important; }
+      #_portal_print_overlay [style*="border-bottom"] { border-bottom-color:#000!important; }
+      #_portal_print_overlay [style*="border-top"] { border-top-color:#000!important; }
+      #_portal_print_overlay [style*="border:1px"] { border:0.5pt solid #000!important; }
+      ._print_pnum::after { content:counter(page); }
     }
     input,select,textarea { font-family:inherit; }
     button { cursor:pointer; font-family:inherit; }
@@ -235,81 +188,34 @@
       background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);
       animation:progress-indeterminate 1.4s ease-in-out infinite;
     }
+    /* 印刷オーバーレイ（通常時は非表示） */
+    #_portal_print_overlay { display:none; }
     @media print {
-      /* ===== 基本設定 ===== */
-      @page { size:A4 portrait; margin:15mm 18mm; }
-      @page {
-        @top-left   { content:""; }
-        @top-center { content:""; }
-        @top-right  { content:""; }
-        @bottom-left  { content:""; }
-        @bottom-center { content:counter(page); font-size:9pt; font-family:serif; }
-        @bottom-right { content:""; }
-      }
-      html, body { height:auto!important; overflow:visible!important; background:#fff!important; zoom:1!important; }
-
-      /* ===== UI非表示 ===== */
-      #nav-sidebar { display:none!important; }
-      [data-noprint] { display:none!important; }
-
-      /* ===== 外側ラッパーをリセット ===== */
-      body > * > *,
-      [style*="height:100vh"] {
-        height:auto!important;
-        overflow:visible!important;
+      /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
+      @page { size:A4 portrait; margin:0; }
+      body > *:not(#_portal_print_overlay) { display:none!important; }
+      #_portal_print_overlay {
         display:block!important;
-        background:#fff!important;
-        max-width:none!important;
-        box-shadow:none!important;
+        padding:15mm 18mm;
+        box-sizing:border-box;
+        font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;
+        background:#fff;
+        color:#000;
       }
-
-      /* ===== メインコンテンツ展開 ===== */
-      #main-scroll {
-        height:auto!important;
-        max-height:none!important;
-        overflow:visible!important;
-        background:#fff!important;
-        padding:0!important;
-        flex:none!important;
-      }
-
-      /* ===== 固定要素・モーダル非表示 ===== */
-      [style*="position:fixed"] { display:none!important; }
-
-      /* ===== 請求書・領収書モーダル印刷 ===== */
-      #print-modal-visible { display:block!important; position:static!important; }
-      #print-doc {
-        position:static!important;
-        margin:0!important;
-        padding:16mm 0 0!important;
-        box-shadow:none!important;
-        border-radius:0!important;
-        max-width:none!important;
-      }
-
-      /* ===== 決算書・報告書 ===== */
-      table { page-break-inside:avoid; width:100%!important; }
-      tr { page-break-inside:avoid; }
-      .stmt-doc { page-break-inside:avoid; }
-
-      /* ===== 余白・シャドウ除去 ===== */
-      * {
-        box-shadow:none!important;
+      #_portal_print_overlay * {
+        color:#000!important;
         -webkit-print-color-adjust:exact;
         print-color-adjust:exact;
+        box-shadow:none!important;
       }
-
-      /* ===== ページ区切り ===== */
-      .print-page-break { page-break-before:always!important; }
-      .audit-report-section { page-break-before:always!important; break-before:page!important; display:block!important; }
-
-      /* ===== 一覧ページは全幅・左寄せ（A4はみ出し防止） ===== */
-      #main-scroll > div { max-width:none!important; width:100%!important; }
-      #main-scroll > div > div { max-width:none!important; }
-      .stmt-card-body { margin:0 auto!important; max-width:680px!important; }
-
-      /* ===== 帳票（.stmt-card-body）は中央寄せ、それ以外は全幅 ===== */
-      #main-scroll { display:block!important; }
+      #_portal_print_overlay table { border-collapse:collapse; width:100%; }
+      #_portal_print_overlay tr,
+      #_portal_print_overlay td,
+      #_portal_print_overlay th { border-color:#000!important; }
+      #_portal_print_overlay [style*="border-bottom"] { border-bottom-color:#000!important; }
+      #_portal_print_overlay [style*="border-top"] { border-top-color:#000!important; }
+      #_portal_print_overlay [style*="border:1px"] { border:0.5pt solid #000!important; }
+      ._print_pnum::after { content:counter(page); }
     }
     input,select,textarea { font-family:inherit; }
     button { cursor:pointer; font-family:inherit; }

@@ -383,34 +383,27 @@
   },
 
   _openPrintWindow(bodyHtml, title, noPageNum) {
-    const pageNumCss = noPageNum
-      ? '@page{size:A4 portrait;margin:0;}'
-      : '@page{size:A4 portrait;margin:0;}';
-    const pageFooter = noPageNum
-      ? ''
-      : '<div style="position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;font-family:serif;color:#000;" class="print-pagenum"></div><style>@media print{.print-pagenum::after{content:counter(page);}}</style>';
-    const printCss = [
-      pageNumCss,
-      'body{margin:0;padding:15mm 18mm;background:#fff;color:#000;font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;box-sizing:border-box;}',
-      '*{color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
-      'td,th,div,span,p{color:#000!important;}',
-      'table{border-collapse:collapse;}',
-      'tr,td,th{border-color:#000!important;}',
-      '[style*="border-bottom"]{border-bottom-color:#000!important;}',
-      '[style*="border-top"]{border-top-color:#000!important;}',
-      '[style*="border:1px"]{border:0.5pt solid #000!important;}',
-      '[style*="color:#555"],[style*="color:#666"],[style*="color:#888"],[style*="color:#999"],[style*="color:#A1A1AA"],[style*="color:#6B7280"]{color:#000!important;}',
-      'img{-webkit-print-color-adjust:exact;}',
-    ].join('');
-    const w = window.open('','_blank','width=820,height=1060');
-    w.document.write([
-      '<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>',title,'</title>',
-      '<style>',printCss,'</style>',
-      '<style>@media print{',printCss,'}</style></head>',
-      '<body>',bodyHtml,pageFooter,'</body></html>',
-    ].join(''));
-    w.document.close();
-    setTimeout(()=>w.print(),600);
+    // DOMに印刷オーバーレイを注入（window.open不要）
+    let overlay = document.getElementById('_portal_print_overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = '_portal_print_overlay';
+      document.body.appendChild(overlay);
+    }
+    const pageFooterHtml = noPageNum ? '' :
+      '<div style="position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;font-family:serif;" class="_print_pnum"></div>';
+    overlay.innerHTML = bodyHtml + pageFooterHtml;
+    // タイトルを一時変更（ブラウザ印刷ダイアログのタイトル欄に表示）
+    const prevTitle = document.title;
+    document.title = title;
+    setTimeout(() => {
+      window.print();
+      window.onafterprint = () => {
+        overlay.innerHTML = '';
+        document.title = prevTitle;
+        window.onafterprint = null;
+      };
+    }, 300);
   },
 
 
