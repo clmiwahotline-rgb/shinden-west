@@ -2393,5 +2393,63 @@ class Component extends DCLogic {
 </script>
 
 
+
+<script>
+window.__GAS_URL__ = 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
+// APIキーはlocalStorageから読み込みます（設定ページで初期設定してください）
+const ALLOWED_EMAILS = ['clmiwa.hotline@gmail.com'];
+const AUTH_KEY = 'nitta_auth_v2';
+let __gasAuthEmails = [];
+function prefetchAuthEmails(){
+  const _pk=localStorage.getItem('nitta_api_key')||'';
+  fetch('https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec?key='+encodeURIComponent(_pk)+'&action=load')
+    .then(r=>r.json())
+    .then(d=>{ if(d&&d.authEmails) __gasAuthEmails=(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email); })
+    .catch(()=>{});
+}
+function getAuthEmails(){
+  const local=(()=>{try{const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');return(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email);}catch(e){return[];}})();
+  return [...new Set([...local,...__gasAuthEmails])];
+}
+function showPortal(splash){document.documentElement.setAttribute('data-authed','1');
+  if(splash){
+    // ログイン成功後: auth-overlayをスプラッシュ画面に変換し2秒後に非表示
+    var ov=document.getElementById('auth-overlay');
+    ov.style.background='#FAF8F0';
+    ov.innerHTML='<div style="text-align:center;"><img src="uploads/logo-splash.png" style="width:180px;height:auto;margin-bottom:28px;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display=\'none\'"><div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;margin:0 auto;"><div style="height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;"></div></div></div>';
+    setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
+  }else{
+    document.getElementById('auth-overlay').classList.add('hidden');
+  }
+}
+function handleCredential(response){
+  try{
+    const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const email=payload.email||'';
+    if(![...ALLOWED_EMAILS,...getAuthEmails()].includes(email)){document.getElementById('auth-error').textContent=email+' はアクセス権限がありません';return;}
+    if(document.getElementById('auto-login').checked)localStorage.setItem(AUTH_KEY,JSON.stringify({email,exp:Date.now()+30*24*60*60*1000}));
+    sessionStorage.setItem('nitta_session','1');showPortal(true);
+  }catch(e){document.getElementById('auth-error').textContent='認証エラーが発生しました';}
+}
+(function(){
+  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){var _isn=sessionStorage.getItem('nitta_session');sessionStorage.setItem('nitta_session','1');showPortal(!_isn);return;}}catch(e){}
+  prefetchAuthEmails();
+  function _initGSI(){
+    if(typeof google==='undefined'||!google.accounts)return;
+    google.accounts.id.initialize({client_id:'367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com',callback:handleCredential,auto_select:false});
+    google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'ja',width:280});
+  }
+  window.onGoogleLibraryLoad=_initGSI; // SW高速化後の対策：GSI読込完了時に確実に呼ばれる
+  window.onload=_initGSI;               // 万一onloadが後の場合も対応
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(e){console.warn('SW registration failed:',e);});
+  });
+}
+</script>
+
 </body>
 </html>
