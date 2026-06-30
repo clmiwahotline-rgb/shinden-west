@@ -80,6 +80,9 @@
 
   fetchSheets(url, apiKey, silent) {
     const key = apiKey || this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
+    // ロック: 初回ロード(ssReady=false)または手動同期
+    const shouldLock = !this.state.ssReady || !silent;
+    if (shouldLock) this._showSsLock();
     if (!silent) this.setState({ syncStatus: 'syncing' });
     const lastTs = localStorage.getItem('nitta_last_modified') || '0';
     fetch(`${url}?action=load&key=${encodeURIComponent(key)}&ts=${lastTs}`)
@@ -97,12 +100,14 @@
         if (d.error) throw new Error(d.error);
         // 変更なし → スキップ
         if (d.modified === false) {
+          if (shouldLock) this._hideSsLock();
           this.setState({ syncStatus: 'ok', loading: false, lastSyncAt: Date.now() });
           return;
         }
         if (d.lastModified) localStorage.setItem('nitta_last_modified', d.lastModified);
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length === 0) {
+          if (shouldLock) this._hideSsLock();
           if (!silent) this.loadLocal();
           this.setState({ syncStatus: 'ok', loading: false });
           if (!silent) this.showToast('SSにデータが見つかりません。ローカルデータを使用中');
@@ -111,11 +116,13 @@
           const merged = {...parsed, assemblyDoc};
           this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true, lastSyncAt: Date.now() });
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
+          if (shouldLock) this._hideSsLock();
           if (!silent) this.showToast('スプレッドシートから読み込みました');
         }
       })
       .catch(err => {
         console.warn('Sheets fetch failed:', err.message);
+        if (shouldLock) this._hideSsLock();
         if (!silent) { this.loadLocal(); this.showToast('スプレッドシート接続失敗。ローカルデータを使用します'); }
         this.setState({ syncStatus: 'error', loading: false });
       });
@@ -131,21 +138,24 @@
     const url = this.state.scriptUrl || localStorage.getItem('nitta_script_url') || '';
     const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
     if (!url || !apiKey) return;
-    // &ts= で lastModified を送ることで「変更なし→即スキップ」が効く（&t= は誤り）
+    if (!silent) this._showSsLock();
+    // &ts= で lastModified を送ることで「変更なし→即スキップ」が効く
     const lastTs = localStorage.getItem('nitta_last_modified') || '0';
     fetch(`${url}?action=load&key=${encodeURIComponent(apiKey)}&ts=${lastTs}`)
       .then(r=>r.text())
       .then(text=>{ const d=JSON.parse(text.trim().replace(/^\uFEFF/,'')); if(!d.ok) throw new Error(d.error||'エラー'); return d; })
       .then(d=>{
+        if (d.modified === false) { if (!silent) this._hideSsLock(); return; }
+        if (d.lastModified) localStorage.setItem('nitta_last_modified', d.lastModified);
         const parsed = this.migrate(this.parseSheets(d));
-        if (!parsed.periods || parsed.periods.length===0) { if(!silent) this.showToast('SSにデータがありません'); return; }
+        if (!parsed.periods || parsed.periods.length===0) { if(!silent){ this._hideSsLock(); this.showToast('SSにデータがありません');} return; }
         const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
         const merged = {...parsed, assemblyDoc};
         this.setState({...merged, syncStatus:'ok', ssReady:true});
         localStorage.setItem('nitta_v5', JSON.stringify(merged));
-        if (!silent) this.showToast('SSから最新データを取得しました');
+        if (!silent) { this._hideSsLock(); this.showToast('SSから最新データを取得しました'); }
       })
-      .catch(()=>{ if(!silent) this.showToast('SS再読み込みに失敗しました'); });
+      .catch(()=>{ if(!silent){ this._hideSsLock(); this.showToast('SS再読み込みに失敗しました'); } });
   },
 
   loadFromSS() {
@@ -154,6 +164,7 @@
     if (!url || !apiKey) { this.showToast('URLとAPIキーを先に設定してください'); return; }
     if (!confirm('SSのデータをローカルに上書き読み込みします。\nローカルの未同期データは上書きされます。よろしいですか？')) return;
     this.setState({ loading: true, syncStatus: 'syncing' });
+    this._showSsLock();
     fetch(`${url}?action=load&key=${encodeURIComponent(apiKey)}&t=${Date.now()}`)
       .then(r=>r.text())
       .then(text=>{ const d=JSON.parse(text.trim().replace(/^\uFEFF/,'')); if(!d.ok) throw new Error(d.error||'エラー'); return d; })
@@ -164,9 +175,11 @@
         const merged = {...parsed, assemblyDoc};
         this.setState({...merged, loading:false, syncStatus:'ok', ssReady:true});
         localStorage.setItem('nitta_v5', JSON.stringify(merged));
+        this._hideSsLock();
         this.showToast('SSからデータを読み込みました（ローカルに保存済み）');
       })
       .catch(err=>{
+        this._hideSsLock();
         this.setState({loading:false, syncStatus:'error'});
         this.showToast('読み込み失敗：'+err.message);
       });
@@ -193,13 +206,22 @@
     const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
     if (url && apiKey && this.state.ssReady) {
       this.setState({ syncStatus: 'syncing' });
+      const clientLastModified = localStorage.getItem('nitta_last_modified') || '0';
       fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action: 'save', key: apiKey, data: d }),
+        body: JSON.stringify({ action: 'save', key: apiKey, data: d, clientLastModified }),
       })
       .then(r => r.json())
-      .then(res => this.setState({ syncStatus: res.ok ? 'ok' : 'error' }))
+      .then(res => {
+        if (res.conflict) {
+          this.setState({ syncStatus: 'error' });
+          this.showToast('⚠️ 他のメンバーが更新中です。「↻ 更新」で最新を確認後、再度保存してください');
+          return;
+        }
+        if (res.lastModified) localStorage.setItem('nitta_last_modified', res.lastModified);
+        this.setState({ syncStatus: res.ok ? 'ok' : 'error' });
+      })
       .catch(() => this.setState({ syncStatus: 'error' }));
     }
   },
@@ -370,6 +392,8 @@
         events:     'events.html',
         tasks:      'tasks.html',
         assembly:   'assembly.html',
+        proposals:  'proposals.html',
+        archive:    'archive.html',
         settings:   'settings.html',
       };
       window.location.href = map[id] || './';
@@ -443,6 +467,33 @@
   // -----------------------------------------------
   _shouldShowSplash() {
     return !localStorage.getItem('nitta_v5');
+  },
+
+  // -----------------------------------------------
+  // SS操作ロック（fetch中の誤操作防止）
+  // -----------------------------------------------
+  _injectSsLockMask() {
+    if (document.getElementById('_ss_lock')) return;
+    if (!document.getElementById('_ss_lock_style')) {
+      const s = document.createElement('style');
+      s.id = '_ss_lock_style';
+      s.textContent = '@keyframes _spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(s);
+    }
+    const el = document.createElement('div');
+    el.id = '_ss_lock';
+    el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(245,246,248,0.85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:9994;align-items:center;justify-content:center;flex-direction:column;gap:16px;pointer-events:all;';
+    el.innerHTML = '<div style="width:38px;height:38px;border:3px solid #DDDEE2;border-top-color:#E7C15F;border-radius:50%;animation:_spin 0.8s linear infinite;"></div><div style="font-size:13px;color:#6B7280;font-family:'Noto Sans JP',sans-serif;font-weight:500;letter-spacing:0.04em;">データを同期中...</div>';
+    document.body.appendChild(el);
+  },
+  _showSsLock() {
+    this._injectSsLockMask();
+    const el = document.getElementById('_ss_lock');
+    if (el) el.style.display = 'flex';
+  },
+  _hideSsLock() {
+    const el = document.getElementById('_ss_lock');
+    if (el) el.style.display = 'none';
   },
 
   };

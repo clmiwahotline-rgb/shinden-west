@@ -172,6 +172,13 @@ function doPost(e) {
     const action = body.action || 'save';
 
     if (action === 'save') {
+      // ===== 楽観的ロック: 競合チェック =====
+      const clientTs = body.clientLastModified || '0';
+      const serverTs = getLastModified(props);
+      if (clientTs !== '0' && serverTs !== '0' && clientTs !== serverTs) {
+        // 他のメンバーが更新済み → 競合エラーを返す（保存しない）
+        return jsonOk({ ok: false, conflict: true, serverLastModified: serverTs });
+      }
       const result = saveAllData(body.data || {}, props);
       invalidateCache();
       const newTs = updateLastModified();
