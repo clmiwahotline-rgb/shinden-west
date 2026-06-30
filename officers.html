@@ -106,6 +106,7 @@
 <style>
 #auth-overlay{position:fixed;inset:0;background:#F5F6F8;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Noto Sans JP',sans-serif;}
 #auth-overlay.hidden{display:none;}
+html[data-authed] #auth-overlay{display:none!important;}
 .auth-card{background:#fff;border-radius:20px;padding:48px 44px;box-shadow:0 4px 32px rgba(0,0,0,0.06);border:1px solid #DDDEE2;max-width:400px;width:100%;text-align:center;}
 .auth-logo{width:200px;margin-bottom:28px;}
 .auth-title{font-family:'Zen Kaku Gothic New',sans-serif;font-size:20px;font-weight:700;color:#3F414C;margin-bottom:6px;letter-spacing:0.04em;}
@@ -116,6 +117,7 @@
 </style>
 <script src="./portal-shared.js"></script>
 <script src="./support.js"></script>
+<script>try{var _a=JSON.parse(localStorage.getItem('nitta_portal_auth')||'null');if(_a&&_a.exp>Date.now())document.documentElement.setAttribute('data-authed','1');}catch(e){}</script>
 </head>
 <body>
 <div id="auth-overlay">
@@ -1982,7 +1984,7 @@ function getAuthEmails(){
   const local=(()=>{try{const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');return(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email);}catch(e){return[];}})();
   return [...new Set([...local,...__gasAuthEmails])];
 }
-function showPortal(){document.getElementById('auth-overlay').classList.add('hidden');document.body.classList.add('portal-ready');}
+function showPortal(){document.documentElement.setAttribute('data-authed','1');document.getElementById('auth-overlay').classList.add('hidden');document.body.classList.add('portal-ready');}
 function handleCredential(response){
   try{
     const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
