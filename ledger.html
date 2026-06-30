@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; }
+    html,body { height:100%; overflow:hidden; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -137,7 +137,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; }
+    html,body { height:100%; overflow:hidden; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -226,7 +226,7 @@
 </helmet>
 
 <!-- ===== LOADING SCREEN ===== -->
-<sc-if value="{{ showLoader }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;">
     <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:200px;height:auto;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display='none'" />
     <div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;">
@@ -274,7 +274,7 @@
     <!-- ===== MAIN ===== -->
   <div id="main-scroll" ref="{{ mainScrollRef }}" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
 
-    <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;">
     <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:200px;height:auto;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display='none'" />
     <div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;">
@@ -2061,7 +2061,7 @@ class Component extends DCLogic {
         });
       })(),
       mainScrollRef: this._mainScrollRef,
-      showLoader: !!this.state.loading,
+      showLoader: !!this.state.loading && this._shouldShowSplash(),
       onOpenAssemblyModal:()=>this.openAssemblyModal?.(),
       onPrintAssembly:()=>this.printAssemblyDoc?.(),
       assemblyModalShow:this.state.assemblyModal||false,
@@ -2270,8 +2270,8 @@ class Component extends DCLogic {
         ? {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(123,192,149,0.12)',color:'#7BC095'}
         : {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(255,149,0,0.12)',color:'#ff9500'},
       onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
-      syncProgressBarStyle: (this.state.syncStatus==='syncing'&&!this.state.loading) ? {} : {opacity:0,pointerEvents:'none'},
-      syncProgressBarClass: (this.state.syncStatus==='syncing'&&!this.state.loading) ? '' : 'hidden',
+      syncProgressBarStyle: (this.state.syncStatus==='syncing'&&!(this.state.loading&&this._shouldShowSplash())) ? {} : {opacity:0,pointerEvents:'none'},
+      syncProgressBarClass: (this.state.syncStatus==='syncing'&&!(this.state.loading&&this._shouldShowSplash())) ? '' : 'hidden',
       syncStatusLabel: (()=>{
         if (this.state.syncPaused) return '⏸ 同期停止中';
         const st = String(this.state.syncStatus);

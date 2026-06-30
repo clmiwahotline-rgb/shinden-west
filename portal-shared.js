@@ -129,7 +129,9 @@
     const url = this.state.scriptUrl || localStorage.getItem('nitta_script_url') || '';
     const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
     if (!url || !apiKey) return;
-    fetch(`${url}?action=load&key=${encodeURIComponent(apiKey)}&t=${Date.now()}`)
+    // &ts= で lastModified を送ることで「変更なし→即スキップ」が効く（&t= は誤り）
+    const lastTs = localStorage.getItem('nitta_last_modified') || '0';
+    fetch(`${url}?action=load&key=${encodeURIComponent(apiKey)}&ts=${lastTs}`)
       .then(r=>r.text())
       .then(text=>{ const d=JSON.parse(text.trim().replace(/^\uFEFF/,'')); if(!d.ok) throw new Error(d.error||'エラー'); return d; })
       .then(d=>{
@@ -430,8 +432,16 @@
     const y = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear()-1; // 4月以降が新年度
     const reiwa = y - 2018;
     return `令和${reiwa}年度`;
-  }
+  },
 
+  // -----------------------------------------------
+  // スプラッシュ表示判定
+  // localStorage にデータがない（= 初回ログイン or クリア後）場合のみ true
+  // → showLoader: !!loading && _shouldShowSplash() で使用
+  // -----------------------------------------------
+  _shouldShowSplash() {
+    return !localStorage.getItem('nitta_v5');
+  },
 
   };
 })();
