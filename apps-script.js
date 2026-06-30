@@ -13,7 +13,7 @@ const SHEETS = [
   'periods','members','officers','invoices',
   'transactions','budgetItems','events',
   'memberChangeLogs','invoiceLogs','orgInfo',
-  'balanceLogs','settlements','authEmails','tasks'
+  'balanceLogs','settlements','authEmails','tasks','proposals','archiveDocs'
 ];
 
 // キャッシュキープレフィックス（チャンク分割用）

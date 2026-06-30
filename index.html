@@ -254,7 +254,7 @@ html[data-authed] #auth-overlay{display:none!important;}
       </div>
     </div>
     <div style="flex:1;minHeight:0;overflowY:auto;padding:4px 8px 8px;">
-      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="10">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="13">
         <div onClick="{{ item.onClick }}" style="{{ item.navStyle }}">{{ item.label }}</div>
       </sc-for>
     </div>
@@ -1136,7 +1136,7 @@ class Component extends DCLogic {
       {id:'members',label:'会員管理'},{id:'invoices',label:'請求書管理'},
       {id:'ledger',label:'入出金管理'},{id:'budget',label:'予算管理'},
       {id:'statements',label:'決算書'},{id:'events',label:'事業記録'},
-      {id:'tasks',label:'タスク管理'},{id:'assembly',label:'総会資料'},{id:'settings',label:'設定'},
+      {id:'tasks',label:'タスク管理'},{id:'assembly',label:'総会資料'},{id:'proposals',label:'議案作成'},{id:'archive',label:'資料庫'},{id:'settings',label:'設定'},
     ];
     const navItems = NAV.map(n=>({
       ...n, onClick:()=>this.nav(n.id),

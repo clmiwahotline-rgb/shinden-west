@@ -72,6 +72,8 @@
       budgetDraft:   (()=>{try{return typeof d.budgetDraft==='string'?JSON.parse(d.budgetDraft||'null'):(d.budgetDraft||null);}catch(e){return null;}})(),
       assemblyDoc:   (()=>{try{return typeof d.assemblyDoc==='string'?JSON.parse(d.assemblyDoc||'null'):(d.assemblyDoc||null);}catch(e){return null;}})(),
       tasks:         d.tasks||[],
+      proposals:     d.proposals||[],
+      archiveDocs:   d.archiveDocs||[],
       currentPeriodId: d.currentPeriodId||null,
     };
   },

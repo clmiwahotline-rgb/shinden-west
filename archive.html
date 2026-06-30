@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設定 — 新田西口商店会</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    html { zoom:1.2; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
+    h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
+    /* ボタン基本 */
+    button { white-space:nowrap; border-radius:12px; transition:background 0.15s,opacity 0.15s; }
+    /* Primaryボタン hover（#E7C15F → #D4AF4C） */
+    button[style*="background:#E7C15F"] { border-radius:12px!important; }
+    button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
+    /* Secondary button — white + border */
+    button[style*="rgba(0,0,0,0.05)"] { background:#fff!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.05)"]:hover { background:#F5F6F8!important; }
+    button[style*="rgba(0,0,0,0.06)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    button[style*="rgba(0,0,0,0.07)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    /* Danger button */
+    button[style*="rgba(229,115,115"] { border-radius:10px!important; }
+    button[style*="color:#E57373"] { border-radius:10px!important; }
+    /* Info/Gold tint button */
+    button[style*="rgba(231,193,95"] { border-radius:10px!important; }
+    button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* 金額・数値 — BIZ UDP */
+    /* 金額・数値 — BIZ UDP */
+    .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
+    /* ローディング進捗バー */
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    body.portal-ready { animation: fadeInPage 0.18s ease-out both; }
+    @keyframes progress-indeterminate {
+      0%   { transform: translateX(-100%) scaleX(0.5); }
+      50%  { transform: translateX(0%)    scaleX(0.8); }
+      100% { transform: translateX(100%)  scaleX(0.5); }
+    }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+    @keyframes logo-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.75; transform: scale(0.95); }
+    }
+    #sync-progress-bar {
+      position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
+      background:rgba(231,193,95,0.12);
+      overflow:hidden;
+      transition:opacity 0.3s;
+    }
+    #sync-progress-bar.hidden { opacity:0; pointer-events:none; }
+    #sync-progress-bar::after {
+      content:'';
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);
+      animation:progress-indeterminate 1.4s ease-in-out infinite;
+    }
+    /* 印刷オーバーレイ（通常時は非表示） */
+    #_portal_print_overlay { display:none; }
+    @media print {
+      /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
+      @page { size:A4 portrait; margin:0; }
+      body > *:not(#_portal_print_overlay) { display:none!important; }
+      #_portal_print_overlay {
+        display:block!important;
+        padding:15mm 18mm;
+        box-sizing:border-box;
+        font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;
+        background:#fff;
+        color:#000;
+      }
+      #_portal_print_overlay * {
+        color:#000!important;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+        box-shadow:none!important;
+      }
+      #_portal_print_overlay table { border-collapse:collapse; width:100%; }
+      #_portal_print_overlay tr,
+      #_portal_print_overlay td,
+      #_portal_print_overlay th { border-color:#000!important; }
+      #_portal_print_overlay [style*="border-bottom"] { border-bottom-color:#000!important; }
+      #_portal_print_overlay [style*="border-top"] { border-top-color:#000!important; }
+      #_portal_print_overlay [style*="border:1px"] { border:0.5pt solid #000!important; }
+      ._print_pnum::after { content:counter(page); }
+    }
+    input,select,textarea { font-family:inherit; }
+    button { cursor:pointer; font-family:inherit; }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
+  </style>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+#auth-overlay{position:fixed;inset:0;background:#F5F6F8;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Noto Sans JP',sans-serif;}
+#auth-overlay.hidden{display:none;}
+html[data-authed] #auth-overlay{display:none!important;}
+.auth-card{background:#fff;border-radius:20px;padding:48px 44px;box-shadow:0 4px 32px rgba(0,0,0,0.06);border:1px solid #DDDEE2;max-width:400px;width:100%;text-align:center;}
+.auth-logo{width:200px;margin-bottom:28px;}
+.auth-title{font-family:'Zen Kaku Gothic New',sans-serif;font-size:20px;font-weight:700;color:#3F414C;margin-bottom:6px;letter-spacing:0.04em;}
+.auth-sub{font-size:13px;color:#6B7280;margin-bottom:32px;letter-spacing:0.02em;}
+#auth-error{color:#E57373;font-size:12px;margin-top:12px;min-height:16px;}
+#g_id_signin{display:flex;justify-content:center;}
+.auto-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:12px;color:#6B7280;}
+</style>
+<script src="./portal-shared.js"></script>
+<script src="./support.js"></script>
+<script>try{var _a=JSON.parse(localStorage.getItem('nitta_portal_auth')||'null');if(_a&&_a.exp>Date.now())document.documentElement.setAttribute('data-authed','1');}catch(e){}</script>
+</head>
+<body>
+<div id="auth-overlay">
+  <div class="auth-card">
+    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'" style="pointer-events:none;user-select:none;-webkit-user-select:none;">
+    <div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div>
+    <div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div>
+    <div id="g_id_signin"></div>
+    <div id="auth-error"></div>
+    <div class="auto-row">
+      <input type="checkbox" id="auto-login" checked>
+      <label for="auto-login">30&#x65e5;&#x9593;&#x81ea;&#x52d5;&#x30ed;&#x30b0;&#x30a4;&#x30f3;</label>
+    </div>
+  </div>
+</div>
+<x-dc>
+
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    html { zoom:1.2; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
+    h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
+    /* ボタン基本 */
+    button { white-space:nowrap; border-radius:12px; transition:background 0.15s,opacity 0.15s; }
+    /* Primaryボタン hover（#E7C15F → #D4AF4C） */
+    button[style*="background:#E7C15F"] { border-radius:12px!important; }
+    button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
+    /* Secondary button — white + border */
+    button[style*="rgba(0,0,0,0.05)"] { background:#fff!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.05)"]:hover { background:#F5F6F8!important; }
+    button[style*="rgba(0,0,0,0.06)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    button[style*="rgba(0,0,0,0.07)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    /* Danger button */
+    button[style*="rgba(229,115,115"] { border-radius:10px!important; }
+    button[style*="color:#E57373"] { border-radius:10px!important; }
+    /* Info/Gold tint button */
+    button[style*="rgba(231,193,95"] { border-radius:10px!important; }
+    button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* 金額・数値 — BIZ UDP */
+    /* 金額・数値 — BIZ UDP */
+    .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
+    /* ローディング進捗バー */
+    @keyframes progress-indeterminate {
+      0%   { transform: translateX(-100%) scaleX(0.5); }
+      50%  { transform: translateX(0%)    scaleX(0.8); }
+      100% { transform: translateX(100%)  scaleX(0.5); }
+    }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+    @keyframes logo-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.75; transform: scale(0.95); }
+    }
+    #sync-progress-bar {
+      position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
+      background:rgba(231,193,95,0.12);
+      overflow:hidden;
+      transition:opacity 0.3s;
+    }
+    #sync-progress-bar.hidden { opacity:0; pointer-events:none; }
+    #sync-progress-bar::after {
+      content:'';
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);
+      animation:progress-indeterminate 1.4s ease-in-out infinite;
+    }
+    /* 印刷オーバーレイ（通常時は非表示） */
+    #_portal_print_overlay { display:none; }
+    @media print {
+      /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
+      @page { size:A4 portrait; margin:0; }
+      body > *:not(#_portal_print_overlay) { display:none!important; }
+      #_portal_print_overlay {
+        display:block!important;
+        padding:15mm 18mm;
+        box-sizing:border-box;
+        font-family:"游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;
+        background:#fff;
+        color:#000;
+      }
+      #_portal_print_overlay * {
+        color:#000!important;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+        box-shadow:none!important;
+      }
+      #_portal_print_overlay table { border-collapse:collapse; width:100%; }
+      #_portal_print_overlay tr,
+      #_portal_print_overlay td,
+      #_portal_print_overlay th { border-color:#000!important; }
+      #_portal_print_overlay [style*="border-bottom"] { border-bottom-color:#000!important; }
+      #_portal_print_overlay [style*="border-top"] { border-top-color:#000!important; }
+      #_portal_print_overlay [style*="border:1px"] { border:0.5pt solid #000!important; }
+      ._print_pnum::after { content:counter(page); }
+    }
+    input,select,textarea { font-family:inherit; }
+    button { cursor:pointer; font-family:inherit; }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
+  </style>
+</helmet>
+
+<!-- ===== LOADING SCREEN ===== -->
+<sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;">
+    <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:200px;height:auto;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display='none'" />
+    <div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;">
+      <div style="height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;"></div>
+    </div>
+    <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
+  </div>
+</sc-if>
+
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    html { zoom:1.2; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,sans-serif; letter-spacing:0.01em; }
+    h1,h2 { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
+    button { white-space:nowrap; border-radius:12px; transition:background 0.15s; cursor:pointer; font-family:inherit; }
+    button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    input,select,textarea { font-family:inherit; box-sizing:border-box; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:3px; }
+    @keyframes progress-indeterminate { 0%{transform:translateX(-100%) scaleX(0.5);} 50%{transform:translateX(0%) scaleX(0.8);} 100%{transform:translateX(100%) scaleX(0.5);} }
+    @keyframes logo-pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.75;transform:scale(0.95);} }
+    #sync-progress-bar { position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;background:rgba(231,193,95,0.12);overflow:hidden;transition:opacity 0.3s; }
+    #sync-progress-bar.hidden { opacity:0;pointer-events:none; }
+    #sync-progress-bar::after { content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);animation:progress-indeterminate 1.4s ease-in-out infinite; }
+    #_portal_print_overlay { display:none; }
+  </style>
+</helmet>
+
+<div style="height:100vh;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
+<div style="display:flex;width:100%;maxWidth:1440px;height:100vh;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
+
+  <!-- ===== SIDEBAR ===== -->
+  <div style="width:220px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(0,0,0,0.07);zIndex:10;">
+    <div style="padding:18px 16px 14px;">
+      <img src="uploads/logo-horizontal-clean.png" alt="新田西口商店会" style="width:100%;height:auto;display:block;marginBottom:4px;" onerror="this.style.display='none'" />
+      <div style="marginTop:10px;">
+        <select value="{{ currentPeriodId }}" onChange="{{ onChangePeriod }}" style="width:100%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.1);color:#3F414C;fontSize:12px;padding:5px 8px;borderRadius:7px;appearance:none;-webkit-appearance:none;">
+          <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="1">
+            <option value="{{ opt.id }}">{{ opt.name }}</option>
+          </sc-for>
+        </select>
+      </div>
+    </div>
+    <div style="flex:1;minHeight:0;overflowY:auto;padding:4px 8px 8px;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="13">
+        <div onClick="{{ item.onClick }}" style="{{ item.navStyle }}">{{ item.label }}</div>
+      </sc-for>
+    </div>
+    <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
+      <div style="display:flex;alignItems:center;gap:6px;">
+        <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
+        <button onClick="{{ onRefreshFromSS }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sync-progress-bar" style="{{ syncProgressBarStyle }}"></div>
+
+  <!-- ===== MAIN ===== -->
+  <div id="main-scroll" ref="{{ mainScrollRef }}" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
+    <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;alignItems:center;justifyContent:center;">
+        <img src="uploads/logo-splash.png" style="width:180px;" onerror="this.style.display='none'" />
+      </div>
+    </sc-if>
+
+    <div style="padding:32px 36px;maxWidth:900px;">
+
+      <!-- Header -->
+      <div style="display:flex;alignItems:center;justifyContent:space-between;marginBottom:24px;">
+        <div>
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">資料庫</div>
+          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">議事録・定款・規約など重要資料の保管</div>
+        </div>
+        <button onClick="{{ onNew }}" style="border:none;background:#E7C15F;color:#fff;padding:10px 22px;borderRadius:12px;fontSize:14px;fontWeight:600;">＋ 資料を追加</button>
+      </div>
+
+      <!-- カテゴリフィルター -->
+      <div style="display:flex;gap:6px;marginBottom:24px;flexWrap:wrap;">
+        <sc-for list="{{ catFilters }}" as="cf" hint-placeholder-count="7">
+          <button onClick="{{ cf.onClick }}" style="{{ cf.btnStyle }}">{{ cf.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- 空状態 -->
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;padding:60px 40px;color:#A1A1AA;fontSize:14px;background:#fff;borderRadius:14px;border:1px solid #DDDEE2;">
+          <div style="fontSize:36px;marginBottom:14px;">📁</div>
+          <div style="fontWeight:600;marginBottom:6px;">資料がまだ登録されていません</div>
+          <div style="fontSize:12px;">「資料を追加」から登録してください</div>
+        </div>
+      </sc-if>
+
+      <!-- ドキュメントリスト -->
+      <div style="display:flex;flexDirection:column;gap:10px;">
+        <sc-for list="{{ docList }}" as="doc" hint-placeholder-count="3">
+          <div style="background:#fff;borderRadius:14px;padding:18px 22px;border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s,border-color 0.15s;" onClick="{{ doc.onEdit }}" style-hover="box-shadow:0 4px 16px rgba(0,0,0,0.08);border-color:#AFC3D7;">
+            <div style="display:flex;alignItems:center;justifyContent:space-between;marginBottom:10px;">
+              <div style="display:flex;alignItems:center;gap:8px;">
+                <span style="{{ doc.catStyle }}">{{ doc.category }}</span>
+                <span style="fontSize:12px;color:#A1A1AA;">{{ doc.date }}</span>
+              </div>
+              <div style="display:flex;alignItems:center;gap:8px;">
+                <sc-if value="{{ doc.hasUrl }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ doc.onOpen }}" style="border:1px solid #AFC3D7;background:rgba(175,195,215,0.15);color:#3F414C;padding:3px 10px;borderRadius:6px;fontSize:11px;" style-hover="background:rgba(175,195,215,0.3);">🔗 開く</button>
+                </sc-if>
+                <button onClick="{{ doc.onDelete }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 10px;borderRadius:6px;fontSize:11px;" style-hover="background:rgba(229,115,115,0.18);">削除</button>
+              </div>
+            </div>
+            <div style="fontSize:15px;fontWeight:600;color:#3F414C;marginBottom:6px;">{{ doc.title }}</div>
+            <sc-if value="{{ doc.hasNotes }}" hint-placeholder-val="{{ false }}">
+              <div style="fontSize:12px;color:#6B7280;lineHeight:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ doc.notesPreview }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 追加・編集モーダル ===== -->
+<sc-if value="{{ modalShow }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:200;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;" onClick="{{ onCloseModal }}">
+    <div style="background:#fff;borderRadius:16px;padding:28px;width:600px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
+      <div style="display:flex;justifyContent:space-between;alignItems:center;marginBottom:22px;">
+        <div style="fontFamily:'Zen Kaku Gothic New',sans-serif;fontSize:18px;fontWeight:700;color:#3F414C;">{{ modalTitle }}</div>
+        <button onClick="{{ onCloseModal }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 14px;borderRadius:8px;fontSize:13px;">✕ 閉じる</button>
+      </div>
+
+      <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:16px;">
+        <div>
+          <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">カテゴリ</label>
+          <select data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+            <option value="議事録">議事録</option>
+            <option value="定款">定款</option>
+            <option value="規約">規約</option>
+            <option value="申請書類">申請書類</option>
+            <option value="通知文">通知文</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">日付</label>
+          <input type="date" data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" />
+        </div>
+      </div>
+
+      <div style="marginBottom:14px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">タイトル *</label>
+        <input type="text" data-field="title" value="{{ formData.title }}" onChange="{{ onInput }}" placeholder="例：第39回定期総会 議事録" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;" />
+      </div>
+
+      <div style="marginBottom:14px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">リンク（Google Drive等）</label>
+        <input type="url" data-field="url" value="{{ formData.url }}" onChange="{{ onInput }}" placeholder="https://drive.google.com/..." style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;" />
+      </div>
+
+      <div style="marginBottom:22px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">メモ・内容</label>
+        <textarea data-field="notes" value="{{ formData.notes }}" onChange="{{ onInput }}" rows="6" placeholder="内容の要約やメモを入力..." style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;resize:vertical;lineHeight:1.8;"></textarea>
+      </div>
+
+      <div style="display:flex;justifyContent:flex-end;gap:8px;paddingTop:18px;borderTop:1px solid rgba(0,0,0,0.07);">
+        <button onClick="{{ onCloseModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+        <button onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#fff;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:600;">保存</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:28px;right:28px;background:#3F414C;color:#fff;padding:12px 20px;borderRadius:10px;fontSize:13px;fontWeight:500;zIndex:300;boxShadow:0 4px 16px rgba(0,0,0,0.25);">{{ toast }}</div>
+</sc-if>
+
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    archiveDocs:[],periods:[],members:[],officers:[],
+    currentPeriodId:null,
+    toast:null,_tt:null,
+    scriptUrl:'',scriptApiKey:'',
+    syncStatus:null,loading:false,ssReady:false,syncPaused:false,
+    modal:{show:false,editId:null},
+    formData:{},
+    filterCat:'全て',
+  };
+
+  _portalInit=(()=>{
+    if(window.PortalMethods)Object.assign(this,window.PortalMethods);
+    this._myPages=['archive'];
+  })();
+
+  _mainScrollRef=React.createRef();
+
+  componentDidMount(){
+    if(window.PortalMethods)Object.assign(this,window.PortalMethods);
+    const url=window.__GAS_URL__||'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
+    const apiKey=localStorage.getItem('nitta_api_key')||'';
+    localStorage.setItem('nitta_script_url',url);
+    this.setState({scriptUrl:url});
+    if(url&&apiKey){
+      this.setState({scriptApiKey:apiKey});
+      this.loadLocal();
+      this.setState({syncStatus:'syncing'});
+      setTimeout(()=>this.fetchSheets(url,apiKey,true),50);
+      this._timer=setInterval(()=>this.refreshFromSS(true),5*60*1000);
+    }else{
+      this.loadLocal();
+    }
+  }
+
+  componentWillUnmount(){if(this._timer)clearInterval(this._timer);}
+
+  renderVals(){
+    const{archiveDocs,periods,currentPeriodId,modal,formData,toast,filterCat,syncStatus}=this.state;
+    const cp=periods.find(p=>p.id===currentPeriodId)||{};
+    const CATS=['全て','議事録','定款','規約','申請書類','通知文','その他'];
+    const catPal={
+      '議事録':['#dbeafe','#1d4ed8'],'定款':['#dcfce7','#166534'],
+      '規約':['#fef9c3','#854d0e'],'申請書類':['#fff7ed','#c2410c'],
+      '通知文':['#f3e8ff','#7e22ce'],'その他':['#f1f5f9','#475569'],
+    };
+    const badge=(bg,fg)=>({display:'inline-block',padding:'2px 10px',borderRadius:'20px',fontSize:'11px',fontWeight:'600',background:bg,color:fg,whiteSpace:'nowrap'});
+    const fBtn=(label,active,onClick)=>({label,onClick,btnStyle:{border:active?'none':'1px solid #DDDEE2',background:active?'#E7C15F':'#fff',color:active?'#fff':'#3F414C',padding:'5px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:active?'600':'400',cursor:'pointer'}});
+    const catFilters=CATS.map(c=>fBtn(c,filterCat===c,()=>this.setState({filterCat:c})));
+    const filtered=(archiveDocs||[]).filter(d=>filterCat==='全て'||d.category===filterCat)
+      .sort((a,b)=>(b.date||b.addedAt||'').localeCompare(a.date||a.addedAt||''));
+    const docList=filtered.map(doc=>{
+      const cp=catPal[doc.category]||catPal['その他'];
+      return{...doc,
+        catStyle:badge(cp[0],cp[1]),
+        hasUrl:!!(doc.url&&doc.url.trim()),
+        hasNotes:!!(doc.notes&&doc.notes.trim()),
+        notesPreview:(doc.notes||'').slice(0,120),
+        onEdit:()=>this.setState({modal:{show:true,editId:doc.id},formData:{...doc}}),
+        onOpen:(e)=>{e.stopPropagation();if(doc.url)window.open(doc.url,'_blank');},
+        onDelete:(e)=>{e.stopPropagation();if(!confirm(`「${doc.title}」を削除しますか？`))return;this.setState(s=>({archiveDocs:s.archiveDocs.filter(d=>d.id!==doc.id)}),()=>this.persist());this.showToast('削除しました');},
+      };
+    });
+    const NAV=[
+      {id:'dashboard',label:'ダッシュボード'},{id:'officers',label:'役員'},
+      {id:'members',label:'会員名簿'},{id:'invoices',label:'請求管理'},
+      {id:'ledger',label:'入出金'},{id:'budget',label:'予算'},
+      {id:'statements',label:'決算'},{id:'events',label:'事業'},
+      {id:'tasks',label:'タスク管理'},{id:'assembly',label:'総会資料'},
+      {id:'proposals',label:'議案作成'},{id:'archive',label:'資料庫'},
+      {id:'settings',label:'設定'},
+    ];
+    const navS=(a)=>a
+      ?{display:'block',padding:'7px 12px',fontSize:'13px',fontWeight:'500',color:'#C39425',background:'rgba(231,193,95,0.18)',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'}
+      :{display:'block',padding:'7px 12px',fontSize:'13px',color:'#3F414C',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'};
+    return{
+      showLoader:false,
+      navItems:NAV.map(n=>({...n,onClick:()=>this.nav(n.id),navStyle:navS(n.id==='archive')})),
+      periodOptions:(this.state.periods||[]).map(p=>({...p})),
+      currentPeriodId,
+      onChangePeriod:(e)=>this.setState({currentPeriodId:e.target.value}),
+      currentPeriodName:cp.name||'',
+      catFilters,docList,isEmpty:docList.length===0,
+      onNew:()=>{
+        const today=new Date().toISOString().slice(0,10);
+        this.setState({modal:{show:true,editId:null},formData:{category:'議事録',title:'',date:today,url:'',notes:''}});
+      },
+      modalShow:modal.show,
+      modalTitle:modal.editId?'資料を編集':'資料を追加',
+      formData,
+      onInput:(e)=>this.setField(e.target.dataset.field,e.target.value),
+      onSave:()=>{
+        const{formData:f,modal:m}=this.state;
+        if(!f.title){this.showToast('タイトルを入力してください');return;}
+        if(m.editId){
+          this.setState(s=>({archiveDocs:s.archiveDocs.map(d=>d.id===m.editId?{...d,...f}:d),modal:{show:false}}),()=>this.persist());
+        }else{
+          const n={...f,id:this.gen(),addedAt:new Date().toISOString()};
+          this.setState(s=>({archiveDocs:[...s.archiveDocs,n],modal:{show:false}}),()=>this.persist());
+        }
+        this.showToast('保存しました');
+      },
+      onCloseModal:()=>this.setState({modal:{show:false}}),
+      stopProp:(e)=>e.stopPropagation(),
+      syncStatusColor:{null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'}[String(syncStatus)]||'#A1A1AA',
+      syncStatusLabel:syncStatus==='syncing'?'同期中...':syncStatus==='ok'?'✓ 同期済':syncStatus==='error'?'✗ オフライン':'未連携',
+      syncProgressBarStyle:syncStatus==='syncing'?{}:{opacity:0,pointerEvents:'none'},
+      onRefreshFromSS:()=>this.refreshFromSS(false),
+      mainScrollRef:this._mainScrollRef,
+      toast,showToast:!!toast,
+    };
+  }
+}
+</script>
+
+<script>
+window.__GAS_URL__ = 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
+// APIキーはlocalStorageから読み込みます（設定ページで初期設定してください）
+const ALLOWED_EMAILS = ['clmiwa.hotline@gmail.com'];
+const AUTH_KEY = 'nitta_auth_v2';
+let __gasAuthEmails = [];
+function prefetchAuthEmails(){
+  const _pk=localStorage.getItem('nitta_api_key')||'';
+  fetch('https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec?key='+encodeURIComponent(_pk)+'&action=load')
+    .then(r=>r.json())
+    .then(d=>{ if(d&&d.authEmails) __gasAuthEmails=(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email); })
+    .catch(()=>{});
+}
+function getAuthEmails(){
+  const local=(()=>{try{const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');return(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email);}catch(e){return[];}})();
+  return [...new Set([...local,...__gasAuthEmails])];
+}
+function showPortal(splash){
+  document.documentElement.setAttribute('data-authed','1');
+  if(splash){
+    var ov=document.getElementById('auth-overlay');
+    ov.style.cssText='position:fixed;inset:0;background:#FAF8F0;z-index:9999;display:flex;align-items:center;justify-content:center;';
+    var c=ov.querySelector('.auth-card');if(c)c.style.display='none';
+    var d=document.createElement('div');d.style.textAlign='center';
+    var i=document.createElement('img');i.src='uploads/logo-splash.png';
+    i.style.cssText='width:180px;height:auto;display:block;margin:0 auto 28px;animation:logo-pulse 1.8s ease-in-out infinite;';
+    i.onerror=function(){this.style.display='none';};
+    var b=document.createElement('div');b.style.cssText='width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;margin:0 auto;';
+    var fi=document.createElement('div');fi.style.cssText='height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;';
+    b.appendChild(fi);d.appendChild(i);d.appendChild(b);ov.appendChild(d);
+    setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
+  }else{
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.body.classList.add('portal-ready');
+  }
+}
+function handleCredential(response){
+  try{
+    const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const email=payload.email||'';
+    if(![...ALLOWED_EMAILS,...getAuthEmails()].includes(email)){document.getElementById('auth-error').textContent=email+' はアクセス権限がありません';return;}
+    if(document.getElementById('auto-login').checked)localStorage.setItem(AUTH_KEY,JSON.stringify({email,exp:Date.now()+30*24*60*60*1000}));
+    sessionStorage.setItem('nitta_session','1');showPortal(true);
+  }catch(e){document.getElementById('auth-error').textContent='認証エラーが発生しました';}
+}
+(function(){
+  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){var _isn=sessionStorage.getItem('nitta_session');sessionStorage.setItem('nitta_session','1');showPortal(!_isn);return;}}catch(e){}
+  prefetchAuthEmails();
+  window.onload=function(){
+    if(typeof google!=='undefined'&&google.accounts){
+      google.accounts.id.initialize({client_id:'367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com',callback:handleCredential,auto_select:false});
+      google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'ja',width:280});
+    }
+  };
+})();
+</script>
+</body>
+</html>
