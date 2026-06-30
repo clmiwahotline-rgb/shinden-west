@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; overflow:hidden; }
+    html,body { height:100%; overflow:hidden; background:#e6e6ec; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -31,6 +31,15 @@
     /* Info/Gold tint button */
     button[style*="rgba(231,193,95"] { border-radius:10px!important; }
     button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* ─── data-variant セレクタ（style*= の安定版代替）─── */
+    button[data-variant="primary"] { border-radius:12px!important; }
+    button[data-variant="primary"]:hover { background:#D4AF4C!important; }
+    button[data-variant="secondary"] { background:#F5F6F8!important;border:1px solid #DDDEE2!important;color:#3F414C!important;border-radius:10px!important; }
+    button[data-variant="secondary"]:hover { background:#E6E8EC!important; }
+    button[data-variant="danger"] { border-radius:10px!important; }
+    button[data-variant="danger"]:hover { background:rgba(229,115,115,0.18)!important; }
+    button[data-variant="info"] { border-radius:10px!important; }
+    button[data-variant="info"]:hover { background:rgba(231,193,95,0.2)!important; }
     /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
@@ -71,6 +80,7 @@
     @media print {
       /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
       @page { size:A4 portrait; margin:0; }
+      html { zoom:1!important; }
       body > *:not(#_portal_print_overlay) { display:none!important; }
       #_portal_print_overlay {
         display:block!important;
@@ -139,7 +149,7 @@ html[data-authed] #auth-overlay{display:none!important;}
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; overflow:hidden; }
+    html,body { height:100%; overflow:hidden; background:#e6e6ec; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -160,6 +170,15 @@ html[data-authed] #auth-overlay{display:none!important;}
     /* Info/Gold tint button */
     button[style*="rgba(231,193,95"] { border-radius:10px!important; }
     button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* ─── data-variant セレクタ（style*= の安定版代替）─── */
+    button[data-variant="primary"] { border-radius:12px!important; }
+    button[data-variant="primary"]:hover { background:#D4AF4C!important; }
+    button[data-variant="secondary"] { background:#F5F6F8!important;border:1px solid #DDDEE2!important;color:#3F414C!important;border-radius:10px!important; }
+    button[data-variant="secondary"]:hover { background:#E6E8EC!important; }
+    button[data-variant="danger"] { border-radius:10px!important; }
+    button[data-variant="danger"]:hover { background:rgba(229,115,115,0.18)!important; }
+    button[data-variant="info"] { border-radius:10px!important; }
+    button[data-variant="info"]:hover { background:rgba(231,193,95,0.2)!important; }
     /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
@@ -195,6 +214,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     @media print {
       /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
       @page { size:A4 portrait; margin:0; }
+      html { zoom:1!important; }
       body > *:not(#_portal_print_overlay) { display:none!important; }
       #_portal_print_overlay {
         display:block!important;
@@ -261,7 +281,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
-        <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
+        <button data-variant="info" onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
       </div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
@@ -297,8 +317,8 @@ html[data-authed] #auth-overlay{display:none!important;}
           </div>
           <div style="display:flex;gap:8px;">
             <sc-if value="{{ assemblyHasDoc }}" hint-placeholder-val="{{ false }}">
-              <button onClick="{{ onPrintAssembly }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:700;cursor:pointer;">印刷 / PDF</button>
-              <button onClick="{{ onOpenAssemblyModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;cursor:pointer;">編集</button>
+              <button data-variant="primary" onClick="{{ onPrintAssembly }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:700;cursor:pointer;">印刷 / PDF</button>
+              <button data-variant="secondary" onClick="{{ onOpenAssemblyModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;cursor:pointer;">編集</button>
             </sc-if>
           </div>
         </div>
@@ -309,7 +329,7 @@ html[data-authed] #auth-overlay{display:none!important;}
             <div style="width:64px;height:64px;background:#F5F6F8;borderRadius:16px;display:flex;align-items:center;justify-content:center;marginBottom:20px;fontSize:28px;color:#C39425;fontWeight:700;">書</div>
             <div style="fontSize:16px;fontWeight:700;color:#3F414C;marginBottom:8px;">総会資料がまだ作成されていません</div>
             <div style="fontSize:13px;color:#6B7280;marginBottom:32px;maxWidth:360px;lineHeight:1.8;">議案書の構成を設定し、表紙から各議案まで一括で印刷できる正式な議案書を作成します</div>
-            <button onClick="{{ onOpenAssemblyModal }}" style="border:none;background:#E7C15F;color:#3F414C;padding:13px 40px;borderRadius:10px;fontSize:15px;fontWeight:700;cursor:pointer;letterSpacing:0.02em;">＋ 総会資料を作成</button>
+            <button data-variant="primary" onClick="{{ onOpenAssemblyModal }}" style="border:none;background:#E7C15F;color:#3F414C;padding:13px 40px;borderRadius:10px;fontSize:15px;fontWeight:700;cursor:pointer;letterSpacing:0.02em;">＋ 総会資料を作成</button>
           </div>
         </sc-if>
 
@@ -352,7 +372,7 @@ html[data-authed] #auth-overlay{display:none!important;}
           <div onClick="{{ stopProp }}" style="background:#fff;borderRadius:18px;width:100%;maxWidth:680px;boxShadow:0 8px 40px rgba(0,0,0,0.18);overflow:hidden;marginBottom:24px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 24px 0;">
               <div style="fontSize:18px;fontWeight:700;color:#3F414C;fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;">総会資料を作成</div>
-              <button onClick="{{ onCloseAssemblyModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:32px;height:32px;borderRadius:50%;fontSize:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+              <button data-variant="secondary" onClick="{{ onCloseAssemblyModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:32px;height:32px;borderRadius:50%;fontSize:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
             </div>
             <div style="display:flex;padding:14px 24px 0;gap:0;borderBottom:1px solid rgba(0,0,0,0.08);marginTop:14px;">
               <button onClick="{{ onAssemblyTabCover }}" style="{{ assemblyTabCoverStyle }}">表紙設定</button>
@@ -403,21 +423,21 @@ html[data-authed] #auth-overlay{display:none!important;}
                       <button onClick="{{ ag.onSetResource }}" style="{{ ag.kindResourceStyle }}">その他</button>
                     </div>
                     <sc-if value="{{ ag.isCustom }}" hint-placeholder-val="{{ false }}">
-                      <button onClick="{{ ag.onEditCustom }}" style="border:1px solid #E7C15F;background:#F5F6F8;color:#C39425;padding:5px 11px;borderRadius:6px;fontSize:12px;fontWeight:600;cursor:pointer;whiteSpace:nowrap;flexShrink:0;">内容編集</button>
+                      <button data-variant="primary" onClick="{{ ag.onEditCustom }}" style="border:1px solid #E7C15F;background:#F5F6F8;color:#C39425;padding:5px 11px;borderRadius:6px;fontSize:12px;fontWeight:600;cursor:pointer;whiteSpace:nowrap;flexShrink:0;">内容編集</button>
                     </sc-if>
                     <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
-                      <button onClick="{{ ag.onMoveUp }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;width:22px;height:22px;borderRadius:4px;fontSize:10px;cursor:pointer;padding:0;lineHeight:1;">▲</button>
-                      <button onClick="{{ ag.onMoveDown }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;width:22px;height:22px;borderRadius:4px;fontSize:10px;cursor:pointer;padding:0;lineHeight:1;">▼</button>
+                      <button data-variant="secondary" onClick="{{ ag.onMoveUp }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;width:22px;height:22px;borderRadius:4px;fontSize:10px;cursor:pointer;padding:0;lineHeight:1;">▲</button>
+                      <button data-variant="secondary" onClick="{{ ag.onMoveDown }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;width:22px;height:22px;borderRadius:4px;fontSize:10px;cursor:pointer;padding:0;lineHeight:1;">▼</button>
                     </div>
-                    <button onClick="{{ ag.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;width:28px;height:28px;borderRadius:6px;fontSize:14px;cursor:pointer;padding:0;flex-shrink:0;lineHeight:1;">✕</button>
+                    <button data-variant="danger" onClick="{{ ag.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;width:28px;height:28px;borderRadius:6px;fontSize:14px;cursor:pointer;padding:0;flex-shrink:0;lineHeight:1;">✕</button>
                   </div>
                 </sc-for>
-                <button onClick="{{ onAddAgendaItem }}" style="width:100%;border:2px dashed rgba(231,193,95,0.45);background:rgba(231,193,95,0.04);color:#C39425;padding:10px;borderRadius:10px;fontSize:13px;fontWeight:600;cursor:pointer;marginTop:4px;">＋ 議案を追加</button>
+                <button data-variant="info" onClick="{{ onAddAgendaItem }}" style="width:100%;border:2px dashed rgba(231,193,95,0.45);background:rgba(231,193,95,0.04);color:#C39425;padding:10px;borderRadius:10px;fontSize:13px;fontWeight:600;cursor:pointer;marginTop:4px;">＋ 議案を追加</button>
               </div>
             </sc-if>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;borderTop:1px solid rgba(0,0,0,0.07);background:#fafafa;">
               <button onClick="{{ onCloseAssemblyModal }}" style="border:1px solid rgba(0,0,0,0.12);background:#fff;color:#3F414C;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:500;cursor:pointer;">キャンセル</button>
-              <button onClick="{{ onSaveAssembly }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;borderRadius:8px;fontSize:13px;fontWeight:700;cursor:pointer;">保存</button>
+              <button data-variant="primary" onClick="{{ onSaveAssembly }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;borderRadius:8px;fontSize:13px;fontWeight:700;cursor:pointer;">保存</button>
             </div>
           </div>
         </div>
@@ -429,7 +449,7 @@ html[data-authed] #auth-overlay{display:none!important;}
           <div onClick="{{ stopProp }}" style="background:#fff;borderRadius:18px;width:100%;maxWidth:600px;boxShadow:0 8px 40px rgba(0,0,0,0.22);overflow:hidden;marginBottom:24px;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;borderBottom:1px solid rgba(0,0,0,0.07);">
               <div style="fontSize:16px;fontWeight:700;color:#3F414C;fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;">カスタム議案を作成</div>
-              <button onClick="{{ onCloseCustomAgenda }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:32px;height:32px;borderRadius:50%;fontSize:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+              <button data-variant="secondary" onClick="{{ onCloseCustomAgenda }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:32px;height:32px;borderRadius:50%;fontSize:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
             </div>
             <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
               <div>
@@ -443,7 +463,7 @@ html[data-authed] #auth-overlay{display:none!important;}
               <div>
                 <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:8px;">
                   <label style="fontSize:11px;fontWeight:700;color:#6B7280;">表（任意）</label>
-                  <button onClick="{{ onAddCustomTableRow }}" style="border:none;background:rgba(231,193,95,0.12);color:#C39425;padding:4px 12px;borderRadius:6px;fontSize:12px;fontWeight:600;cursor:pointer;">＋ 行を追加</button>
+                  <button data-variant="info" onClick="{{ onAddCustomTableRow }}" style="border:none;background:rgba(231,193,95,0.12);color:#C39425;padding:4px 12px;borderRadius:6px;fontSize:12px;fontWeight:600;cursor:pointer;">＋ 行を追加</button>
                 </div>
                 <div style="border:1px solid rgba(0,0,0,0.1);borderRadius:10px;overflow:hidden;">
                   <div style="display:grid;gridTemplateColumns:1fr 1fr 30px;background:#F5F6F8;padding:7px 10px;gap:6px;align-items:center;">
@@ -455,7 +475,7 @@ html[data-authed] #auth-overlay{display:none!important;}
                     <div style="display:grid;gridTemplateColumns:1fr 1fr 30px;padding:6px 10px;gap:6px;align-items:center;borderTop:1px solid rgba(0,0,0,0.05);">
                       <input value="{{ row.col1 }}" onChange="{{ row.onCol1 }}" style="border:1px solid rgba(0,0,0,0.1);borderRadius:5px;padding:4px 8px;fontSize:12px;" />
                       <input value="{{ row.col2 }}" onChange="{{ row.onCol2 }}" style="border:1px solid rgba(0,0,0,0.1);borderRadius:5px;padding:4px 8px;fontSize:12px;" />
-                      <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;width:24px;height:24px;borderRadius:5px;fontSize:12px;cursor:pointer;padding:0;lineHeight:1;">✕</button>
+                      <button data-variant="danger" onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.08);color:#E57373;width:24px;height:24px;borderRadius:5px;fontSize:12px;cursor:pointer;padding:0;lineHeight:1;">✕</button>
                     </div>
                   </sc-for>
                   <sc-if value="{{ customAgendaNoRows }}" hint-placeholder-val="{{ false }}">
@@ -466,7 +486,7 @@ html[data-authed] #auth-overlay{display:none!important;}
             </div>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;borderTop:1px solid rgba(0,0,0,0.07);background:#fafafa;">
               <button onClick="{{ onCloseCustomAgenda }}" style="border:1px solid rgba(0,0,0,0.12);background:#fff;color:#3F414C;padding:9px 20px;borderRadius:8px;fontSize:13px;cursor:pointer;">キャンセル</button>
-              <button onClick="{{ onSaveCustomAgenda }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 24px;borderRadius:8px;fontSize:13px;fontWeight:700;cursor:pointer;">保存</button>
+              <button data-variant="primary" onClick="{{ onSaveCustomAgenda }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 24px;borderRadius:8px;fontSize:13px;fontWeight:700;cursor:pointer;">保存</button>
             </div>
           </div>
         </div>
@@ -481,7 +501,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
       <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:20px;">
         <div style="fontSize:17px;fontWeight:700;color:#3F414C;letterSpacing:0.01em;">{{ modalTitle }}</div>
-        <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
+        <button data-variant="secondary" onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
       </div>
 
       <sc-if value="{{ isOfficer }}" hint-placeholder-val="{{ false }}">
@@ -732,11 +752,11 @@ html[data-authed] #auth-overlay{display:none!important;}
       </sc-if>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;paddingTop:20px;borderTop:1px solid rgba(0,0,0,0.07);marginTop:20px;">
-        <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+        <button data-variant="secondary" onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
         <sc-if value="{{ isTxNew }}" hint-placeholder-val="{{ false }}">
           <button onClick="{{ onSaveAndNext }}" style="border:1px solid #AFC3D7;background:#fff;color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">追加して次へ</button>
         </sc-if>
-        <button onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
+        <button data-variant="primary" onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
       </div>
     </div>
   </div>
@@ -2394,7 +2414,6 @@ function showPortal(splash){
     setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
   }else{
     document.getElementById('auth-overlay').classList.add('hidden');
-    document.body.classList.add('portal-ready');
   }
 }
 function handleCredential(response){

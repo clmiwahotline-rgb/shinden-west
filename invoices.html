@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; overflow:hidden; }
+    html,body { height:100%; overflow:hidden; background:#e6e6ec; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -31,6 +31,15 @@
     /* Info/Gold tint button */
     button[style*="rgba(231,193,95"] { border-radius:10px!important; }
     button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* ─── data-variant セレクタ（style*= の安定版代替）─── */
+    button[data-variant="primary"] { border-radius:12px!important; }
+    button[data-variant="primary"]:hover { background:#D4AF4C!important; }
+    button[data-variant="secondary"] { background:#F5F6F8!important;border:1px solid #DDDEE2!important;color:#3F414C!important;border-radius:10px!important; }
+    button[data-variant="secondary"]:hover { background:#E6E8EC!important; }
+    button[data-variant="danger"] { border-radius:10px!important; }
+    button[data-variant="danger"]:hover { background:rgba(229,115,115,0.18)!important; }
+    button[data-variant="info"] { border-radius:10px!important; }
+    button[data-variant="info"]:hover { background:rgba(231,193,95,0.2)!important; }
     /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
@@ -71,6 +80,7 @@
     @media print {
       /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
       @page { size:A4 portrait; margin:0; }
+      html { zoom:1!important; }
       body > *:not(#_portal_print_overlay) { display:none!important; }
       #_portal_print_overlay {
         display:block!important;
@@ -139,7 +149,7 @@ html[data-authed] #auth-overlay{display:none!important;}
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; overflow:hidden; }
+    html,body { height:100%; overflow:hidden; background:#e6e6ec; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -160,6 +170,15 @@ html[data-authed] #auth-overlay{display:none!important;}
     /* Info/Gold tint button */
     button[style*="rgba(231,193,95"] { border-radius:10px!important; }
     button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* ─── data-variant セレクタ（style*= の安定版代替）─── */
+    button[data-variant="primary"] { border-radius:12px!important; }
+    button[data-variant="primary"]:hover { background:#D4AF4C!important; }
+    button[data-variant="secondary"] { background:#F5F6F8!important;border:1px solid #DDDEE2!important;color:#3F414C!important;border-radius:10px!important; }
+    button[data-variant="secondary"]:hover { background:#E6E8EC!important; }
+    button[data-variant="danger"] { border-radius:10px!important; }
+    button[data-variant="danger"]:hover { background:rgba(229,115,115,0.18)!important; }
+    button[data-variant="info"] { border-radius:10px!important; }
+    button[data-variant="info"]:hover { background:rgba(231,193,95,0.2)!important; }
     /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
@@ -195,6 +214,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     @media print {
       /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
       @page { size:A4 portrait; margin:0; }
+      html { zoom:1!important; }
       body > *:not(#_portal_print_overlay) { display:none!important; }
       #_portal_print_overlay {
         display:block!important;
@@ -261,7 +281,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
-        <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
+        <button data-variant="info" onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
       </div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
@@ -295,23 +315,23 @@ html[data-authed] #auth-overlay{display:none!important;}
           </div>
           <div style="display:flex;gap:8px;" data-noprint="">
             <button onClick="{{ onExportInvoicesCSV }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">CSV</button>
-            <button onClick="{{ onOpenInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一覧印刷</button>
+            <button data-variant="secondary" onClick="{{ onOpenInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一覧印刷</button>
             <button onClick="{{ onBulkPrintAll }}" style="border:1px solid rgba(0,0,0,0.15);background:#fff;color:#3F414C;padding:8px 14px;borderRadius:8px;fontSize:13px;fontWeight:500;">🖨 まとめて印刷</button>
-            <button onClick="{{ onOpenBulk }}" style="border:1px solid #C39425;background:transparent;color:#C39425;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
-            <button onClick="{{ onAddInvoice }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
+            <button data-variant="info" onClick="{{ onOpenBulk }}" style="border:1px solid #C39425;background:transparent;color:#C39425;padding:8px 16px;borderRadius:8px;fontSize:13px;fontWeight:500;">一括請求書発行</button>
+            <button data-variant="primary" onClick="{{ onAddInvoice }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">＋ 手動追加</button>
           </div>
         </div>
         <!-- Year nav + Month tabs -->
         <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:14px 18px;marginBottom:14px;">
           <div style="display:flex;alignItems:center;gap:8px;marginBottom:12px;">
-            <button onClick="{{ onInvPrevYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">←</button>
+            <button data-variant="secondary" onClick="{{ onInvPrevYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">←</button>
             <div style="display:flex;gap:4px;flex:1;justifyContent:center;">
               <sc-for list="{{ invPeriodTabs }}" as="tab" hint-placeholder-count="3">
                 <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
               </sc-for>
             </div>
             <div style="fontSize:12px;color:#6B7280;minWidth:64px;textAlign:center;">{{ invYearLabel }}</div>
-            <button onClick="{{ onInvNextYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">→</button>
+            <button data-variant="secondary" onClick="{{ onInvNextYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">→</button>
           </div>
           <div style="display:flex;gap:4px;flexWrap:wrap;">
             <sc-for list="{{ invMonthTabs }}" as="tab" hint-placeholder-count="13">
@@ -356,9 +376,9 @@ html[data-authed] #auth-overlay{display:none!important;}
                 </sc-if>
               </span>
               <span style="width:210px;display:flex;gap:3px;flexWrap:wrap;" data-noprint="">
-                <button onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
+                <button data-variant="secondary" onClick="{{ row.onEdit }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">編集</button>
                 <button onClick="{{ row.onMarkPaid }}" style="{{ row.markPaidStyle }}">入金</button>
-                <button onClick="{{ row.onPrintInvoice }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">請求書</button>
+                <button data-variant="info" onClick="{{ row.onPrintInvoice }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">請求書</button>
                 <button onClick="{{ row.onPrintReceipt }}" style="{{ row.receiptStyle }}">領収書</button>
                 <button onClick="{{ row.onInstallment }}" style="border:none;background:rgba(255,149,0,0.1);color:#ff9500;padding:3px 7px;borderRadius:5px;fontSize:10px;fontWeight:500;">分割</button>
                 <button onClick="{{ row.onCancel }}" style="{{ row.cancelStyle }}">取消</button>
@@ -392,7 +412,7 @@ html[data-authed] #auth-overlay{display:none!important;}
         <div onClick="{{ stopProp }}" style="background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,0.15);border:1px solid #DDDEE2;overflow:hidden;margin-bottom:40px;">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #DDDEE2;">
             <div style="font-size:16px;font-weight:700;color:#3F414C;font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;letter-spacing:0.03em;">請求一覧 印刷</div>
-            <button onClick="{{ onCloseInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
+            <button data-variant="secondary" onClick="{{ onCloseInvoicePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;">✕</button>
           </div>
           <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
             <div>
@@ -414,7 +434,7 @@ html[data-authed] #auth-overlay{display:none!important;}
           </div>
           <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid #DDDEE2;background:#F5F6F8;">
             <button onClick="{{ onCloseInvoicePrint }}" style="border:1px solid #DDDEE2;background:#fff;color:#3F414C;padding:9px 20px;border-radius:8px;font-size:13px;cursor:pointer;">キャンセル</button>
-            <button onClick="{{ onPrintInvoiceList }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">印刷 / PDF</button>
+            <button data-variant="primary" onClick="{{ onPrintInvoiceList }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 28px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">印刷 / PDF</button>
           </div>
         </div>
       </div>
@@ -427,7 +447,7 @@ html[data-authed] #auth-overlay{display:none!important;}
               <div style="fontSize:17px;fontWeight:700;color:#3F414C;">口座引き落とし・分割払い設定</div>
               <div style="fontSize:12px;color:#6B7280;marginTop:3px;">{{ installmentInvoiceStore }}　{{ installmentTotalStr }}</div>
             </div>
-            <button onClick="{{ onCloseInstallment }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
+            <button data-variant="secondary" onClick="{{ onCloseInstallment }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
           </div>
           <!-- Settings -->
           <div style="background:#F5F6F8;borderRadius:10px;padding:16px;marginBottom:16px;display:grid;gridTemplateColumns:1fr 1fr 1fr;gap:12px;">
@@ -485,7 +505,7 @@ html[data-authed] #auth-overlay{display:none!important;}
           <div style="display:flex;justify-content:space-between;alignItems:center;">
             <div style="fontSize:13px;color:#6B7280;">済み {{ installmentPaidCount }} / {{ installmentCount }} 回　残高 {{ installmentRemainingStr }}</div>
             <div style="display:flex;gap:8px;">
-              <button onClick="{{ onCloseInstallment }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">閉じる</button>
+              <button data-variant="secondary" onClick="{{ onCloseInstallment }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">閉じる</button>
               <button onClick="{{ onSaveInstallment }}" style="border:none;background:#ff9500;color:#fff;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">設定を保存</button>
             </div>
           </div>
@@ -497,7 +517,7 @@ html[data-authed] #auth-overlay{display:none!important;}
         <div style="background:#fff;borderRadius:16px;width:580px;boxShadow:0 20px 60px rgba(0,0,0,0.25);padding:24px;marginBottom:40px;" onClick="{{ stopProp }}">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:18px;">
             <div style="fontSize:17px;fontWeight:700;color:#3F414C;">一括請求書発行</div>
-            <button onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
+            <button data-variant="secondary" onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;padding:0;">×</button>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:12px;marginBottom:14px;">
             <div>
@@ -521,8 +541,8 @@ html[data-authed] #auth-overlay{display:none!important;}
           <div style="marginBottom:14px;display:flex;justify-content:space-between;alignItems:center;">
             <div style="fontSize:12px;fontWeight:600;color:#6B7280;">発行対象会員を選択</div>
             <div style="display:flex;gap:6px;">
-              <button onClick="{{ onBulkSelectAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">全選択</button>
-              <button onClick="{{ onBulkClearAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">全解除</button>
+              <button data-variant="secondary" onClick="{{ onBulkSelectAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">全選択</button>
+              <button data-variant="secondary" onClick="{{ onBulkClearAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:500;">全解除</button>
             </div>
           </div>
           <div style="border:1px solid rgba(0,0,0,0.08);borderRadius:10px;overflow:hidden;marginBottom:18px;maxHeight:300px;overflowY:auto;">
@@ -541,8 +561,8 @@ html[data-authed] #auth-overlay{display:none!important;}
           <div style="display:flex;justify-content:space-between;alignItems:center;padding-top:14px;borderTop:1px solid rgba(0,0,0,0.07);">
             <div style="fontSize:13px;color:#6B7280;">選択中: {{ bulkSelectedCount }} 名</div>
             <div style="display:flex;gap:8px;">
-              <button onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
-              <button onClick="{{ onBulkGenerate }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">発行する</button>
+              <button data-variant="secondary" onClick="{{ onCloseBulk }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+              <button data-variant="primary" onClick="{{ onBulkGenerate }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">発行する</button>
             </div>
           </div>
         </div>
@@ -556,8 +576,8 @@ html[data-authed] #auth-overlay{display:none!important;}
             <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:12px;">
               <div style="fontSize:14px;fontWeight:600;color:#3F414C;">{{ printDocTitle }}</div>
               <div style="display:flex;gap:8px;">
-                <button onClick="{{ onPrintInvoiceDoc }}" style="border:none;background:#E7C15F;color:#3F414C;padding:7px 16px;borderRadius:7px;fontSize:13px;fontWeight:500;">印刷 / PDF保存</button>
-                <button onClick="{{ onClosePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:7px 14px;borderRadius:7px;fontSize:13px;">閉じる</button>
+                <button data-variant="primary" onClick="{{ onPrintInvoiceDoc }}" style="border:none;background:#E7C15F;color:#3F414C;padding:7px 16px;borderRadius:7px;fontSize:13px;fontWeight:500;">印刷 / PDF保存</button>
+                <button data-variant="secondary" onClick="{{ onClosePrint }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:7px 14px;borderRadius:7px;fontSize:13px;">閉じる</button>
               </div>
             </div>
             <div style="display:flex;alignItems:center;gap:10px;background:#F5F6F8;borderRadius:8px;padding:10px 14px;">
@@ -673,10 +693,10 @@ html[data-authed] #auth-overlay{display:none!important;}
               <div style="fontSize:12px;color:#6B7280;marginTop:2px;">{{ bulkCheckedCount }}件選択中 ／ 1件ずつA4で出力されます</div>
             </div>
             <div style="display:flex;gap:8px;">
-              <button onClick="{{ onBulkCheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">全選択</button>
-              <button onClick="{{ onBulkUncheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">全解除</button>
-              <button onClick="{{ onDoBulkPrint }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">🖨 印刷</button>
-              <button onClick="{{ onCloseBulkPrint }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">閉じる</button>
+              <button data-variant="secondary" onClick="{{ onBulkCheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">全選択</button>
+              <button data-variant="secondary" onClick="{{ onBulkUncheckAll }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">全解除</button>
+              <button data-variant="primary" onClick="{{ onDoBulkPrint }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 18px;borderRadius:8px;fontSize:13px;fontWeight:600;">🖨 印刷</button>
+              <button data-variant="secondary" onClick="{{ onCloseBulkPrint }}" style="border:none;background:rgba(0,0,0,0.07);color:#3F414C;padding:7px 12px;borderRadius:8px;fontSize:12px;">閉じる</button>
             </div>
           </div>
           <!-- チェックリスト -->
@@ -719,7 +739,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
       <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:20px;">
         <div style="fontSize:17px;fontWeight:700;color:#3F414C;letterSpacing:0.01em;">{{ modalTitle }}</div>
-        <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
+        <button data-variant="secondary" onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
       </div>
 
       <sc-if value="{{ isOfficer }}" hint-placeholder-val="{{ false }}">
@@ -970,11 +990,11 @@ html[data-authed] #auth-overlay{display:none!important;}
       </sc-if>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;paddingTop:20px;borderTop:1px solid rgba(0,0,0,0.07);marginTop:20px;">
-        <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+        <button data-variant="secondary" onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
         <sc-if value="{{ isTxNew }}" hint-placeholder-val="{{ false }}">
           <button onClick="{{ onSaveAndNext }}" style="border:1px solid #AFC3D7;background:#fff;color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">追加して次へ</button>
         </sc-if>
-        <button onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
+        <button data-variant="primary" onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
       </div>
     </div>
   </div>
@@ -2679,7 +2699,6 @@ function showPortal(splash){
     setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
   }else{
     document.getElementById('auth-overlay').classList.add('hidden');
-    document.body.classList.add('portal-ready');
   }
 }
 function handleCredential(response){

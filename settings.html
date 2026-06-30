@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; overflow:hidden; }
+    html,body { height:100%; overflow:hidden; background:#e6e6ec; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -31,6 +31,15 @@
     /* Info/Gold tint button */
     button[style*="rgba(231,193,95"] { border-radius:10px!important; }
     button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* ─── data-variant セレクタ（style*= の安定版代替）─── */
+    button[data-variant="primary"] { border-radius:12px!important; }
+    button[data-variant="primary"]:hover { background:#D4AF4C!important; }
+    button[data-variant="secondary"] { background:#F5F6F8!important;border:1px solid #DDDEE2!important;color:#3F414C!important;border-radius:10px!important; }
+    button[data-variant="secondary"]:hover { background:#E6E8EC!important; }
+    button[data-variant="danger"] { border-radius:10px!important; }
+    button[data-variant="danger"]:hover { background:rgba(229,115,115,0.18)!important; }
+    button[data-variant="info"] { border-radius:10px!important; }
+    button[data-variant="info"]:hover { background:rgba(231,193,95,0.2)!important; }
     /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
@@ -71,6 +80,7 @@
     @media print {
       /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
       @page { size:A4 portrait; margin:0; }
+      html { zoom:1!important; }
       body > *:not(#_portal_print_overlay) { display:none!important; }
       #_portal_print_overlay {
         display:block!important;
@@ -139,7 +149,7 @@ html[data-authed] #auth-overlay{display:none!important;}
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
     * { box-sizing:border-box; margin:0; padding:0; }
-    html,body { height:100%; overflow:hidden; }
+    html,body { height:100%; overflow:hidden; background:#e6e6ec; }
     html { zoom:1.2; }
     body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
     h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
@@ -160,6 +170,15 @@ html[data-authed] #auth-overlay{display:none!important;}
     /* Info/Gold tint button */
     button[style*="rgba(231,193,95"] { border-radius:10px!important; }
     button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* ─── data-variant セレクタ（style*= の安定版代替）─── */
+    button[data-variant="primary"] { border-radius:12px!important; }
+    button[data-variant="primary"]:hover { background:#D4AF4C!important; }
+    button[data-variant="secondary"] { background:#F5F6F8!important;border:1px solid #DDDEE2!important;color:#3F414C!important;border-radius:10px!important; }
+    button[data-variant="secondary"]:hover { background:#E6E8EC!important; }
+    button[data-variant="danger"] { border-radius:10px!important; }
+    button[data-variant="danger"]:hover { background:rgba(229,115,115,0.18)!important; }
+    button[data-variant="info"] { border-radius:10px!important; }
+    button[data-variant="info"]:hover { background:rgba(231,193,95,0.2)!important; }
     /* 金額・数値 — BIZ UDP */
     /* 金額・数値 — BIZ UDP */
     .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
@@ -195,6 +214,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     @media print {
       /* ===== オーバーレイ方式：印刷時はUI全非表示、オーバーレイのみ表示 ===== */
       @page { size:A4 portrait; margin:0; }
+      html { zoom:1!important; }
       body > *:not(#_portal_print_overlay) { display:none!important; }
       #_portal_print_overlay {
         display:block!important;
@@ -261,7 +281,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
-        <button onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
+        <button data-variant="info" onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
       </div>
       <sc-if value="{{ gasUserEmail }}" hint-placeholder-val="{{ false }}">
         <div style="fontSize:10px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;marginBottom:2px;" title="{{ gasUserEmail }}">{{ gasUserEmail }}</div>
@@ -293,7 +313,7 @@ html[data-authed] #auth-overlay{display:none!important;}
           
           <div style="display:flex;justify-content:space-between;align-items:center;marginBottom:8px;">
             <div style="fontSize:14px;fontWeight:600;color:#3F414C;">期の管理</div>
-            <button onClick="{{ onAddPeriod }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">＋ 新しい期を追加</button>
+            <button data-variant="primary" onClick="{{ onAddPeriod }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">＋ 新しい期を追加</button>
           </div>
           <sc-for list="{{ periodRows }}" as="row" hint-placeholder-count="2">
             <div style="display:flex;align-items:center;gap:10px;padding:11px 0;borderBottom:1px solid rgba(0,0,0,0.05);">
@@ -305,7 +325,7 @@ html[data-authed] #auth-overlay{display:none!important;}
                     <span style="fontSize:11px;color:#6B7280;">〜</span>
                     <input type="date" value="{{ row.editEnd }}" onChange="{{ row.onEditEnd }}" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:4px 8px;fontSize:11px;">
                     <button onClick="{{ row.onSaveEdit }}" style="border:none;background:#7BC095;color:#fff;padding:4px 10px;borderRadius:6px;fontSize:11px;fontWeight:600;">保存</button>
-                    <button onClick="{{ row.onCancelEdit }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;padding:4px 8px;borderRadius:6px;fontSize:11px;">取消</button>
+                    <button data-variant="secondary" onClick="{{ row.onCancelEdit }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;padding:4px 8px;borderRadius:6px;fontSize:11px;">取消</button>
                   </div>
                 </sc-if>
                 <sc-if value="{{ row.isNotEditing }}" hint-placeholder-val="{{ true }}">
@@ -313,14 +333,14 @@ html[data-authed] #auth-overlay{display:none!important;}
                 </sc-if>
               </div>
               <span style="{{ row.activeBadge }}">{{ row.activeLabel }}</span>
-              <button onClick="{{ row.onEditDate }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 10px;borderRadius:6px;fontSize:11px;" data-noprint="">日付修正</button>
-              <button onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
+              <button data-variant="secondary" onClick="{{ row.onEditDate }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 10px;borderRadius:6px;fontSize:11px;" data-noprint="">日付修正</button>
+              <button data-variant="secondary" onClick="{{ row.onSelect }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;">選択</button>
             </div>
           </sc-for>
         </div><div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:22px;marginBottom:16px;">
           <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:16px;">
             <div style="fontSize:14px;fontWeight:600;color:#3F414C;">代表者・団体情報</div>
-            <button onClick="{{ onSaveOrgInfo }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
+            <button data-variant="primary" onClick="{{ onSaveOrgInfo }}" style="border:none;background:#E7C15F;color:#3F414C;padding:6px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;">保存</button>
           </div>
           <div style="display:flex;flexDirection:column;gap:12px;">
             <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
@@ -375,7 +395,7 @@ html[data-authed] #auth-overlay{display:none!important;}
             <div style="display:flex;gap:8px;">
               <input value="{{ scriptApiKey }}" onChange="{{ onApiKeyInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;fontFamily:monospace;" placeholder="APIキー（例: a1b2c3d4e5f6g7h8）">
               <button onClick="{{ onLoadFromSS }}" style="border:1px solid #ff9500;background:rgba(255,149,0,0.06);color:#ff9500;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">SSから読み込み</button>
-              <button onClick="{{ onSaveScriptUrl }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
+              <button data-variant="primary" onClick="{{ onSaveScriptUrl }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 16px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">保存・接続</button>
             </div>
             <!-- デバイスを追加 -->
             <div style="marginTop:12px;padding:12px 14px;background:rgba(175,195,215,0.10);borderRadius:10px;border:1px solid rgba(175,195,215,0.3);">
@@ -414,14 +434,14 @@ html[data-authed] #auth-overlay{display:none!important;}
                   <span style="fontSize:12px;fontWeight:600;color:#3F414C;minWidth:90px;">{{ ae.name }}</span>
                 </sc-if>
                 <span style="fontSize:12px;color:#6B7280;flex:1;">{{ ae.email }}</span>
-                <button onClick="{{ ae.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
+                <button data-variant="danger" onClick="{{ ae.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;fontWeight:500;">削除</button>
               </div>
             </sc-for>
           </div>
           <div style="display:flex;gap:8px;marginBottom:6px;">
             <input value="{{ authNameInput }}" onChange="{{ onAuthNameInput }}" style="width:120px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="氏名・役割">
             <input value="{{ authEmailInput }}" onChange="{{ onAuthEmailInput }}" style="flex:1;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 11px;fontSize:12px;" placeholder="example@gmail.com" type="email">
-            <button onClick="{{ onAddAuthEmail }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
+            <button data-variant="primary" onClick="{{ onAddAuthEmail }}" style="border:none;background:#E7C15F;color:#3F414C;padding:8px 14px;borderRadius:7px;fontSize:12px;fontWeight:500;whiteSpace:nowrap;">追加</button>
           </div>
           <div style="marginTop:10px;fontSize:11px;color:#A1A1AA;lineHeight:1.7;">
             ⚠️ 変更後は「index.htmlを更新して」とお伝えください。新しいindex.htmlをGitHubにアップすると反映されます。
@@ -454,7 +474,7 @@ html[data-authed] #auth-overlay{display:none!important;}
     <div style="background:#fff;borderRadius:16px;padding:26px;width:520px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
       <div style="display:flex;justify-content:space-between;alignItems:center;marginBottom:20px;">
         <div style="fontSize:17px;fontWeight:700;color:#3F414C;letterSpacing:0.01em;">{{ modalTitle }}</div>
-        <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
+        <button data-variant="secondary" onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.07);color:#6B7280;fontSize:16px;width:28px;height:28px;borderRadius:50%;display:flex;alignItems:center;justifyContent:center;lineHeight:1;padding:0;">×</button>
       </div>
 
       <sc-if value="{{ isOfficer }}" hint-placeholder-val="{{ false }}">
@@ -705,11 +725,11 @@ html[data-authed] #auth-overlay{display:none!important;}
       </sc-if>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;paddingTop:20px;borderTop:1px solid rgba(0,0,0,0.07);marginTop:20px;">
-        <button onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+        <button data-variant="secondary" onClick="{{ onClose }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
         <sc-if value="{{ isTxNew }}" hint-placeholder-val="{{ false }}">
           <button onClick="{{ onSaveAndNext }}" style="border:1px solid #AFC3D7;background:#fff;color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">追加して次へ</button>
         </sc-if>
-        <button onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
+        <button data-variant="primary" onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#3F414C;padding:9px 22px;borderRadius:8px;fontSize:13px;fontWeight:500;">{{ modalSaveLabel }}</button>
       </div>
     </div>
   </div>
@@ -2092,7 +2112,6 @@ function showPortal(splash){
     setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
   }else{
     document.getElementById('auth-overlay').classList.add('hidden');
-    document.body.classList.add('portal-ready');
   }
 }
 function handleCredential(response){
