@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v4'; // v4: ロックロジック修正（localStorage確認に変更）
+const CACHE = 'nitta-portal-v5'; // v5: onGoogleLibraryLoad対応・全ページキャッシュ強制更新
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
