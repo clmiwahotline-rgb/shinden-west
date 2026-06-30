@@ -80,8 +80,8 @@
 
   fetchSheets(url, apiKey, silent) {
     const key = apiKey || this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
-    // ロック: 初回ロード(ssReady=false)または手動同期
-    const shouldLock = !this.state.ssReady || !silent;
+    // ロック: ローカルデータが一切ない初回のみ、または手動同期
+    const shouldLock = !localStorage.getItem('nitta_v5') || !silent;
     if (shouldLock) this._showSsLock();
     if (!silent) this.setState({ syncStatus: 'syncing' });
     const lastTs = localStorage.getItem('nitta_last_modified') || '0';

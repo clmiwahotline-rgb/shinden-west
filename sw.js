@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v3'; // v3: portal-shared.js 構文エラー修正
+const CACHE = 'nitta-portal-v4'; // v4: ロックロジック修正（localStorage確認に変更）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
