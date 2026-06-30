@@ -1709,7 +1709,7 @@ class Component extends DCLogic {
         });
       })(),
       mainScrollRef: this._mainScrollRef,
-      showLoader: !!this.state.loading && this._shouldShowSplash(),
+      showLoader: false,
       onOpenAssemblyModal:()=>this.openAssemblyModal?.(),
       onPrintAssembly:()=>this.printAssemblyDoc?.(),
       assemblyModalShow:this.state.assemblyModal||false,
@@ -1918,8 +1918,8 @@ class Component extends DCLogic {
         ? {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(123,192,149,0.12)',color:'#7BC095'}
         : {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(255,149,0,0.12)',color:'#ff9500'},
       onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
-      syncProgressBarStyle: (this.state.syncStatus==='syncing'&&!(this.state.loading&&this._shouldShowSplash())) ? {} : {opacity:0,pointerEvents:'none'},
-      syncProgressBarClass: (this.state.syncStatus==='syncing'&&!(this.state.loading&&this._shouldShowSplash())) ? '' : 'hidden',
+      syncProgressBarStyle: (this.state.syncStatus==='syncing') ? {} : {opacity:0,pointerEvents:'none'},
+      syncProgressBarClass: (this.state.syncStatus==='syncing') ? '' : 'hidden',
       syncStatusLabel: (()=>{
         if (this.state.syncPaused) return '⏸ 同期停止中';
         const st = String(this.state.syncStatus);
@@ -2020,11 +2020,11 @@ function handleCredential(response){
     const email=payload.email||'';
     if(![...ALLOWED_EMAILS,...getAuthEmails()].includes(email)){document.getElementById('auth-error').textContent=email+' はアクセス権限がありません';return;}
     if(document.getElementById('auto-login').checked)localStorage.setItem(AUTH_KEY,JSON.stringify({email,exp:Date.now()+30*24*60*60*1000}));
-    showPortal(true); // ← ログイン時のみ2秒スプラッシュ
+    sessionStorage.setItem('nitta_session','1');showPortal(true);
   }catch(e){document.getElementById('auth-error').textContent='認証エラーが発生しました';}
 }
 (function(){
-  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){showPortal();return;}}catch(e){}
+  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){var _isn=sessionStorage.getItem('nitta_session');sessionStorage.setItem('nitta_session','1');showPortal(!_isn);return;}}catch(e){}
   prefetchAuthEmails();
   window.onload=function(){
     if(typeof google!=='undefined'&&google.accounts){

@@ -1718,7 +1718,7 @@ class Component extends DCLogic {
         });
       })(),
       mainScrollRef: this._mainScrollRef,
-      showLoader: !!this.state.loading && this._shouldShowSplash(),
+      showLoader: false,
       onOpenAssemblyModal:()=>this.openAssemblyModal?.(),
       onPrintAssembly:()=>this.printAssemblyDoc?.(),
       assemblyModalShow:this.state.assemblyModal||false,
@@ -1927,8 +1927,8 @@ class Component extends DCLogic {
         ? {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(123,192,149,0.12)',color:'#7BC095'}
         : {border:'none',padding:'5px 12px',borderRadius:'7px',fontSize:'12px',fontWeight:'600',cursor:'pointer',background:'rgba(255,149,0,0.12)',color:'#ff9500'},
       onToggleSyncPause: ()=>{ const p=!this.state.syncPaused; this.setState({syncPaused:p}); this.showToast(p?'SS同期を一時停止しました':'SS同期を再開しました'); },
-      syncProgressBarStyle: (this.state.syncStatus==='syncing'&&!(this.state.loading&&this._shouldShowSplash())) ? {} : {opacity:0,pointerEvents:'none'},
-      syncProgressBarClass: (this.state.syncStatus==='syncing'&&!(this.state.loading&&this._shouldShowSplash())) ? '' : 'hidden',
+      syncProgressBarStyle: (this.state.syncStatus==='syncing') ? {} : {opacity:0,pointerEvents:'none'},
+      syncProgressBarClass: (this.state.syncStatus==='syncing') ? '' : 'hidden',
       syncStatusLabel: (()=>{
         if (this.state.syncPaused) return '⏸ 同期停止中';
         const st = String(this.state.syncStatus);
@@ -2011,18 +2011,36 @@ function getAuthEmails(){
   const local=(()=>{try{const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');return(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email);}catch(e){return[];}})();
   return [...new Set([...local,...__gasAuthEmails])];
 }
-function showPortal(){document.documentElement.setAttribute('data-authed','1');document.getElementById('auth-overlay').classList.add('hidden');document.body.classList.add('portal-ready');}
+function showPortal(splash){
+  document.documentElement.setAttribute('data-authed','1');
+  if(splash){
+    var ov=document.getElementById('auth-overlay');
+    ov.style.cssText='position:fixed;inset:0;background:#FAF8F0;z-index:9999;display:flex;align-items:center;justify-content:center;';
+    var c=ov.querySelector('.auth-card');if(c)c.style.display='none';
+    var d=document.createElement('div');d.style.textAlign='center';
+    var i=document.createElement('img');i.src='uploads/logo-splash.png';
+    i.style.cssText='width:180px;height:auto;display:block;margin:0 auto 28px;animation:logo-pulse 1.8s ease-in-out infinite;';
+    i.onerror=function(){this.style.display='none';};
+    var b=document.createElement('div');b.style.cssText='width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;margin:0 auto;';
+    var fi=document.createElement('div');fi.style.cssText='height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;';
+    b.appendChild(fi);d.appendChild(i);d.appendChild(b);ov.appendChild(d);
+    setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
+  }else{
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.body.classList.add('portal-ready');
+  }
+}
 function handleCredential(response){
   try{
     const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
     const email=payload.email||'';
     if(![...ALLOWED_EMAILS,...getAuthEmails()].includes(email)){document.getElementById('auth-error').textContent=email+' はアクセス権限がありません';return;}
     if(document.getElementById('auto-login').checked)localStorage.setItem(AUTH_KEY,JSON.stringify({email,exp:Date.now()+30*24*60*60*1000}));
-    showPortal();
+    sessionStorage.setItem('nitta_session','1');showPortal(true);
   }catch(e){document.getElementById('auth-error').textContent='認証エラーが発生しました';}
 }
 (function(){
-  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){showPortal();return;}}catch(e){}
+  try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){var _isn=sessionStorage.getItem('nitta_session');sessionStorage.setItem('nitta_session','1');showPortal(!_isn);return;}}catch(e){}
   prefetchAuthEmails();
   window.onload=function(){
     if(typeof google!=='undefined'&&google.accounts){
