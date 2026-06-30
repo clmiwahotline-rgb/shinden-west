@@ -483,7 +483,7 @@
     const el = document.createElement('div');
     el.id = '_ss_lock';
     el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(245,246,248,0.85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:9994;align-items:center;justify-content:center;flex-direction:column;gap:16px;pointer-events:all;';
-    el.innerHTML = '<div style="width:38px;height:38px;border:3px solid #DDDEE2;border-top-color:#E7C15F;border-radius:50%;animation:_spin 0.8s linear infinite;"></div><div style="font-size:13px;color:#6B7280;font-family:'Noto Sans JP',sans-serif;font-weight:500;letter-spacing:0.04em;">データを同期中...</div>';
+    el.innerHTML = '<div style="width:38px;height:38px;border:3px solid #DDDEE2;border-top-color:#E7C15F;border-radius:50%;animation:_spin 0.8s linear infinite;"></div><div style="font-size:13px;color:#6B7280;font-family:sans-serif;font-weight:500;letter-spacing:0.04em;">\u30c7\u30fc\u30bf\u3092\u540c\u671f\u4e2d...</div>';
     document.body.appendChild(el);
   },
   _showSsLock() {
