@@ -4,26 +4,30 @@
 <script>/* auth-early-check */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(s&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');return;}}catch(e){}document.documentElement.setAttribute('data-needs-login','1');})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>タスク管理 — 新田西口商店会</title>
-
+<title>&#x30bf;&#x30b9;&#x30af;&#x7ba1;&#x7406; | &#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="portal-common.css">
-
-</helmet>
-
-<!-- ===== LOADING SCREEN ===== -->
-<sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;">
-    <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:200px;height:auto;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display='none'" />
-    <div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;">
-      <div style="height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;"></div>
+<link rel="stylesheet" href="portal-common.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div id="auth-overlay">
+  <div class="auth-card">
+    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'" style="pointer-events:none;user-select:none;-webkit-user-select:none;">
+    <div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div>
+    <div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div>
+    <div id="g_id_signin"></div>
+    <div id="auth-error"></div>
+    <div class="auto-row">
+      <input type="checkbox" id="auto-login">
+      <label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff0830&#x65e5;&#x9593;&#xff09;</label>
     </div>
-    <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
   </div>
-</sc-if>
-
+</div>
+<div id="sync-progress-bar" class="hidden"></div>
+<script src="portal-shared.js"></script>
+<script src="support.js"></script>
 
 
 <helmet>
@@ -1842,6 +1846,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
