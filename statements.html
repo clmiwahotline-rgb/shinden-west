@@ -840,8 +840,8 @@ class Component extends DCLogic {
       id:'stl_'+Date.now(),
       periodId:pid,
       periodName:cp.name||'',
-      periodStart:cp.startDate||'',
-      periodEnd:cp.endDate||'',
+      periodStart:(cp.startDate||'').slice(0,10),
+      periodEnd:(cp.endDate||'').slice(0,10),
       confirmedAt:new Date().toISOString().slice(0,10),
       totalIncome:totalI,
       totalExpense:totalE,
@@ -859,6 +859,7 @@ class Component extends DCLogic {
 
   printSettlementDoc(s) {
     const orgInfo = this.state.orgInfo||{};
+    s = {...s, periodStart:(s.periodStart||'').slice(0,10), periodEnd:(s.periodEnd||'').slice(0,10)};
     const orgName = orgInfo.name||'新田西口商店会';
     const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===s.periodId);
     const budMap={}; budgets.forEach(b=>{budMap[b.category]=(b.amount||0);});
@@ -1854,7 +1855,7 @@ class Component extends DCLogic {
           const auditorHankoSvg = audit ? this.makeHanko?.(audit.name||'') : '';
           return {
             ...s,
-            periodStart: pd.startDate||'', periodEnd: pd.endDate||'',
+            periodStart: (pd.startDate||'').slice(0,10), periodEnd: (pd.endDate||'').slice(0,10),
             totalIncomeStr:this.fmt(s.totalIncome),
             totalExpenseStr:this.fmt(s.totalExpense),
             netStr:this.fmt(s.net),
@@ -2079,6 +2080,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
