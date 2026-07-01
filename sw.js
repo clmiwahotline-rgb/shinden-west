@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v8'; // v8: auth-early-check を <head> 先頭に移動（フラッシュ完全解消）
+const CACHE = 'nitta-portal-v9'; // v9: auth-overlay デフォルトnone + data-needs-login で根本修正
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

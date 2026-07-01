@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script>/* auth-early-check */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(s&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');}}catch(e){}})();</script>
+<script>/* auth-early-check */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(s&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');return;}}catch(e){}document.documentElement.setAttribute('data-needs-login','1');})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>新田西口商店会 管理ポータル</title>
@@ -115,7 +115,7 @@
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-#auth-overlay{position:fixed;inset:0;background:#F5F6F8;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Noto Sans JP',sans-serif;}
+#auth-overlay{position:fixed;inset:0;background:#F5F6F8;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;font-family:'Noto Sans JP',sans-serif;}
 #auth-overlay.hidden{display:none;}
 html[data-authed] #auth-overlay{display:none!important;}
 .auth-card{background:#fff;border-radius:20px;padding:48px 44px;box-shadow:0 4px 32px rgba(0,0,0,0.06);border:1px solid #DDDEE2;max-width:400px;width:100%;text-align:center;}
