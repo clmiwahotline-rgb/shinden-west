@@ -1609,7 +1609,7 @@ class Component extends DCLogic {
       // Settlement modal
       showSettlementModal:this.state.settlementModal||false,
       onCloseSettlement:()=>this.setState({settlementModal:false}),
-      onConfirmSettlement:()=>{ if(confirm('収支を確定します。よろしいですか？')) this.confirmSettlement?.(); },
+      onConfirmSettlement:()=>this.confirmSettlement?.(),
       settlementNote:this.state.settlementNote||'',
       onSettlementNote:(e)=>this.setState({settlementNote:e.target.value}),
       settlementPeriodName:cp.name||'',
