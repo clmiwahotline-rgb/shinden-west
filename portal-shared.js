@@ -411,17 +411,18 @@
   },
 
   _openPrintWindow(bodyHtml, title, noPageNum) {
-    // DOMに印刷オーバーレイを注入（window.open不要）
     let overlay = document.getElementById('_portal_print_overlay');
     if (!overlay) {
       overlay = document.createElement('div');
       overlay.id = '_portal_print_overlay';
       document.body.appendChild(overlay);
     }
-    const pageFooterHtml = noPageNum ? '' :
-      '<div style="position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;font-family:serif;" class="_print_pnum"></div>';
-    overlay.innerHTML = bodyHtml + pageFooterHtml;
-    // タイトルを一時変更（ブラウザ印刷ダイアログのタイトル欄に表示）
+    // ページ番号: @page @bottom-center 方式（position:fixedを廃止してレイアウト被り解消）
+    // noPageNum=trueの場合はstyle注入でページ番号を非表示
+    const pageStyle = noPageNum
+      ? '<style>@page{margin:15mm 18mm 15mm;}@page{}</style>'
+      : '<style>@page{margin:15mm 18mm 22mm;}@page{@bottom-center{content:counter(page) " / " counter(pages);font-size:9pt;font-family:serif;}}</style>';
+    overlay.innerHTML = pageStyle + bodyHtml;
     const prevTitle = document.title;
     document.title = title;
     setTimeout(() => {
@@ -432,6 +433,27 @@
         window.onafterprint = null;
       };
     }, 300);
+  },
+
+  // ログイン中のユーザー情報を取得
+  getLoginInfo() {
+    try {
+      const s = JSON.parse(localStorage.getItem('nitta_auth_v2') || 'null');
+      if (!s) return { email: '', name: '' };
+      return { email: s.email || '', name: s.name || '' };
+    } catch(e) { return { email: '', name: '' }; }
+  },
+
+  // ログイン名を役員名として取得（設定の emailMap を参照）
+  getLoggedInName() {
+    try {
+      const auth = JSON.parse(localStorage.getItem('nitta_auth_v2') || 'null');
+      if (!auth || !auth.email) return '';
+      const emailMap = (this.state.orgInfo || {}).emailMap || {};
+      if (emailMap[auth.email]) return emailMap[auth.email];
+      // フォールバック: Googleの表示名
+      return auth.name || '';
+    } catch(e) { return ''; }
   },
 
 

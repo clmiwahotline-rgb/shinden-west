@@ -55,6 +55,7 @@
       </sc-for>
     </div>
     <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
+      <div style="fontSize:10px;color:#6B7280;marginBottom:6px;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;cursor:default;" title="{{ loginEmail }}">👤 {{ loginDisplayName }}</div>
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
         <button data-variant="info" onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
@@ -2157,7 +2158,7 @@ function handleCredential(response){
     const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
     const email=payload.email||'';
     if(![...ALLOWED_EMAILS,...getAuthEmails()].includes(email)){document.getElementById('auth-error').textContent=email+' はアクセス権限がありません';return;}
-    if(document.getElementById('auto-login').checked)localStorage.setItem(AUTH_KEY,JSON.stringify({email,exp:Date.now()+30*24*60*60*1000}));
+    if(document.getElementById('auto-login').checked)localStorage.setItem(AUTH_KEY,JSON.stringify({email,name:payload.name||'',exp:Date.now()+30*24*60*60*1000}));
     sessionStorage.setItem('nitta_session','1');showPortal(true);
   }catch(e){document.getElementById('auth-error').textContent='認証エラーが発生しました';}
 }
