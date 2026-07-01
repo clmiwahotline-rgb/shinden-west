@@ -118,8 +118,9 @@ html[data-authed]       #auth-overlay       { display: none!important; }
 
 /* ── 印刷 ── */
 @media print {
-  @page { size: A4 portrait; margin: 15mm 18mm; }
   @page {
+    size: A4 portrait;
+    margin: 15mm 18mm;
     @top-left    { content: ""; }
     @top-center  { content: ""; }
     @top-right   { content: ""; }

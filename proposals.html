@@ -46,7 +46,13 @@
       </sc-for>
     </div>
     <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
-      <div style="fontSize:10px;color:#6B7280;marginBottom:6px;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;cursor:default;" title="{{ loginEmail }}">👤 {{ loginDisplayName }}</div>
+      <div style="display:flex;alignItems:center;gap:8px;marginBottom:8px;">
+        <div style="width:30px;height:30px;borderRadius:50%;background:#E7C15F;display:flex;alignItems:center;justifyContent:center;fontSize:12px;fontWeight:700;color:#3F414C;flexShrink:0;">{{ loginInitial }}</div>
+        <div style="flex:1;minWidth:0;">
+          <div style="fontSize:11px;fontWeight:600;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ loginDisplayName }}</div>
+          <div style="fontSize:9px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;" title="{{ loginEmail }}">{{ loginEmail }}</div>
+        </div>
+      </div>
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
         <button data-variant="info" onClick="{{ onRefreshFromSS }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
@@ -497,6 +503,7 @@ class Component extends DCLogic {
       onDropZoneClick:()=>{const el=document.getElementById('_proposal_file_input');if(el)el.click();},
       loginEmail:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');return s&&s.email?s.email:'';}catch(e){return '';}})(),
       loginDisplayName:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return 'ゲスト';return s.name?s.name:s.email.split('@')[0];}catch(e){return 'ゲスト';}})(),
+      loginInitial:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return '?';const n=s.name||s.email;return n.charAt(0).toUpperCase();}catch(e){return '?';}})(),
       syncStatusColor:{null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'}[String(syncStatus)]||'#A1A1AA',
       syncStatusLabel:syncStatus==='syncing'?'同期中...':syncStatus==='ok'?'✓ 同期済':syncStatus==='error'?'✗ オフライン':'未連携',
       syncProgressBarStyle:syncStatus==='syncing'?{}:{opacity:0,pointerEvents:'none'},
@@ -551,6 +558,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 

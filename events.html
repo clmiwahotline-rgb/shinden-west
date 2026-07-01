@@ -55,7 +55,13 @@
       </sc-for>
     </div>
     <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
-      <div style="fontSize:10px;color:#6B7280;marginBottom:6px;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;cursor:default;" title="{{ loginEmail }}">👤 {{ loginDisplayName }}</div>
+      <div style="display:flex;alignItems:center;gap:8px;marginBottom:8px;">
+        <div style="width:30px;height:30px;borderRadius:50%;background:#E7C15F;display:flex;alignItems:center;justifyContent:center;fontSize:12px;fontWeight:700;color:#3F414C;flexShrink:0;">{{ loginInitial }}</div>
+        <div style="flex:1;minWidth:0;">
+          <div style="fontSize:11px;fontWeight:600;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ loginDisplayName }}</div>
+          <div style="fontSize:9px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;" title="{{ loginEmail }}">{{ loginEmail }}</div>
+        </div>
+      </div>
       <div style="display:flex;alignItems:center;gap:6px;marginBottom:3px;">
         <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
         <button data-variant="info" onClick="{{ onRefreshFromSS }}" title="SSから最新データを取得" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;lineHeight:1.4;display:flex;alignItems:center;gap:3px;transition:background 0.15s;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
@@ -615,7 +621,7 @@ class Component extends DCLogic {
       return `<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(dateStr)}</td><td style="padding:7px 8px;vertical-align:top;font-weight:600;">${esc(e.name)} ${sched}</td><td style="padding:7px 8px;white-space:nowrap;vertical-align:top;color:#555;">${esc(e.type||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;">${esc(e.participants||'')}</td><td style="padding:7px 8px;vertical-align:top;color:#555;line-height:1.6;">${esc(e.notes||'')}</td></tr>`;
     }).join('');
     const bodyHtml = [
-      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">事　業　進　捗　報　告</div><div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div><div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div><div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div></div>`,
+      `<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;"><div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">事　業　進　捗　報　告</div><div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　自 ${fmtD(cp.startDate)} 至 ${fmtD(cp.endDate)}　${esc(orgName)}　作成日：${new Date().toLocaleDateString('ja-JP',{era:'long',year:'numeric',month:'long',day:'numeric'})}</div></div>`,
       `<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #3F414C;"><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:96px;">開　催　日</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">事　業　名</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:78px;">種　別</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;width:92px;">参　加　者</th><th style="text-align:left;padding:5px 8px;font-weight:400;color:#888;font-size:10px;">備　考　・　記　録</th></tr></thead><tbody>${rowsHtml}<tr style="border-top:2px solid #3F414C;font-weight:700;"><td colspan="5" style="padding:8px;text-align:right;">事業件数　${evts.length}　件</td></tr></tbody></table>`,
 
     ].join('');
@@ -1717,6 +1723,9 @@ class Component extends DCLogic {
         }
         return '未連携';
       })(),
+      loginEmail:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');return s&&s.email?s.email:'';}catch(e){return '';}})(),
+      loginDisplayName:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return 'ゲスト';return s.name?s.name:s.email.split('@')[0];}catch(e){return 'ゲスト';}})(),
+      loginInitial:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return '?';const n=s.name||s.email;return n.charAt(0).toUpperCase();}catch(e){return '?';}})(),
       syncStatusColor: this.state.syncPaused ? '#ff9500' : ({null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'})[String(this.state.syncStatus)]||'#A1A1AA',
       gasUserEmail:(this.state.gasUser||{}).email||'',
       gasLogoutUrl:'https://accounts.google.com/logout',
@@ -1815,6 +1824,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
