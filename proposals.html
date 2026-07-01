@@ -125,7 +125,15 @@
               </div>
             </div>
             <div style="fontSize:15px;fontWeight:600;color:#3F414C;marginBottom:4px;">{{ pr.title }}</div>
-            <div style="fontSize:12px;color:#6B7280;">起案者：{{ pr.author }}</div>
+            <div style="display:flex;alignItems:center;gap:10px;">
+              <div style="fontSize:12px;color:#6B7280;">起案者：{{ pr.author }}</div>
+              <sc-if value="{{ pr.hasAttachments }}" hint-placeholder-val="{{ false }}">
+                <div style="fontSize:11px;color:#6B7280;">📎 {{ pr.attachmentCount }}件</div>
+              </sc-if>
+              <sc-if value="{{ pr.hasTable }}" hint-placeholder-val="{{ false }}">
+                <div style="fontSize:11px;color:#6B7280;">📊 表あり</div>
+              </sc-if>
+            </div>
           </div>
         </sc-for>
       </div>
@@ -181,9 +189,52 @@
         </div>
       </div>
 
-      <div style="marginBottom:22px;">
+      <div style="marginBottom:14px;">
         <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">本文</label>
-        <textarea data-field="body" value="{{ formData.body }}" onChange="{{ onInput }}" rows="10" placeholder="内容・提案理由・詳細を入力..." style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;resize:vertical;lineHeight:1.8;"></textarea>
+        <textarea data-field="body" value="{{ formData.body }}" onChange="{{ onInput }}" rows="8" placeholder="内容・提案理由・詳細を入力..." style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;resize:vertical;lineHeight:1.8;"></textarea>
+      </div>
+
+      <!-- ===== 添付表 ===== -->
+      <div style="marginBottom:14px;background:#FAFAFA;borderRadius:10px;padding:14px;border:1px solid #DDDEE2;">
+        <div style="display:flex;alignItems:center;justifyContent:space-between;marginBottom:8px;">
+          <label style="fontSize:12px;fontWeight:600;color:#6B7280;">添付表（オプション）</label>
+          <button onClick="{{ onAddTableRow }}" style="border:none;background:rgba(231,193,95,0.15);color:#C39425;padding:3px 11px;borderRadius:6px;fontSize:12px;fontWeight:600;cursor:pointer;">＋ 行追加</button>
+        </div>
+        <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:6px;marginBottom:6px;">
+          <input value="{{ tableH1 }}" onChange="{{ onTableH1Change }}" placeholder="列1見出し（例：項目）" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;fontWeight:600;background:#fff;" />
+          <input value="{{ tableH2 }}" onChange="{{ onTableH2Change }}" placeholder="列2見出し（例：内容）" style="border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:5px 8px;fontSize:12px;fontWeight:600;background:#fff;" />
+        </div>
+        <sc-for list="{{ tableRows }}" as="row" hint-placeholder-count="0">
+          <div style="display:grid;gridTemplateColumns:1fr 1fr 28px;gap:4px;marginBottom:4px;alignItems:center;">
+            <input value="{{ row.col1 }}" onChange="{{ row.onCol1 }}" style="border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;background:#fff;" />
+            <input value="{{ row.col2 }}" onChange="{{ row.onCol2 }}" style="border:1px solid rgba(0,0,0,0.12);borderRadius:6px;padding:5px 8px;fontSize:12px;background:#fff;" />
+            <button onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.12);color:#E57373;borderRadius:6px;fontSize:14px;cursor:pointer;height:28px;padding:0;">×</button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ tableRowsEmpty }}" hint-placeholder-val="{{ true }}">
+          <div style="fontSize:11px;color:#A1A1AA;textAlign:center;padding:4px 0;">行がありません。「行追加」で追加できます。</div>
+        </sc-if>
+      </div>
+
+      <!-- ===== D&D 添付資料 ===== -->
+      <div style="marginBottom:22px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:8px;">添付資料（画像）</label>
+        <div onDragOver="{{ onDragOver }}" onDrop="{{ onDrop }}" onClick="{{ onDropZoneClick }}" style="border:2px dashed #DDDEE2;borderRadius:10px;padding:14px;textAlign:center;fontSize:12px;color:#A1A1AA;cursor:pointer;transition:border-color 0.15s;" style-hover="border-color:#E7C15F;background:rgba(231,193,95,0.04);">
+          <div style="fontSize:22px;marginBottom:4px;">📎</div>
+          <div>クリック または 画像をドラッグ&ドロップで追加</div>
+          <div style="fontSize:11px;marginTop:3px;color:#C8C8CC;">JPEG / PNG / GIF（最大800px に自動圧縮）</div>
+        </div>
+        <input id="_proposal_file_input" type="file" accept="image/*" multiple onChange="{{ onFileSelect }}" style="display:none;" />
+        <sc-if value="{{ hasAttachments }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flexWrap:wrap;gap:8px;marginTop:10px;">
+            <sc-for list="{{ attachmentList }}" as="att" hint-placeholder-count="0">
+              <div style="position:relative;width:80px;height:80px;borderRadius:8px;overflow:hidden;border:1px solid #DDDEE2;flexShrink:0;">
+                <img src="{{ att.dataUrl }}" style="width:100%;height:100%;objectFit:cover;" />
+                <button onClick="{{ att.onRemove }}" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);border:none;color:#fff;borderRadius:50%;width:18px;height:18px;fontSize:11px;cursor:pointer;lineHeight:1;padding:0;">×</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
       </div>
 
       <div style="display:flex;justifyContent:flex-end;gap:8px;paddingTop:18px;borderTop:1px solid rgba(0,0,0,0.07);">
@@ -238,8 +289,52 @@ class Component extends DCLogic {
 
   componentWillUnmount(){if(this._timer)clearInterval(this._timer);}
 
+  // ── 表操作 ──────────────────────────────────────
+  addTableRow(){this.setState(s=>{const f=s.formData||{};return{formData:{...f,tableRows:[...(f.tableRows||[]),{col1:'',col2:''}]}}});}
+  removeTableRow(idx){this.setState(s=>{const f=s.formData||{};return{formData:{...f,tableRows:(f.tableRows||[]).filter((_,i)=>i!==idx)}}});}
+  updateTableCell(idx,col,val){this.setState(s=>{const f=s.formData||{};return{formData:{...f,tableRows:(f.tableRows||[]).map((r,i)=>i===idx?{...r,[col]:val}:r)}}});}
+
+  // ── 添付画像 ─────────────────────────────────────
+  handleDrop(e){e.preventDefault();this._processImageFiles([...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/')));}
+  handleFileSelect(e){this._processImageFiles([...(e.target.files||[])].filter(f=>f.type.startsWith('image/')));e.target.value='';}
+  _processImageFiles(files){
+    files.forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const img=new Image();
+        img.onload=()=>{
+          const MAX=800;const scale=Math.min(1,MAX/Math.max(img.width,img.height,1));
+          const canvas=document.createElement('canvas');
+          canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+          canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+          const dataUrl=canvas.toDataURL('image/jpeg',0.78);
+          this.setState(s=>{const f=s.formData||{};return{formData:{...f,attachments:[...(f.attachments||[]),{name:file.name,dataUrl}]}};});
+        };
+        img.src=ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── 印刷 ─────────────────────────────────────────
   _doPrint(pr){
     const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    const rows=pr.tableRows||[];
+    const h1=pr.col1Header||'項目';const h2=pr.col2Header||'内容';
+    const tableHtml=rows.length?`
+      <div style="margin-top:20pt;margin-bottom:16pt;">
+        <div style="font-size:11pt;font-weight:700;border-bottom:1pt solid #000;padding-bottom:4pt;margin-bottom:8pt;">添付表</div>
+        <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+          <tr><th style="padding:4pt 8pt;border-bottom:1pt solid #000;text-align:left;">${esc(h1)}</th><th style="padding:4pt 8pt;border-bottom:1pt solid #000;text-align:left;">${esc(h2)}</th></tr>
+          ${rows.map(r=>`<tr><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(r.col1)}</td><td style="padding:4pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(r.col2)}</td></tr>`).join('')}
+        </table>
+      </div>`:'';
+    const atts=pr.attachments||[];
+    const attHtml=atts.length?`
+      <div style="margin-top:20pt;page-break-before:${rows.length?'always':'auto'};">
+        <div style="font-size:11pt;font-weight:700;border-bottom:1pt solid #000;padding-bottom:4pt;margin-bottom:12pt;">添付資料</div>
+        ${atts.map(a=>`<div style="margin-bottom:16pt;"><div style="font-size:9pt;color:#555;margin-bottom:4pt;">${esc(a.name)}</div><img src="${a.dataUrl}" style="max-width:100%;height:auto;display:block;" /></div>`).join('')}
+      </div>`:'';
     let body='';
     if((pr.type||'')==='稟議書'){
       body=`
@@ -250,27 +345,21 @@ class Component extends DCLogic {
           <tr><td style="padding:5pt 8pt;font-weight:700;border-bottom:0.5pt solid #ddd;">起案者</td><td style="padding:5pt 8pt;border-bottom:0.5pt solid #ddd;">${esc(pr.author)}</td></tr>
         </table>
         <div style="font-size:11pt;font-weight:700;border-bottom:1pt solid #000;padding-bottom:4pt;margin-bottom:12pt;">内容・提案理由</div>
-        <div style="font-size:10pt;line-height:2.0;min-height:80pt;margin-bottom:30pt;">${esc(pr.body)}</div>
-        <table style="width:100%;border-collapse:collapse;font-size:10pt;">
-          <tr>
-            <th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">会長</th>
-            <th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">副会長</th>
-            <th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">担当理事</th>
-            <th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">起案者</th>
-          </tr>
-          <tr>
-            <td style="padding:28pt 5pt;border:0.5pt solid #000;"></td>
-            <td style="padding:28pt 5pt;border:0.5pt solid #000;"></td>
-            <td style="padding:28pt 5pt;border:0.5pt solid #000;"></td>
-            <td style="padding:28pt 5pt;border:0.5pt solid #000;"></td>
-          </tr>
-        </table>`;
+        <div style="font-size:10pt;line-height:2.0;min-height:80pt;margin-bottom:${rows.length?'0':'30pt'};">${esc(pr.body)}</div>
+        ${tableHtml}${attHtml}
+        <div style="margin-top:28pt;page-break-inside:avoid;">
+          <table style="width:100%;border-collapse:collapse;font-size:10pt;">
+            <tr><th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">会長</th><th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">副会長</th><th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">担当理事</th><th style="padding:5pt;border:0.5pt solid #000;text-align:center;width:25%;">起案者</th></tr>
+            <tr><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td></tr>
+          </table>
+        </div>`;
     }else{
       body=`
         <div style="font-size:18pt;font-weight:700;text-align:center;letter-spacing:0.12em;border-bottom:2pt solid #000;padding-bottom:8pt;margin-bottom:10pt;">${esc(pr.type||'文書')}</div>
         <div style="font-size:11pt;text-align:right;color:#333;margin-bottom:18pt;">${esc(pr.date)}</div>
         <div style="font-size:14pt;font-weight:700;margin-bottom:20pt;line-height:1.5;">${esc(pr.title)}</div>
-        <div style="font-size:10pt;line-height:2.0;">${esc(pr.body)}</div>`;
+        <div style="font-size:10pt;line-height:2.0;">${esc(pr.body)}</div>
+        ${tableHtml}${attHtml}`;
     }
     this._openPrintWindow(body,pr.title||'文書');
   }
@@ -300,6 +389,9 @@ class Component extends DCLogic {
         onEdit:()=>this.setState({modal:{show:true,editId:pr.id},formData:{...pr}}),
         onPrint:(e)=>{e.stopPropagation();this._doPrint(pr);},
         onDelete:(e)=>{e.stopPropagation();if(!confirm(`「${pr.title}」を削除しますか？`))return;this.setState(s=>({proposals:s.proposals.filter(p=>p.id!==pr.id)}),()=>this.persist());this.showToast('削除しました');},
+        hasAttachments:!!(pr.attachments&&pr.attachments.length),
+        attachmentCount:(pr.attachments||[]).length,
+        hasTable:!!(pr.tableRows&&pr.tableRows.length),
       };
     });
     const NAV=[
@@ -345,6 +437,29 @@ class Component extends DCLogic {
       onPrintCurrent:()=>{if(formData.title)this._doPrint(formData);},
       onCloseModal:()=>this.setState({modal:{show:false}}),
       stopProp:(e)=>e.stopPropagation(),
+      // 表エディタ
+      tableH1:formData.col1Header||'項目',
+      tableH2:formData.col2Header||'内容',
+      tableRows:(formData.tableRows||[]).map((row,i)=>({
+        ...row,
+        onCol1:(e)=>this.updateTableCell(i,'col1',e.target.value),
+        onCol2:(e)=>this.updateTableCell(i,'col2',e.target.value),
+        onDel:()=>this.removeTableRow(i),
+      })),
+      tableRowsEmpty:!(formData.tableRows||[]).length,
+      onAddTableRow:()=>this.addTableRow(),
+      onTableH1Change:(e)=>this.setState(s=>({formData:{...s.formData,col1Header:e.target.value}})),
+      onTableH2Change:(e)=>this.setState(s=>({formData:{...s.formData,col2Header:e.target.value}})),
+      // 添付画像
+      hasAttachments:!!(formData.attachments&&formData.attachments.length),
+      attachmentList:(formData.attachments||[]).map((att,i)=>({
+        ...att,
+        onRemove:(e)=>{e.stopPropagation();this.setState(s=>({formData:{...s.formData,attachments:(s.formData.attachments||[]).filter((_,j)=>j!==i)}}));},
+      })),
+      onDragOver:(e)=>e.preventDefault(),
+      onDrop:(e)=>this.handleDrop(e),
+      onFileSelect:(e)=>this.handleFileSelect(e),
+      onDropZoneClick:()=>{const el=document.getElementById('_proposal_file_input');if(el)el.click();},
       syncStatusColor:{null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'}[String(syncStatus)]||'#A1A1AA',
       syncStatusLabel:syncStatus==='syncing'?'同期中...':syncStatus==='ok'?'✓ 同期済':syncStatus==='error'?'✗ オフライン':'未連携',
       syncProgressBarStyle:syncStatus==='syncing'?{}:{opacity:0,pointerEvents:'none'},
@@ -399,6 +514,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 

@@ -240,6 +240,30 @@
               <button data-variant="secondary" onClick="{{ onCloseCustomAgenda }}" style="border:none;background:rgba(0,0,0,0.06);color:#6B7280;width:32px;height:32px;borderRadius:50%;fontSize:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
             </div>
             <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+
+              <!-- ===== 議案から引用 ===== -->
+              <div style="background:#F5F6F8;borderRadius:10px;padding:12px 14px;">
+                <div style="display:flex;alignItems:center;justifyContent:space-between;marginBottom:{{ proposalPickerOpen ? '10px' : '0' }};">
+                  <div style="fontSize:12px;fontWeight:600;color:#6B7280;">📋 議案作成ページから引用</div>
+                  <button onClick="{{ onToggleProposalPicker }}" style="border:1px solid #AFC3D7;background:#fff;color:#3F414C;padding:4px 12px;borderRadius:6px;fontSize:12px;fontWeight:500;cursor:pointer;">{{ proposalPickerBtnLabel }}</button>
+                </div>
+                <sc-if value="{{ proposalPickerOpen }}" hint-placeholder-val="{{ false }}">
+                  <sc-if value="{{ proposalPickerEmpty }}" hint-placeholder-val="{{ false }}">
+                    <div style="fontSize:12px;color:#A1A1AA;textAlign:center;padding:8px 0;">議案が登録されていません</div>
+                  </sc-if>
+                  <sc-if value="{{ proposalPickerHasItems }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:#fff;borderRadius:8px;border:1px solid #DDDEE2;maxHeight:180px;overflowY:auto;">
+                      <sc-for list="{{ proposalPickerItems }}" as="pitem" hint-placeholder-count="3">
+                        <div onClick="{{ pitem.onSelect }}" style="padding:9px 12px;fontSize:13px;cursor:pointer;borderBottom:1px solid #F5F6F8;display:flex;alignItems:center;gap:8px;" style-hover="background:#FFF8E8;">
+                          <span style="{{ pitem.typeStyle }}">{{ pitem.type }}</span>
+                          <span style="color:#3F414C;flex:1;">{{ pitem.title }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </sc-if>
+              </div>
+
               <div>
                 <label style="display:block;fontSize:11px;fontWeight:700;color:#6B7280;marginBottom:4px;">議案タイトル</label>
                 <input value="{{ customAgendaForm.title }}" onChange="{{ onCustomAgendaTitleChange }}" placeholder="例：その他（次回総会の日程について）" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:14px;" />
@@ -634,6 +658,7 @@ class Component extends DCLogic {
     customAgendaModal: false,
     customAgendaEditId: null,
     customAgendaForm: {title:'',body:'',col1Header:'項目',col2Header:'内容',tableRows:[]},
+    proposalPicker: false,
   };
 
 
@@ -815,6 +840,14 @@ class Component extends DCLogic {
     const ag=(this.state.assemblyFormAgendas||[]).find(a=>a.id===id);
     const cd=(ag&&ag.customData)?ag.customData:{title:'',body:'',col1Header:'項目',col2Header:'内容',tableRows:[]};
     this.setState({customAgendaModal:true,customAgendaEditId:id,customAgendaForm:{...cd,tableRows:(cd.tableRows||[]).map(r=>({...r}))}});
+  }
+
+  applyProposalToAgenda(pr) {
+    this.setState(s=>({
+      customAgendaForm:{...s.customAgendaForm, title:pr.title||'', body:pr.body||''},
+      proposalPicker: false,
+    }));
+    this.showToast(`「${pr.title}」を引用しました`);
   }
 
   saveCustomAgenda() {
@@ -1945,6 +1978,19 @@ class Component extends DCLogic {
         onCol2:(e)=>this.updateCustomTableCell?.(i,'col2',e.target.value),
         onDel:()=>this.removeCustomTableRow?.(i),
       })),
+      onToggleProposalPicker:()=>this.setState(s=>({proposalPicker:!s.proposalPicker})),
+      proposalPickerOpen:this.state.proposalPicker||false,
+      proposalPickerBtnLabel:this.state.proposalPicker?'▲ 閉じる':'▼ 選択',
+      proposalPickerEmpty:!(this.state.proposals||[]).length,
+      proposalPickerHasItems:!!(this.state.proposals||[]).length,
+      proposalPickerItems:(this.state.proposals||[]).map(pr=>{
+        const tPal={'議案':['#dbeafe','#1d4ed8'],'稟議書':['#dcfce7','#166534'],'通知文':['#fef9c3','#854d0e'],'報告書':['#f3e8ff','#7e22ce'],'その他':['#f1f5f9','#475569']};
+        const[bg,fg]=(tPal[pr.type]||tPal['その他']);
+        return{...pr,
+          typeStyle:{display:'inline-block',padding:'1px 8px',borderRadius:'20px',fontSize:'10px',fontWeight:'600',background:bg,color:fg,whiteSpace:'nowrap'},
+          onSelect:()=>this.applyProposalToAgenda(pr),
+        };
+      }),
       onCustomAgendaTitleChange:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),title:e.target.value}})),
       onCustomAgendaBodyChange:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),body:e.target.value}})),
       onCustomTableH1Change:(e)=>this.setState(s=>({customAgendaForm:{...(s.customAgendaForm||{}),col1Header:e.target.value}})),
@@ -2213,6 +2259,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
