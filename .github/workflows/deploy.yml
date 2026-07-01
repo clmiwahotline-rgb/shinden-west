@@ -2,11 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'deploy/**'
+    branches: [main]   # main への push で即起動（pathsフィルタなし）
 
-  workflow_dispatch:
+  workflow_dispatch:   # 手動実行も可能
 
 permissions:
   contents: read
@@ -15,7 +13,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true   # 連続pushで古いビルドをキャンセル
 
 jobs:
   deploy:
@@ -30,10 +28,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload deploy/ folder only
+      - name: Upload artifact (root directory)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './deploy'
+          path: '.'   # ルートディレクトリをそのままデプロイ
 
       - name: Deploy to GitHub Pages
         id: deployment
