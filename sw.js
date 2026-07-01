@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v6'; // v6: auth early-check (data-authed before CSS paint)
+const CACHE = 'nitta-portal-v7'; // v7: スプラッシュ完全削除
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

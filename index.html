@@ -2023,16 +2023,10 @@ function getAuthEmails(){
   const local=(()=>{try{const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');return(d.authEmails||[]).map(e=>typeof e==='string'?e:e.email);}catch(e){return[];}})();
   return [...new Set([...local,...__gasAuthEmails])];
 }
-function showPortal(splash){document.documentElement.setAttribute('data-authed','1');
-  if(splash){
-    // ログイン成功後: auth-overlayをスプラッシュ画面に変換し2秒後に非表示
-    var ov=document.getElementById('auth-overlay');
-    ov.style.background='#FAF8F0';
-    ov.innerHTML='<div style="text-align:center;"><img src="uploads/logo-splash.png" style="width:180px;height:auto;margin-bottom:28px;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display=\'none\'"><div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;margin:0 auto;"><div style="height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;"></div></div></div>';
-    setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
-  }else{
-    document.getElementById('auth-overlay').classList.add('hidden');
-  }
+function showPortal(splash){
+  document.documentElement.setAttribute('data-authed','1');
+  var ov=document.getElementById('auth-overlay');
+  if(ov) ov.classList.add('hidden');
 }
 function handleCredential(response){
   try{
