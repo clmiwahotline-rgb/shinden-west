@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v5'; // v5: onGoogleLibraryLoad対応・全ページキャッシュ強制更新
+const CACHE = 'nitta-portal-v6'; // v6: auth early-check (data-authed before CSS paint)
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

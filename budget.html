@@ -128,6 +128,7 @@ html[data-authed] #auth-overlay{display:none!important;}
 <script src="./portal-shared.js"></script>
 <script src="./support.js"></script>
 <script>try{var _a=JSON.parse(localStorage.getItem('nitta_portal_auth')||'null');if(_a&&_a.exp>Date.now())document.documentElement.setAttribute('data-authed','1');}catch(e){}</script>
+<script>/* auth-early-check */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(s&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');}}catch(e){}})();</script>
 </head>
 <body>
 <div id="auth-overlay">
@@ -2286,12 +2287,13 @@ function handleCredential(response){
 (function(){
   try{const s=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(s&&s.exp>Date.now()){var _isn=sessionStorage.getItem('nitta_session');sessionStorage.setItem('nitta_session','1');showPortal(!_isn);return;}}catch(e){}
   prefetchAuthEmails();
-  window.onload=function(){
-    if(typeof google!=='undefined'&&google.accounts){
-      google.accounts.id.initialize({client_id:'367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com',callback:handleCredential,auto_select:false});
-      google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'ja',width:280});
-    }
-  };
+  function _initGSI(){
+    if(typeof google==='undefined'||!google.accounts)return;
+    google.accounts.id.initialize({client_id:'367605623443-ahrthnavf0f09c63t6fcfa5hb1251s56.apps.googleusercontent.com',callback:handleCredential,auto_select:false});
+    google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'ja',width:280});
+  }
+  window.onGoogleLibraryLoad=_initGSI; // SW高速化後の対策：GSI読込完了時に確実に呼ばれる
+  window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
 <script>
