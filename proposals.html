@@ -12,19 +12,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-<div id="auth-overlay" style="display:none">
-  <div class="auth-card">
-    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'">
-    <div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div>
-    <div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div>
-    <div id="g_id_signin"></div>
-    <div id="auth-error"></div>
-    <div class="auto-row">
-      <input type="checkbox" id="auto-login">
-      <label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff0830&#x65e5;&#x9593;&#xff09;</label>
-    </div>
-  </div>
-</div>
+<div id="auth-overlay" style="display:none"><div class="auth-card"><img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'"><div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div><div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div><div id="g_id_signin"></div><div id="auth-error"></div><div class="auto-row"><input type="checkbox" id="auto-login"><label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff0830&#x65e5;&#x9593;&#xff09;</label></div></div></div>
 <div id="sync-progress-bar" class="hidden"></div>
 <script src="portal-shared.js"></script>
 <script src="support.js"></script>
@@ -184,9 +172,14 @@
           <input type="date" data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" />
         </div>
         <div>
-          <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">起案者</label>
+          <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">{{ authorLabel }}</label>
           <input type="text" data-field="author" value="{{ formData.author }}" onChange="{{ onInput }}" placeholder="氏名を入力" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;" />
         </div>
+      </div>
+
+      <div style="{{ recipientRowStyle }}">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">宛先（御中・様）</label>
+        <input type="text" data-field="recipient" value="{{ formData.recipient }}" onChange="{{ onInput }}" placeholder="例：○○商工会議所　御中" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;" />
       </div>
 
       <div style="marginBottom:14px;">
@@ -221,15 +214,23 @@
         <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:8px;">添付資料（画像）</label>
         <div onDragOver="{{ onDragOver }}" onDrop="{{ onDrop }}" onClick="{{ onDropZoneClick }}" style="border:2px dashed #DDDEE2;borderRadius:10px;padding:14px;textAlign:center;fontSize:12px;color:#A1A1AA;cursor:pointer;transition:border-color 0.15s;" style-hover="border-color:#E7C15F;background:rgba(231,193,95,0.04);">
           <div style="fontSize:22px;marginBottom:4px;">📎</div>
-          <div>クリック または 画像をドラッグ&ドロップで追加</div>
-          <div style="fontSize:11px;marginTop:3px;color:#C8C8CC;">JPEG / PNG / GIF（最大800px に自動圧縮）</div>
+          <div>クリック または ファイルをドラッグ&ドロップで追加</div>
+          <div style="fontSize:11px;marginTop:3px;color:#C8C8CC;">画像（自動圧縮）/ PDF / Word / Excel など ・ 上限2MB/ファイル</div>
         </div>
-        <input id="_proposal_file_input" type="file" accept="image/*" multiple onChange="{{ onFileSelect }}" style="display:none;" />
+        <input id="_proposal_file_input" type="file" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv" multiple onChange="{{ onFileSelect }}" style="display:none;" />
         <sc-if value="{{ hasAttachments }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flexWrap:wrap;gap:8px;marginTop:10px;">
             <sc-for list="{{ attachmentList }}" as="att" hint-placeholder-count="0">
-              <div style="position:relative;width:80px;height:80px;borderRadius:8px;overflow:hidden;border:1px solid #DDDEE2;flexShrink:0;">
-                <img src="{{ att.dataUrl }}" style="width:100%;height:100%;objectFit:cover;" />
+              <div style="position:relative;width:80px;height:80px;borderRadius:8px;overflow:hidden;border:1px solid #DDDEE2;flexShrink:0;background:#F5F6F8;">
+                <sc-if value="{{ att.isImage }}" hint-placeholder-val="{{ false }}">
+                  <img src="{{ att.dataUrl }}" style="width:100%;height:100%;objectFit:cover;" />
+                </sc-if>
+                <sc-if value="{{ att.isDoc }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flexDirection:column;alignItems:center;justifyContent:center;height:100%;padding:6px;gap:4px;">
+                    <div style="fontSize:24px;">{{ att.icon }}</div>
+                    <div style="fontSize:9px;textAlign:center;wordBreak:break-all;color:#3F414C;lineHeight:1.3;">{{ att.shortName }}</div>
+                  </div>
+                </sc-if>
                 <button onClick="{{ att.onRemove }}" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);border:none;color:#fff;borderRadius:50%;width:18px;height:18px;fontSize:11px;cursor:pointer;lineHeight:1;padding:0;">×</button>
               </div>
             </sc-for>
@@ -295,24 +296,34 @@ class Component extends DCLogic {
   updateTableCell(idx,col,val){this.setState(s=>{const f=s.formData||{};return{formData:{...f,tableRows:(f.tableRows||[]).map((r,i)=>i===idx?{...r,[col]:val}:r)}}});}
 
   // ── 添付画像 ─────────────────────────────────────
-  handleDrop(e){e.preventDefault();this._processImageFiles([...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/')));}
-  handleFileSelect(e){this._processImageFiles([...(e.target.files||[])].filter(f=>f.type.startsWith('image/')));e.target.value='';}
-  _processImageFiles(files){
+  handleDrop(e){e.preventDefault();this._processFiles([...(e.dataTransfer?.files||[])]);}
+  handleFileSelect(e){this._processFiles([...(e.target.files||[])]);e.target.value='';}
+  _processFiles(files){
+    const MAX=2*1024*1024;
     files.forEach(file=>{
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        const img=new Image();
-        img.onload=()=>{
-          const MAX=800;const scale=Math.min(1,MAX/Math.max(img.width,img.height,1));
-          const canvas=document.createElement('canvas');
-          canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
-          canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
-          const dataUrl=canvas.toDataURL('image/jpeg',0.78);
-          this.setState(s=>{const f=s.formData||{};return{formData:{...f,attachments:[...(f.attachments||[]),{name:file.name,dataUrl}]}};});
+      if(file.size>MAX){this.showToast(`${file.name} は2MBを超えています（スキップ）`);return;}
+      if(file.type.startsWith('image/')){
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          const img=new Image();
+          img.onload=()=>{
+            const S=800;const scale=Math.min(1,S/Math.max(img.width,img.height,1));
+            const canvas=document.createElement('canvas');
+            canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+            canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+            const dataUrl=canvas.toDataURL('image/jpeg',0.78);
+            this.setState(s=>{const f=s.formData||{};return{formData:{...f,attachments:[...(f.attachments||[]),{name:file.name,dataUrl,type:'image'}]}};});
+          };
+          img.src=ev.target.result;
         };
-        img.src=ev.target.result;
-      };
-      reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
+      }else{
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          this.setState(s=>{const f=s.formData||{};return{formData:{...f,attachments:[...(f.attachments||[]),{name:file.name,dataUrl:ev.target.result,type:'doc',mimeType:file.type}]}};});
+        };
+        reader.readAsDataURL(file);
+      }
     });
   }
 
@@ -353,6 +364,20 @@ class Component extends DCLogic {
             <tr><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td><td style="padding:28pt 5pt;border:0.5pt solid #000;"></td></tr>
           </table>
         </div>`;
+    }else if((pr.type||'')==='通知文'){
+      const fmtDate=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');const reiwa=parseInt(y)-2018;return `令和${reiwa}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
+      body=`
+        <div style="text-align:right;font-size:10pt;margin-bottom:24pt;">${esc(fmtDate(pr.date))}</div>
+        <div style="font-size:11pt;line-height:2.0;margin-bottom:20pt;">${esc(pr.recipient||'')}</div>
+        <div style="text-align:right;font-size:10pt;line-height:2.0;margin-bottom:28pt;">
+          新田西口商店会<br>
+          会長　${esc(pr.author||'')}
+        </div>
+        <div style="font-size:14pt;font-weight:700;text-align:center;letter-spacing:0.08em;margin-bottom:24pt;border-bottom:1pt solid #000;padding-bottom:8pt;">${esc(pr.title)}</div>
+        <div style="text-align:right;margin-bottom:8pt;font-size:10pt;">拝啓</div>
+        <div style="font-size:10pt;line-height:2.2;margin-bottom:24pt;">${esc(pr.body)}</div>
+        <div style="text-align:right;font-size:10pt;margin-bottom:24pt;">敬具</div>
+        ${tableHtml}${attHtml}`;
     }else{
       body=`
         <div style="font-size:18pt;font-weight:700;text-align:center;letter-spacing:0.12em;border-bottom:2pt solid #000;padding-bottom:8pt;margin-bottom:10pt;">${esc(pr.type||'文書')}</div>
@@ -395,10 +420,10 @@ class Component extends DCLogic {
       };
     });
     const NAV=[
-      {id:'dashboard',label:'ダッシュボード'},{id:'officers',label:'役員'},
-      {id:'members',label:'会員名簿'},{id:'invoices',label:'請求管理'},
-      {id:'ledger',label:'入出金'},{id:'budget',label:'予算'},
-      {id:'statements',label:'決算'},{id:'events',label:'事業'},
+      {id:'dashboard',label:'ダッシュボード'},{id:'officers',label:'役員名簿'},
+      {id:'members',label:'会員管理'},{id:'invoices',label:'請求書管理'},
+      {id:'ledger',label:'入出金管理'},{id:'budget',label:'予算管理'},
+      {id:'statements',label:'決算書'},{id:'events',label:'事業記録'},
       {id:'tasks',label:'タスク管理'},{id:'assembly',label:'総会資料'},
       {id:'proposals',label:'議案作成'},{id:'archive',label:'資料庫'},
       {id:'settings',label:'設定'},
@@ -450,12 +475,20 @@ class Component extends DCLogic {
       onAddTableRow:()=>this.addTableRow(),
       onTableH1Change:(e)=>this.setState(s=>({formData:{...s.formData,col1Header:e.target.value}})),
       onTableH2Change:(e)=>this.setState(s=>({formData:{...s.formData,col2Header:e.target.value}})),
-      // 添付画像
+      // 通知文フィールド制御
+      authorLabel:formData.type==='通知文'?'発信者（会長名）':'起案者',
+      recipientRowStyle:formData.type==='通知文'?{marginBottom:'14px'}:{display:'none'},
+      // 添付ファイル
       hasAttachments:!!(formData.attachments&&formData.attachments.length),
-      attachmentList:(formData.attachments||[]).map((att,i)=>({
-        ...att,
-        onRemove:(e)=>{e.stopPropagation();this.setState(s=>({formData:{...s.formData,attachments:(s.formData.attachments||[]).filter((_,j)=>j!==i)}}));},
-      })),
+      attachmentList:(formData.attachments||[]).map((att,i)=>{
+        const isImg=att.type==='image'||(!att.type&&att.dataUrl&&att.dataUrl.startsWith('data:image'));
+        const ext=(att.name||'').split('.').pop().toLowerCase();
+        const icon=ext==='pdf'?'📕':ext==='doc'||ext==='docx'?'📘':ext==='xls'||ext==='xlsx'?'📗':ext==='ppt'||ext==='pptx'?'📙':'📄';
+        const shortName=(att.name||'').length>14?(att.name||'').slice(0,12)+'…':(att.name||'');
+        return{...att,isImage:isImg,isDoc:!isImg,icon,shortName,
+          onRemove:(e)=>{e.stopPropagation();this.setState(s=>({formData:{...s.formData,attachments:(s.formData.attachments||[]).filter((_,j)=>j!==i)}}));},
+        };
+      }),
       onDragOver:(e)=>e.preventDefault(),
       onDrop:(e)=>this.handleDrop(e),
       onFileSelect:(e)=>this.handleFileSelect(e),
