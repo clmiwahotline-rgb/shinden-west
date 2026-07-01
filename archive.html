@@ -285,8 +285,33 @@ html[data-authed] #auth-overlay{display:none!important;}
   </style>
 </helmet>
 
-<div style="height:100vh;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
-<div style="display:flex;width:100%;maxWidth:1440px;height:100vh;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; overflow:hidden; }
+    html { zoom:1.2; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,sans-serif; letter-spacing:0.01em; }
+    h1,h2 { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
+    button { white-space:nowrap; border-radius:12px; transition:background 0.15s; cursor:pointer; font-family:inherit; }
+    button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    input,select,textarea { font-family:inherit; box-sizing:border-box; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:3px; }
+    @keyframes progress-indeterminate { 0%{transform:translateX(-100%) scaleX(0.5);} 50%{transform:translateX(0%) scaleX(0.8);} 100%{transform:translateX(100%) scaleX(0.5);} }
+    @keyframes logo-pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.75;transform:scale(0.95);} }
+    #sync-progress-bar { position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;background:rgba(231,193,95,0.12);overflow:hidden;transition:opacity 0.3s; }
+    #sync-progress-bar.hidden { opacity:0;pointer-events:none; }
+    #sync-progress-bar::after { content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);animation:progress-indeterminate 1.4s ease-in-out infinite; }
+    #_portal_print_overlay { display:none; }
+  </style>
+</helmet>
+
+<div style="height:100%;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
+<div style="display:flex;width:100%;maxWidth:1440px;height:100%;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
 
   <!-- ===== SIDEBAR ===== -->
   <div style="width:220px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(0,0,0,0.07);zIndex:10;">
@@ -569,21 +594,8 @@ function getAuthEmails(){
 }
 function showPortal(splash){
   document.documentElement.setAttribute('data-authed','1');
-  if(splash){
-    var ov=document.getElementById('auth-overlay');
-    ov.style.cssText='position:fixed;inset:0;background:#FAF8F0;z-index:9999;display:flex;align-items:center;justify-content:center;';
-    var c=ov.querySelector('.auth-card');if(c)c.style.display='none';
-    var d=document.createElement('div');d.style.textAlign='center';
-    var i=document.createElement('img');i.src='uploads/logo-splash.png';
-    i.style.cssText='width:180px;height:auto;display:block;margin:0 auto 28px;animation:logo-pulse 1.8s ease-in-out infinite;';
-    i.onerror=function(){this.style.display='none';};
-    var b=document.createElement('div');b.style.cssText='width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;margin:0 auto;';
-    var fi=document.createElement('div');fi.style.cssText='height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;';
-    b.appendChild(fi);d.appendChild(i);d.appendChild(b);ov.appendChild(d);
-    setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
-  }else{
-    document.getElementById('auth-overlay').classList.add('hidden');
-  }
+  var ov=document.getElementById('auth-overlay');
+  if(ov) ov.classList.add('hidden');
 }
 function handleCredential(response){
   try{

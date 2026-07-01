@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v9'; // v9: auth-overlay デフォルトnone + data-needs-login で根本修正
+const CACHE = 'nitta-portal-v10'; // v10: height:100vh→height:100% (zoom:1.2スクロール修正)
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

@@ -260,8 +260,160 @@ html[data-authed] #auth-overlay{display:none!important;}
   </div>
 </sc-if>
 
-<div style="height:100vh;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
-<div style="display:flex;width:100%;maxWidth:1440px;height:100vh;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
+
+
+<helmet>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; }
+    html { zoom:1.2; }
+    body { font-family:'Noto Sans JP','Zen Kaku Gothic New',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; letter-spacing:0.01em; }
+    h1,h2,.heading-font { font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif; letter-spacing:0.04em; }
+    /* ボタン基本 */
+    button { white-space:nowrap; border-radius:12px; transition:background 0.15s,opacity 0.15s; }
+    /* Primaryボタン hover（#E7C15F → #D4AF4C） */
+    button[style*="background:#E7C15F"] { border-radius:12px!important; }
+    button[style*="background:#E7C15F"]:hover { background:#D4AF4C!important; }
+    /* Secondary button — white + border */
+    button[style*="rgba(0,0,0,0.05)"] { background:#fff!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.05)"]:hover { background:#F5F6F8!important; }
+    button[style*="rgba(0,0,0,0.06)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    button[style*="rgba(0,0,0,0.06)"]:hover { background:#E6E8EC!important; }
+    button[style*="rgba(0,0,0,0.07)"] { background:#F5F6F8!important; border:1px solid #DDDEE2!important; color:#3F414C!important; border-radius:10px!important; }
+    /* Danger button */
+    button[style*="rgba(229,115,115"] { border-radius:10px!important; }
+    button[style*="color:#E57373"] { border-radius:10px!important; }
+    /* Info/Gold tint button */
+    button[style*="rgba(231,193,95"] { border-radius:10px!important; }
+    button[style*="color:#C39425"] { border-radius:10px!important; }
+    /* 金額・数値 — BIZ UDP */
+    /* 金額・数値 — BIZ UDP */
+    .num { font-family:'BIZ UDPGothic','BIZ UDP Gothic','Noto Sans JP',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:0.03em; }
+    /* ローディング進捗バー */
+    @keyframes progress-indeterminate {
+      0%   { transform: translateX(-100%) scaleX(0.5); }
+      50%  { transform: translateX(0%)    scaleX(0.8); }
+      100% { transform: translateX(100%)  scaleX(0.5); }
+    }
+    @keyframes progress-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+    @keyframes logo-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.75; transform: scale(0.95); }
+    }
+    #sync-progress-bar {
+      position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;
+      background:rgba(231,193,95,0.12);
+      overflow:hidden;
+      transition:opacity 0.3s;
+    }
+    #sync-progress-bar.hidden { opacity:0; pointer-events:none; }
+    #sync-progress-bar::after {
+      content:'';
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(90deg,#E7C15F,#E8CE84,#E7C15F);
+      animation:progress-indeterminate 1.4s ease-in-out infinite;
+    }
+    @media print {
+      /* ===== 基本設定 ===== */
+      @page { size:A4 portrait; margin:15mm 18mm; }
+      @page {
+        @top-left   { content:""; }
+        @top-center { content:""; }
+        @top-right  { content:""; }
+        @bottom-left  { content:""; }
+        @bottom-center { content:counter(page); font-size:9pt; font-family:serif; }
+        @bottom-right { content:""; }
+      }
+      html, body { height:auto!important; overflow:visible!important; background:#fff!important; zoom:1!important; }
+
+      /* ===== UI非表示 ===== */
+      #nav-sidebar { display:none!important; }
+      [data-noprint] { display:none!important; }
+
+      /* ===== 外側ラッパーをリセット ===== */
+      body > * > *,
+      [style*="height:100vh"] {
+        height:auto!important;
+        overflow:visible!important;
+        display:block!important;
+        background:#fff!important;
+        max-width:none!important;
+        box-shadow:none!important;
+      }
+
+      /* ===== メインコンテンツ展開 ===== */
+      #main-scroll {
+        height:auto!important;
+        max-height:none!important;
+        overflow:visible!important;
+        background:#fff!important;
+        padding:0!important;
+        flex:none!important;
+      }
+
+      /* ===== 固定要素・モーダル非表示 ===== */
+      [style*="position:fixed"] { display:none!important; }
+
+      /* ===== 請求書・領収書モーダル印刷 ===== */
+      #print-modal-visible { display:block!important; position:static!important; }
+      #print-doc {
+        position:static!important;
+        margin:0!important;
+        padding:16mm 0 0!important;
+        box-shadow:none!important;
+        border-radius:0!important;
+        max-width:none!important;
+      }
+
+      /* ===== 決算書・報告書 ===== */
+      table { page-break-inside:avoid; width:100%!important; }
+      tr { page-break-inside:avoid; }
+      .stmt-doc { page-break-inside:avoid; }
+
+      /* ===== 余白・シャドウ除去 ===== */
+      * {
+        box-shadow:none!important;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+
+      /* ===== ページ区切り ===== */
+      .print-page-break { page-break-before:always!important; }
+      .audit-report-section { page-break-before:always!important; break-before:page!important; display:block!important; }
+
+      /* ===== 一覧ページは全幅・左寄せ（A4はみ出し防止） ===== */
+      #main-scroll > div { max-width:none!important; width:100%!important; }
+      #main-scroll > div > div { max-width:none!important; }
+      .stmt-card-body { margin:0 auto!important; max-width:680px!important; }
+
+      /* ===== 帳票（.stmt-card-body）は中央寄せ、それ以外は全幅 ===== */
+      #main-scroll { display:block!important; }
+    }
+    input,select,textarea { font-family:inherit; }
+    button { cursor:pointer; font-family:inherit; }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); borderRadius:3px; }
+  </style>
+</helmet>
+
+<!-- ===== LOADING SCREEN ===== -->
+<sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;">
+    <img src="uploads/logo-splash.png" alt="新田西口商店会" style="width:200px;height:auto;animation:logo-pulse 1.8s ease-in-out infinite;" onerror="this.style.display='none'" />
+    <div style="width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;">
+      <div style="height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;"></div>
+    </div>
+    <div style="font-size:12px;color:#A1A1AA;letter-spacing:0.18em;font-family:'Inter','Noto Sans JP',sans-serif;font-weight:400;">shinden west loading...</div>
+  </div>
+</sc-if>
+
+<div style="height:100%;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
+<div style="display:flex;width:100%;maxWidth:1440px;height:100%;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
 
   <!-- ===== SIDEBAR ===== -->
   <div id="nav-sidebar" style="width:220px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(0,0,0,0.07);zIndex:10;">
@@ -749,7 +901,7 @@ html[data-authed] #auth-overlay{display:none!important;}
 </sc-if>
 <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;bottom:28px;right:28px;background:#3F414C;color:#fff;padding:12px 20px;borderRadius:10px;fontSize:13px;fontWeight:500;zIndex:300;boxShadow:0 4px 16px rgba(0,0,0,0.25);">{{ toast }}</div>
-</sc-if></x-dc>
+</sc-if>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
@@ -2241,6 +2393,7 @@ class Component extends DCLogic {
   }
 }
 </script>
+
 <script>
 window.__GAS_URL__ = 'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
 // APIキーはlocalStorageから読み込みます（設定ページで初期設定してください）
@@ -2260,21 +2413,8 @@ function getAuthEmails(){
 }
 function showPortal(splash){
   document.documentElement.setAttribute('data-authed','1');
-  if(splash){
-    var ov=document.getElementById('auth-overlay');
-    ov.style.cssText='position:fixed;inset:0;background:#FAF8F0;z-index:9999;display:flex;align-items:center;justify-content:center;';
-    var c=ov.querySelector('.auth-card');if(c)c.style.display='none';
-    var d=document.createElement('div');d.style.textAlign='center';
-    var i=document.createElement('img');i.src='uploads/logo-splash.png';
-    i.style.cssText='width:180px;height:auto;display:block;margin:0 auto 28px;animation:logo-pulse 1.8s ease-in-out infinite;';
-    i.onerror=function(){this.style.display='none';};
-    var b=document.createElement('div');b.style.cssText='width:220px;height:3px;background:#DDDEE2;border-radius:2px;overflow:hidden;margin:0 auto;';
-    var fi=document.createElement('div');fi.style.cssText='height:100%;background:#E7C15F;border-radius:2px;animation:progress-indeterminate 1.4s ease-in-out infinite;transform-origin:left center;';
-    b.appendChild(fi);d.appendChild(i);d.appendChild(b);ov.appendChild(d);
-    setTimeout(function(){ov.classList.add('hidden');document.body.classList.add('portal-ready');},2000);
-  }else{
-    document.getElementById('auth-overlay').classList.add('hidden');
-  }
+  var ov=document.getElementById('auth-overlay');
+  if(ov) ov.classList.add('hidden');
 }
 function handleCredential(response){
   try{
