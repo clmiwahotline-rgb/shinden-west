@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v10'; // v10: height:100vh→height:100% (zoom:1.2スクロール修正)
+const CACHE = 'nitta-portal-v11'; // v11: portal-common.css 導入（#4 印刷CSS整理 / #5 共通CSS統一）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
