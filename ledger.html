@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script>/* auth-early-check */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(s&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');}}catch(e){}})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>入出金管理 — 新田西口商店会</title>
@@ -128,7 +129,7 @@ html[data-authed] #auth-overlay{display:none!important;}
 <script src="./portal-shared.js"></script>
 <script src="./support.js"></script>
 <script>try{var _a=JSON.parse(localStorage.getItem('nitta_portal_auth')||'null');if(_a&&_a.exp>Date.now())document.documentElement.setAttribute('data-authed','1');}catch(e){}</script>
-<script>/* auth-early-check */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(s&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');}}catch(e){}})();</script>
+
 </head>
 <body>
 <div id="auth-overlay">
