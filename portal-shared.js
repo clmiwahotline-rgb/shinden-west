@@ -417,11 +417,10 @@
       overlay.id = '_portal_print_overlay';
       document.body.appendChild(overlay);
     }
-    // ページ番号: @page @bottom-center 方式（position:fixedを廃止してレイアウト被り解消）
-    // noPageNum=trueの場合はstyle注入でページ番号を非表示
+    // noPageNum=true のとき @bottom-center を非表示（スタイル注入で上書き）
     const pageStyle = noPageNum
-      ? '<style>@page{margin:15mm 18mm 15mm;}@page{}</style>'
-      : '<style>@page{margin:15mm 18mm 22mm;}@page{@bottom-center{content:counter(page) " / " counter(pages);font-size:9pt;font-family:serif;}}</style>';
+      ? '<style>@page{@bottom-center{content:none;}@bottom-left{content:none;}@bottom-right{content:none;}}</style>'
+      : '';
     overlay.innerHTML = pageStyle + bodyHtml;
     const prevTitle = document.title;
     document.title = title;
