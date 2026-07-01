@@ -119,12 +119,14 @@ html[data-authed]       #auth-overlay       { display: none!important; }
 /* ── 印刷 ── */
 @media print {
   @page { size: A4 portrait; margin: 0; }
-  html  { zoom: 1!important; }
+  html  { zoom: 1!important; overflow: visible!important; height: auto!important; }
+  body  { overflow: visible!important; height: auto!important; }
   body > *:not(#_portal_print_overlay) { display: none!important; }
   #_portal_print_overlay {
     display: block!important; padding: 15mm 18mm; box-sizing: border-box;
     font-family: "游明朝","Yu Mincho","Hiragino Mincho ProN",sans-serif;
     background: #fff; color: #000;
+    overflow: visible!important; height: auto!important;
   }
   #_portal_print_overlay * {
     color: #000!important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
