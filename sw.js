@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v11'; // v11: portal-common.css 導入（#4 印刷CSS整理 / #5 共通CSS統一）
+const CACHE = 'nitta-portal-v12'; // v12: auth-overlay inline display:none（CSS非依存）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
