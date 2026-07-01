@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v13'; // v13: サイドバーログイン表示・印刷ヘッダー1行・ページ番号修正・氏名自動取得
+const CACHE = 'nitta-portal-v14'; // v14: サイドバーアバター表示・決算処理修正
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
