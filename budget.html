@@ -12,19 +12,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-<div id="auth-overlay" style="display:none">
-  <div class="auth-card">
-    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'">
-    <div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div>
-    <div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div>
-    <div id="g_id_signin"></div>
-    <div id="auth-error"></div>
-    <div class="auto-row">
-      <input type="checkbox" id="auto-login">
-      <label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff0830&#x65e5;&#x9593;&#xff09;</label>
-    </div>
-  </div>
-</div>
+<div id="auth-overlay" style="display:none"><div class="auth-card"><img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'"><div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div><div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div><div id="g_id_signin"></div><div id="auth-error"></div><div class="auto-row"><input type="checkbox" id="auto-login"><label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff0830&#x65e5;&#x9593;&#xff09;</label></div></div></div>
 <div id="sync-progress-bar" class="hidden"></div>
 <script src="portal-shared.js"></script>
 <script src="support.js"></script>
@@ -831,9 +819,7 @@ class Component extends DCLogic {
     const thSL='padding:4pt 8pt;text-align:left;font-weight:600;';
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
-      <div style="font-size:11pt;margin-top:10px;">${esc(cp.name||'')}</div>
-      <div style="font-size:11pt;margin-top:6px;">自　${fmtD(cp.startDate)}　至　${fmtD(cp.endDate)}</div>
-      <div style="font-size:11pt;margin-top:4px;">${esc(orgName)}</div>
+      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　自 ${fmtD(cp.startDate)} 至 ${fmtD(cp.endDate)}　${esc(orgName)}　作成日：${new Date().toLocaleDateString('ja-JP',{era:'long',year:'numeric',month:'long',day:'numeric'})}</div>
     </div>`;
     const buildSection=(rows,label,isIncome)=>{
       let total_b=0,total_a=0;
@@ -2071,6 +2057,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
