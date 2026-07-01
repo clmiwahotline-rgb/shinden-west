@@ -14,7 +14,7 @@
 <body>
 <div id="auth-overlay" style="display:none">
   <div class="auth-card">
-    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'" style="pointer-events:none;user-select:none;-webkit-user-select:none;">
+    <img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'">
     <div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div>
     <div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div>
     <div id="g_id_signin"></div>
@@ -28,7 +28,7 @@
 <div id="sync-progress-bar" class="hidden"></div>
 <script src="portal-shared.js"></script>
 <script src="support.js"></script>
-
+<x-dc>
 
 <helmet>
   <link rel="stylesheet" href="portal-common.css">
@@ -430,7 +430,7 @@
 </sc-if>
 <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;bottom:28px;right:28px;background:#3F414C;color:#fff;padding:12px 20px;borderRadius:10px;fontSize:13px;fontWeight:500;zIndex:300;boxShadow:0 4px 16px rgba(0,0,0,0.25);">{{ toast }}</div>
-</sc-if>
+</sc-if></x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
@@ -1837,6 +1837,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 <script>
