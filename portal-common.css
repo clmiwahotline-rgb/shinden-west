@@ -146,7 +146,9 @@ html[data-authed]       #auth-overlay       { display: none!important; }
   #_portal_print_overlay [style*="background: #f0f0f0"],
   #_portal_print_overlay [style*="background:#f5f5f5"],
   #_portal_print_overlay [style*="background: #f5f5f5"] { background-color: #f0f0f0!important; }
-  #_portal_print_overlay table { border-collapse: collapse; width: 100%; }
+  #_portal_print_overlay table { border-collapse: collapse; width: 100%; break-inside: auto; page-break-inside: auto; }
+  #_portal_print_overlay tr { break-inside: avoid; page-break-inside: avoid; }
+  #_portal_print_overlay thead { display: table-header-group; }
   #_portal_print_overlay [style*="border-bottom"] { border-bottom-color: #000!important; }
   #_portal_print_overlay [style*="border-top"]    { border-top-color: #000!important; }
   ._print_pnum::after { content: counter(page); }
