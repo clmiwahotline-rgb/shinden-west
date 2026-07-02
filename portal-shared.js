@@ -131,8 +131,14 @@
               } catch(e) {}
             }
           }
+          console.log('fetchSheets完了: hasLocalOnly=', hasLocalOnly, '_pendingPersist=', this._pendingPersist);
           this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true, lastSyncAt: Date.now() },
-            () => { if (hasLocalOnly || this._pendingPersist) this.persist(); }  // ローカル未反映分をGASに即時送信
+            () => {
+              if (hasLocalOnly || this._pendingPersist) {
+                console.log('自動リトライ: 保留中の保存をクラウドに送信します');
+                this.persist((status, detail) => console.log('自動リトライ結果:', status, detail));
+              }
+            }
           );
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
           if (shouldLock) this._hideSsLock();
