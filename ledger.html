@@ -325,7 +325,7 @@
               <span style="width:110px;textAlign:right;">現金（実際）</span>
               <span style="width:80px;textAlign:right;">差異</span>
               <span style="width:110px;textAlign:right;">口座（実際）</span>
-              <span style="width:80px;textAlign:right;">差異</span>
+              <span style="width:80px;textAlign:right;paddingRight:12px;">差異</span>
               <span style="flex:1;">メモ</span>
               <span style="width:48px;" data-noprint=""></span>
             </div>
@@ -338,7 +338,7 @@
                 <span style="width:110px;textAlign:right;fontSize:12px;fontWeight:600;color:#3F414C;">{{ row.cashActualStr }}</span>
                 <span style="width:80px;textAlign:right;fontSize:11px;">{{ row.cashDiffStr }}</span>
                 <span style="width:110px;textAlign:right;fontSize:12px;fontWeight:600;color:#3F414C;">{{ row.bankActualStr }}</span>
-                <span style="width:80px;textAlign:right;fontSize:11px;">{{ row.bankDiffStr }}</span>
+                <span style="width:80px;textAlign:right;fontSize:11px;paddingRight:12px;">{{ row.bankDiffStr }}</span>
                 <span style="flex:1;fontSize:11px;color:#6B7280;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;paddingLeft:8px;">{{ row.note }}</span>
                 <span style="width:48px;" data-noprint="">
                   <button data-variant="danger" onClick="{{ row.onDel }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 8px;borderRadius:5px;fontSize:11px;">削除</button>
@@ -853,8 +853,10 @@ class Component extends DCLogic {
 
   saveBalanceCheck() {
     const { bcDate, bcCashActual, bcBankActual, bcNote } = this.state;
-    const cashBook = this.state.transactions.filter(t=>(t.accountType||'口座')==='現金').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
-    const bankBook = this.state.transactions.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+    const pid = this.state.currentPeriodId;
+    const periodTx = this.state.transactions.filter(t=>t.periodId===pid);
+    const cashBook = periodTx.filter(t=>(t.accountType||'口座')==='現金').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+    const bankBook = periodTx.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
     const log = {
       id: 'bc_'+Date.now(),
       date: bcDate,
@@ -898,12 +900,13 @@ class Component extends DCLogic {
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const fmt=n=>(n||0).toLocaleString('ja-JP');
     const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
-    // 対象取引を期間で絞り込み
+    // 対象取引を期間で絞り込み（年度またぎ：4月〜翌3月のように mFrom > mTo の場合はOR判定）
+    const inMonthRange=m=>mFrom<=mTo ? (m>=mFrom&&m<=mTo) : (m>=mFrom||m<=mTo);
     const txs=(this.state.transactions||[]).filter(t=>{
       if(t.periodId&&t.periodId!==pid) return false;
       if(!t.date) return false;
       const m=parseInt(t.date.slice(5,7));
-      return m>=mFrom&&m<=mTo;
+      return inMonthRange(m);
     }).sort((a,b)=>a.date.localeCompare(b.date));
     // 月ごとに集計
     const months=[];
