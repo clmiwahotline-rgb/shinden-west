@@ -1464,7 +1464,7 @@ class Component extends DCLogic {
       cashbookPeriodId:this.state.cashbookPeriodId||this.state.currentPeriodId||'',
       cashbookMonthFrom:this.state.cashbookMonthFrom||1,
       cashbookMonthTo:this.state.cashbookMonthTo||12,
-      cashbookMonthOptions:[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>({value:m,label:`${m}月`})),
+      cashbookMonthOptions:[4,5,6,7,8,9,10,11,12,1,2,3].map(m=>({value:m,label:m<4?`翌${m}月`:`${m}月`})),
       onCashbookPeriodChange:(e)=>this.setState({cashbookPeriodId:e.target.value}),
       onCashbookMonthFromChange:(e)=>this.setState({cashbookMonthFrom:parseInt(e.target.value),cashbookMonthTo:parseInt(e.target.value)}),
       onCashbookMonthToChange:(e)=>this.setState({cashbookMonthTo:parseInt(e.target.value)}),
@@ -2183,6 +2183,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
