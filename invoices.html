@@ -1282,7 +1282,7 @@ class Component extends DCLogic {
     invoices.forEach((inv,i)=>{
       const isPaid=inv.status==='済み'||inv.status==='入金済';
       html+=`<tr style="border-bottom:0.5pt solid #ddd;"><td style="padding:4pt 7pt;text-align:center;">${i+1}</td>
-        <td style="padding:4pt 7pt;white-space:nowrap;">${esc(inv.memberStore||'')}</td>
+        <td style="padding:4pt 7pt;">${esc(inv.memberStore||'')}</td>
         <td style="padding:4pt 7pt;">${esc(inv.type||'')}</td>
         <td style="padding:4pt 7pt;text-align:right;">${fmt(inv.amount)}</td>
         <td style="padding:4pt 7pt;text-align:center;">${esc(inv.issuedDate||'')}</td>
@@ -2495,6 +2495,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
