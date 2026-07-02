@@ -237,16 +237,23 @@ function saveAllData(data, props) {
   const sheetMap = {};
   ss.getSheets().forEach(function(s) { sheetMap[s.getName()] = s; });
 
+  const sheetErrors = [];
   SHEETS.forEach(function(name) {
-    if (name === 'orgInfo') {
-      writeSheet(ss, sheetMap, name, data[name] ? [data[name]] : []);
-    } else if (name === 'authEmails') {
-      const emails = (data[name] || []).map(function(e) {
-        return typeof e === 'string' ? { email: e, name: '' } : e;
-      });
-      writeSheet(ss, sheetMap, name, emails);
-    } else if (Array.isArray(data[name])) {
-      writeSheet(ss, sheetMap, name, data[name]);
+    try {
+      if (name === 'orgInfo') {
+        writeSheet(ss, sheetMap, name, data[name] ? [data[name]] : []);
+      } else if (name === 'authEmails') {
+        const emails = (data[name] || []).map(function(e) {
+          return typeof e === 'string' ? { email: e, name: '' } : e;
+        });
+        writeSheet(ss, sheetMap, name, emails);
+      } else if (Array.isArray(data[name])) {
+        writeSheet(ss, sheetMap, name, data[name]);
+      }
+    } catch (sheetErr) {
+      // 1シートの失敗が他シートの保存を巻き込まないようにする（例: 添付ファイルが巨大でセル上限超過）
+      console.error('シート保存失敗:', name, sheetErr.message);
+      sheetErrors.push(name + ': ' + sheetErr.message);
     }
   });
 
@@ -267,7 +274,7 @@ function saveAllData(data, props) {
       : sp.deleteProperty('ASSEMBLY_DOC');
   }
 
-  return { saved: true };
+  return { saved: true, sheetErrors: sheetErrors.length ? sheetErrors : undefined };
 }
 
 // ===== シート読み込み（シートオブジェクト直接受け取り版） =====
@@ -305,12 +312,27 @@ function writeSheet(ss, sheetMap, name, rows) {
   sheet.clearContents();
   if (!rows || rows.length === 0) return;
   const headers = Object.keys(rows[0]);
+  const CELL_LIMIT = 45000; // Sheetsのセル上限(50,000)より安全マージン
   const data = [headers].concat(rows.map(function(r) {
     return headers.map(function(h) {
       const v = r[h];
       if (v === null || v === undefined) return '';
-      if (typeof v === 'object') return JSON.stringify(v);
-      return v;
+      let out = (typeof v === 'object') ? JSON.stringify(v) : String(v);
+      if (out.length > CELL_LIMIT) {
+        // 添付ファイル等の巨大データはセル上限超過でシート全体を巻き込むため間引く
+        if (typeof v === 'object' && Array.isArray(v)) {
+          // 配列（例: attachments）: dataUrlを間引いて再構築を試みる
+          const trimmed = v.map(function(item) {
+            if (item && typeof item === 'object' && item.dataUrl) {
+              return { name: item.name, type: item.type, mimeType: item.mimeType, _tooLarge: true };
+            }
+            return item;
+          });
+          out = JSON.stringify(trimmed);
+        }
+        if (out.length > CELL_LIMIT) out = out.slice(0, CELL_LIMIT); // それでも超える場合は切り詰め
+      }
+      return typeof v === 'object' ? out : v;
     });
   }));
   sheet.getRange(1, 1, data.length, headers.length).setValues(data);

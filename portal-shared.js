@@ -240,6 +240,10 @@
         }
         if (res.lastModified) localStorage.setItem('nitta_last_modified', res.lastModified);
         this.setState({ syncStatus: res.ok ? 'ok' : 'error' });
+        if (res.sheetErrors && res.sheetErrors.length) {
+          console.warn('シート保存エラー:', res.sheetErrors);
+          this.showToast('⚠️ 一部データの保存に失敗しました（添付ファイルが大きすぎる可能性）: ' + res.sheetErrors.join(', '));
+        }
       })
       .catch(() => this.setState({ syncStatus: 'error' }));
     }
