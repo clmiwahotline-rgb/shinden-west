@@ -218,7 +218,7 @@
     this.fetchSheets(url, apiKey);
   },
 
-  persist() {
+  persist(onResult) {
     const {page,modal,formData,toast,_tt,loading,syncStatus,syncPaused,scriptUrl,scriptUrlInput,scriptApiKey,orgInfoInput,gasUser,...d} = this.state;
     try { localStorage.setItem('nitta_v5', JSON.stringify(d)); } catch(e){}
     const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
@@ -236,6 +236,7 @@
         if (res.conflict) {
           this.setState({ syncStatus: 'error' });
           this.showToast('⚠️ 他のメンバーが更新中です。「↻ 更新」で最新を確認後、再度保存してください');
+          if (onResult) onResult('conflict');
           return;
         }
         if (res.lastModified) localStorage.setItem('nitta_last_modified', res.lastModified);
@@ -243,9 +244,17 @@
         if (res.sheetErrors && res.sheetErrors.length) {
           console.warn('シート保存エラー:', res.sheetErrors);
           this.showToast('⚠️ 一部データの保存に失敗しました（添付ファイルが大きすぎる可能性）: ' + res.sheetErrors.join(', '));
+          if (onResult) onResult('sheetError', res.sheetErrors);
+          return;
         }
+        if (onResult) onResult(res.ok ? 'ok' : 'error');
       })
-      .catch(() => this.setState({ syncStatus: 'error' }));
+      .catch((err) => { this.setState({ syncStatus: 'error' }); if (onResult) onResult('networkError', err); });
+    } else {
+      // クラウド未接続 or SS未初期化 → ローカル保存のみ
+      const reason = !url ? 'no-url' : !apiKey ? 'no-key' : 'not-ready';
+      console.warn('persist(): クラウド送信スキップ:', reason);
+      if (onResult) onResult('local-only', reason);
     }
   },
 

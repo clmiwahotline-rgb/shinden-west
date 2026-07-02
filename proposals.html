@@ -467,13 +467,19 @@ class Component extends DCLogic {
       onSave:()=>{
         const{formData:f,modal:m}=this.state;
         if(!f.title){this.showToast('タイトルを入力してください');return;}
+        const afterSave=()=>this.persist((status,detail)=>{
+          if(status==='ok')this.showToast('✓ 保存＆クラウド同期完了');
+          else if(status==='local-only')this.showToast('⚠️ ローカル保存のみ（クラウド未接続：'+detail+'）。設定画面でSS連携を確認してください');
+          else if(status==='sheetError')this.showToast('⚠️ ローカル保存済み・クラウド同期の一部失敗（添付ファイルが大きい可能性）');
+          else if(status==='conflict')this.showToast('⚠️ 保存を中断しました（他のメンバーが更新中）。↻更新後に再保存してください');
+          else this.showToast('⚠️ ローカル保存済み・クラウド同期失敗（通信エラー）');
+        });
         if(m.editId){
-          this.setState(s=>({proposals:s.proposals.map(p=>p.id===m.editId?{...p,...f}:p),modal:{show:false}}),()=>this.persist());
+          this.setState(s=>({proposals:s.proposals.map(p=>p.id===m.editId?{...p,...f}:p),modal:{show:false}}),afterSave);
         }else{
           const n={...f,id:this.gen(),periodId:f.periodId||currentPeriodId,createdAt:new Date().toISOString()};
-          this.setState(s=>({proposals:[...s.proposals,n],modal:{show:false}}),()=>this.persist());
+          this.setState(s=>({proposals:[...s.proposals,n],modal:{show:false}}),afterSave);
         }
-        this.showToast('保存しました');
       },
       onPrintCurrent:()=>{if(formData.title)this._doPrint(formData);},
       onCloseModal:()=>this.setState({modal:{show:false}}),
@@ -566,6 +572,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
