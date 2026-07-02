@@ -101,7 +101,13 @@
         // 変更なし → スキップ
         if (d.modified === false) {
           if (shouldLock) this._hideSsLock();
-          this.setState({ syncStatus: 'ok', loading: false, lastSyncAt: Date.now() });
+          console.log('fetchSheets: 変更なし(modified=false)。ssReady=trueに設定。_pendingPersist=', this._pendingPersist);
+          this.setState({ syncStatus: 'ok', loading: false, ssReady: true, lastSyncAt: Date.now() }, () => {
+            if (this._pendingPersist) {
+              console.log('自動リトライ(modified=false経由): 保留中の保存をクラウドに送信します');
+              this.persist((status, detail) => console.log('自動リトライ結果:', status, detail));
+            }
+          });
           return;
         }
         if (d.lastModified) localStorage.setItem('nitta_last_modified', d.lastModified);
@@ -170,7 +176,13 @@
       .then(r=>r.text())
       .then(text=>{ const d=JSON.parse(text.trim().replace(/^\uFEFF/,'')); if(!d.ok) throw new Error(d.error||'エラー'); return d; })
       .then(d=>{
-        if (d.modified === false) { if (!silent) this._hideSsLock(); return; }
+        if (d.modified === false) {
+          if (!silent) this._hideSsLock();
+          this.setState({ syncStatus: 'ok', ssReady: true }, () => {
+            if (this._pendingPersist) this.persist();
+          });
+          return;
+        }
         if (d.lastModified) localStorage.setItem('nitta_last_modified', d.lastModified);
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length===0) { if(!silent){ this._hideSsLock(); this.showToast('SSにデータがありません');} return; }
