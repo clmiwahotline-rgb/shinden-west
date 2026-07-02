@@ -114,7 +114,26 @@
         } else {
           const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
           const merged = {...parsed, assemblyDoc};
-          this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true, lastSyncAt: Date.now() });
+          // silentフェッチ時: ローカル未反映アイテムをマージ（新規作成したがGAS未到達のデータを保護）
+          const MERGE_KEYS = ['proposals','archiveDocs','tasks','events','invoices','transactions','budgetItems','members','officers','memberChangeLogs','invoiceLogs','balanceLogs'];
+          let hasLocalOnly = false;
+          if (silent) {
+            const localRaw = localStorage.getItem('nitta_v5');
+            if (localRaw) {
+              try {
+                const local = JSON.parse(localRaw);
+                MERGE_KEYS.forEach(k => {
+                  if (!Array.isArray(local[k]) || !Array.isArray(merged[k])) return;
+                  const gasIds = new Set(merged[k].map(i => i.id));
+                  const localOnly = local[k].filter(i => i.id && !gasIds.has(i.id));
+                  if (localOnly.length) { merged[k] = [...merged[k], ...localOnly]; hasLocalOnly = true; }
+                });
+              } catch(e) {}
+            }
+          }
+          this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true, lastSyncAt: Date.now() },
+            () => { if (hasLocalOnly) this.persist(); }  // ローカル未反映分をGASに即時送信
+          );
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
           if (shouldLock) this._hideSsLock();
           if (!silent) this.showToast('スプレッドシートから読み込みました');
