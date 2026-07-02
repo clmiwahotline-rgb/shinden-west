@@ -904,7 +904,7 @@ class Component extends DCLogic {
       const fmtD2=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
       return `<div style="page-break-before:always;padding-top:4mm;">
         <div style="text-align:center;margin-bottom:16px;padding-bottom:10px;border-bottom:2pt solid #000;">
-          <div style="font-size:10pt;margin-top:6px;">${esc(cp2.name||'')}　自 ${fmtD2(cp2.startDate)} 至 ${fmtD2(cp2.endDate)}　${esc(orgName2)}　作成日：${new Date().toLocaleDateString('ja-JP',{era:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+          <div style="font-size:10pt;margin-top:6px;">${esc(cp2.name||'')}　自 ${fmtD2(cp2.startDate)} 至 ${fmtD2(cp2.endDate)}　${esc(orgName2)}　作成日：${new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'})}</div>
         </div>
         <div style="font-size:14pt;font-weight:700;border-bottom:1pt solid #000;padding-bottom:8px;margin-bottom:22px;letter-spacing:0.02em;">${heading}</div>
         ${content}

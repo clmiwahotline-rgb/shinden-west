@@ -704,7 +704,7 @@ class Component extends DCLogic {
     const fmtD=d=>{if(!d)return'';const[y,m,dd]=d.split('-');return y+'.'+parseInt(m)+'.'+parseInt(dd);};
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">会　員　名　簿</div>
-      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　自 ${fmtD(cp.startDate)} 至 ${fmtD(cp.endDate)}　${esc(orgName)}　作成日：${new Date().toLocaleDateString('ja-JP',{era:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　自 ${fmtD(cp.startDate)} 至 ${fmtD(cp.endDate)}　${esc(orgName)}　作成日：${new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'})}</div>
     </div>`;
     html+=this._buildMembersAgendaHtml();
     this._openPrintWindow(html,'会員名簿');

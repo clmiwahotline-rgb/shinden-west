@@ -826,7 +826,7 @@ class Component extends DCLogic {
     const thSL='padding:4pt 8pt;text-align:left;font-weight:600;';
     let html=`<div style="text-align:center;margin-bottom:28px;padding-bottom:12px;border-bottom:2pt solid #000;">
       <div style="font-size:18pt;font-weight:700;letter-spacing:0.12em;">予　算　進　捗　報　告</div>
-      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　自 ${fmtD(cp.startDate)} 至 ${fmtD(cp.endDate)}　${esc(orgName)}　作成日：${new Date().toLocaleDateString('ja-JP',{era:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+      <div style="font-size:10pt;margin-top:8px;">${esc(cp.name||'')}　自 ${fmtD(cp.startDate)} 至 ${fmtD(cp.endDate)}　${esc(orgName)}　作成日：${new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'})}</div>
     </div>`;
     const buildSection=(rows,label,isIncome)=>{
       let total_b=0,total_a=0;
@@ -836,7 +836,7 @@ class Component extends DCLogic {
           <th style="${thS}">予算額</th>
           <th style="${thS}">実績額</th>
           <th style="${thS}">差引</th>
-          <th style="padding:4pt 8pt;text-align:center;font-weight:600;width:46pt;">${isIncome?'達成率':'使用率'}</th>
+          <th style="padding:4pt 8pt;text-align:center;font-weight:600;width:46pt;font-size:8pt;white-space:nowrap;">${isIncome?'達成率':'使用率'}</th>
         </tr>
         <tr><td colspan="5" style="padding:6pt 8pt 3pt;font-size:9pt;font-weight:700;border-bottom:0.5pt solid #000;">【${label}の部】</td></tr>`;
       rows.forEach(b=>{
@@ -871,6 +871,48 @@ class Component extends DCLogic {
     this._openPrintWindow(html,'予算進捗');
   }
 
+
+  confirmSettlement() {
+    const cp = (this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
+    const pid = cp.id;
+    const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid);
+    const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===pid);
+    const totalI = txs.reduce((s,t)=>s+(t.income||0),0);
+    const totalE = txs.reduce((s,t)=>s+(t.expense||0),0);
+    // 実績集計
+    const incActMap={}, expActMap={};
+    txs.forEach(t=>{
+      if((t.income||0)>0){const k=t.category||'その他';incActMap[k]=(incActMap[k]||0)+(t.income||0);}
+      if((t.expense||0)>0){const k=t.category||'その他';expActMap[k]=(expActMap[k]||0)+(t.expense||0);}
+    });
+    const budMap={}; budgets.forEach(b=>{budMap[b.category]=(b.amount||0);});
+    // 予算科目ベースで全科目（¥0含む）＋実績のみ科目も含める
+    const incCats=[...new Set([...budgets.filter(b=>b.type==='収入').map(b=>b.category),...Object.keys(incActMap)])];
+    const expCats=[...new Set([...budgets.filter(b=>b.type==='支出').map(b=>b.category),...Object.keys(expActMap)])];
+    const categories=[
+      ...incCats.map(cat=>({cat,type:'収入',amt:incActMap[cat]||0,budget:budMap[cat]||0})),
+      ...expCats.map(cat=>({cat,type:'支出',amt:expActMap[cat]||0,budget:budMap[cat]||0})),
+    ];
+    const rec = {
+      id:'stl_'+Date.now(),
+      periodId:pid,
+      periodName:cp.name||'',
+      periodStart:(cp.startDate||'').slice(0,10),
+      periodEnd:(cp.endDate||'').slice(0,10),
+      confirmedAt:new Date().toISOString().slice(0,10),
+      totalIncome:totalI,
+      totalExpense:totalE,
+      net:totalI-totalE,
+      categories,
+      note:this.state.settlementNote||'',
+    };
+    this.setState(s=>({
+      settlements:[rec,...(s.settlements||[]).filter(s=>s.periodId!==pid)],
+      settlementModal:false,
+      settlementNote:'',
+    }),()=>this.persist());
+    this.showToast('決算を確定しました');
+  }
 
   renderVals() {
     const {page,periods,currentPeriodId,officers,members,invoices,transactions,budgetItems,events,modal,formData,toast} = this.state;
