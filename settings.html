@@ -1820,8 +1820,8 @@ class Component extends DCLogic {
         return '未連携';
       })(),
       loginEmail:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');return s&&s.email?s.email:'';}catch(e){return '';}})(),
-      loginDisplayName:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return 'ゲスト';return s.name?s.name:s.email.split('@')[0];}catch(e){return 'ゲスト';}})(),
-      loginInitial:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return '?';const n=s.name||s.email;return n.charAt(0).toUpperCase();}catch(e){return '?';}})(),
+      loginDisplayName:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return 'ゲスト';const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');const ae=d.authEmails||[];const f=ae.find(e=>(typeof e==='string'?e:e.email)===s.email);if(f&&typeof f==='object'&&f.name)return f.name;return s.name||s.email.split('@')[0];}catch(e){return 'ゲスト';}})(),
+      loginInitial:(()=>{try{const s=JSON.parse(localStorage.getItem('nitta_auth_v2')||'null');if(!s||!s.email)return '?';const d=JSON.parse(localStorage.getItem('nitta_v5')||'{}');const ae=d.authEmails||[];const f=ae.find(e=>(typeof e==='string'?e:e.email)===s.email);const n=(f&&f.name)||s.name||s.email;return n.charAt(0).toUpperCase();}catch(e){return '?';}})(),
       syncStatusColor: this.state.syncPaused ? '#ff9500' : ({null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'})[String(this.state.syncStatus)]||'#A1A1AA',
       gasUserEmail:(this.state.gasUser||{}).email||'',
       gasLogoutUrl:'https://accounts.google.com/logout',
@@ -1921,6 +1921,7 @@ function handleCredential(response){
   window.onload=_initGSI;               // 万一onloadが後の場合も対応
 })();
 </script>
+
 
 
 
