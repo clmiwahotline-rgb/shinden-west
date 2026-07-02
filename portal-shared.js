@@ -132,7 +132,7 @@
             }
           }
           this.setState({ ...merged, loading: false, syncStatus: 'ok', ssReady: true, lastSyncAt: Date.now() },
-            () => { if (hasLocalOnly) this.persist(); }  // ローカル未反映分をGASに即時送信
+            () => { if (hasLocalOnly || this._pendingPersist) this.persist(); }  // ローカル未反映分をGASに即時送信
           );
           localStorage.setItem('nitta_v5', JSON.stringify(merged));
           if (shouldLock) this._hideSsLock();
@@ -170,7 +170,24 @@
         if (!parsed.periods || parsed.periods.length===0) { if(!silent){ this._hideSsLock(); this.showToast('SSにデータがありません');} return; }
         const assemblyDoc = this._restoreAssemblyDoc ? this._restoreAssemblyDoc(parsed) : parsed;
         const merged = {...parsed, assemblyDoc};
-        this.setState({...merged, syncStatus:'ok', ssReady:true});
+        // ローカル未反映アイテムを保護（新規作成したがGAS未到達のデータを上書きしない）
+        const MERGE_KEYS = ['proposals','archiveDocs','tasks','events','invoices','transactions','budgetItems','members','officers','memberChangeLogs','invoiceLogs','balanceLogs'];
+        let hasLocalOnly = false;
+        const localRaw = localStorage.getItem('nitta_v5');
+        if (localRaw) {
+          try {
+            const local = JSON.parse(localRaw);
+            MERGE_KEYS.forEach(k => {
+              if (!Array.isArray(local[k]) || !Array.isArray(merged[k])) return;
+              const gasIds = new Set(merged[k].map(i => i.id));
+              const localOnly = local[k].filter(i => i.id && !gasIds.has(i.id));
+              if (localOnly.length) { merged[k] = [...merged[k], ...localOnly]; hasLocalOnly = true; }
+            });
+          } catch(e) {}
+        }
+        this.setState({...merged, syncStatus:'ok', ssReady:true}, () => {
+          if (hasLocalOnly || this._pendingPersist) this.persist();
+        });
         localStorage.setItem('nitta_v5', JSON.stringify(merged));
         if (!silent) { this._hideSsLock(); this.showToast('SSから最新データを取得しました'); }
       })
@@ -224,6 +241,7 @@
     const apiKey = this.state.scriptApiKey || localStorage.getItem('nitta_api_key') || '';
     const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
     if (url && apiKey && this.state.ssReady) {
+      this._pendingPersist = false;
       this.setState({ syncStatus: 'syncing' });
       const clientLastModified = localStorage.getItem('nitta_last_modified') || '0';
       fetch(url, {
@@ -251,9 +269,10 @@
       })
       .catch((err) => { this.setState({ syncStatus: 'error' }); if (onResult) onResult('networkError', err); });
     } else {
-      // クラウド未接続 or SS未初期化 → ローカル保存のみ
+      // クラウド未接続 or SS未初期化 → ローカル保存のみ。SS準備でき次第、自動的に再送信する
       const reason = !url ? 'no-url' : !apiKey ? 'no-key' : 'not-ready';
       console.warn('persist(): クラウド送信スキップ:', reason);
+      if (!url ? false : !apiKey ? false : true) this._pendingPersist = true; // URL/キーはあるが未接続 → 準備でき次第リトライ
       if (onResult) onResult('local-only', reason);
     }
   },
