@@ -876,7 +876,7 @@ class Component extends DCLogic {
       markPaidStyle:(i.status==='未払'||i.status==='未払い')?{border:'none',background:'rgba(123,192,149,0.12)',color:'#7BC095',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'default'},
       onEdit:()=>this.openModal('invoice',i.id,{memberId:i.memberId||'',...i}),
       onPrintInvoice:()=>this.printInvoice?.(i.id),
-      onPrintReceipt:i.status==='済み'?()=>this.printReceipt?.(i.id):()=>{},
+      onPrintReceipt:(i.status==='入金済'||i.status==='済み')?()=>this.printReceipt?.(i.id):()=>{},
       receiptStyle:(i.status==='入金済'||i.status==='済み')?{border:'none',background:'rgba(123,192,149,0.08)',color:'#7BC095',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'}:{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'},
       cancelStyle:i.status==='取消'?{border:'none',background:'rgba(0,0,0,0.04)',color:'#A1A1AA',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',cursor:'not-allowed'}:{border:'none',background:'rgba(229,115,115,0.08)',color:'#E57373',padding:'3px 7px',borderRadius:'5px',fontSize:'10px',fontWeight:'500',cursor:'pointer'},
       onCancel:i.status!=='取消'?()=>this.cancelInvoice?.(i.id):()=>{},

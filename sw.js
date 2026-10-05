@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v35'; // v35: P0-REPO-01 角印を認証つきで取得・暗証番号の廃止・seed の実データ削除
+const CACHE = 'nitta-portal-v36'; // v36: 入金済の請求書でも領収書を印刷できるように修正
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
