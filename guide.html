@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+</style>
+</helmet>
+
+<div style="background:#F5F6F8;fontFamily:'Noto Sans JP',sans-serif;color:#3F414C;paddingBottom:80px;">
+
+  <!-- ===== HEADER / COVER ===== -->
+  <div style="background:#3F414C;padding:56px 32px 48px;color:#fff;">
+    <div style="maxWidth:880px;margin:0 auto;">
+      <div style="fontSize:12px;fontWeight:600;color:#E7C15F;letterSpacing:0.12em;marginBottom:12px;">新田西口商店会　管理ポータル</div>
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:34px;fontWeight:700;letterSpacing:0.02em;lineHeight:1.4;">機能説明・初期設定ガイド</div>
+      <div style="fontSize:14px;color:rgba(255,255,255,0.65);marginTop:14px;letterSpacing:0.02em;">管理者・会員のみなさまへ　管理ポータルの使い方をまとめたガイドです</div>
+    </div>
+  </div>
+
+  <!-- ===== 目次 ===== -->
+  <div style="maxWidth:880px;margin:0 auto;padding:40px 32px 0;">
+    <div style="background:#fff;border:1px solid #DDDEE2;borderRadius:18px;padding:32px 36px;boxShadow:0 4px 20px rgba(0,0,0,0.04);">
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:20px;fontWeight:700;marginBottom:20px;paddingBottom:14px;borderBottom:2px solid #E7C15F;">目次</div>
+      <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:28px;">
+        <div>
+          <div style="fontSize:12px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:10px;">はじめに</div>
+          <a href="#intro" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:5px 0;">本ガイドについて</a>
+          <div style="fontSize:12px;fontWeight:700;color:#C39425;letterSpacing:0.08em;margin:16px 0 10px;">Part 1　初期設定ガイド（管理者向け）</div>
+          <a href="#setup-1" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:5px 0;">1. Googleログイン・認証メール登録</a>
+          <a href="#setup-2" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:5px 0;">2. スプレッドシート(GAS)連携設定</a>
+          <a href="#setup-3" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:5px 0;">3. 組織情報・期(会計年度)の設定</a>
+          <a href="#setup-4" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:5px 0;">4. 会員データの初期登録</a>
+          <a href="#setup-5" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:5px 0;">5. 印刷設定の確認方法</a>
+        </div>
+        <div>
+          <div style="fontSize:12px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:10px;">Part 2　管理者向け機能ガイド（全13ページ）</div>
+          <a href="#page-dashboard" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.1 ダッシュボード</a>
+          <a href="#page-officers" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.2 役員名簿</a>
+          <a href="#page-members" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.3 会員管理</a>
+          <a href="#page-invoices" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.4 請求書管理・入金確認</a>
+          <a href="#page-ledger" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.5 入出金管理</a>
+          <a href="#page-budget" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.6 予算管理</a>
+          <a href="#page-statements" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.7 決算書</a>
+          <a href="#page-events" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.8 事業記録</a>
+          <a href="#page-tasks" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.9 タスク管理</a>
+          <a href="#page-assembly" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.10 総会資料</a>
+          <a href="#page-proposals" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.11 議案作成</a>
+          <a href="#page-archive" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.12 資料庫</a>
+          <a href="#page-settings" style="display:block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">2.13 設定</a>
+        </div>
+      </div>
+      <div style="marginTop:20px;paddingTop:16px;borderTop:1px solid #DDDEE2;">
+        <div style="fontSize:12px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:10px;">Part 3　会員（一般利用者）向けガイド</div>
+        <a href="#member-guide" style="display:inline-block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 20px 4px 0;">3.1 権限の違いと日常的な使い方</a>
+        <a href="#faq" style="display:inline-block;fontSize:14px;color:#3F414C;textDecoration:none;padding:4px 0;">よくある質問</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== はじめに ===== -->
+  <div id="intro" style="maxWidth:880px;margin:0 auto;padding:48px 32px 0;">
+    <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:24px;fontWeight:700;marginBottom:16px;">本ガイドについて</div>
+    <div style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);fontSize:14px;lineHeight:1.9;color:#3F414C;">
+      <p style="margin:0 0 12px;">このガイドは、新田西口商店会「管理ポータル」の各機能と、導入時に行う初期設定の手順をまとめたものです。ポータルは会員管理・請求書発行・入出金管理・予算決算・総会運営など、商店会の事務を一元的に扱うためのWebアプリケーションで、全13ページで構成されています。</p>
+      <p style="margin:0 0 12px;">Part 1では新規に導入する管理者が最初に行うべき設定を、Part 2では各ページの機能を詳しく解説します。Part 3は日常的にポータルを利用する会員・スタッフ向けの簡易ガイドです。</p>
+      <p style="margin:0;color:#6B7280;">※ 画面の数値・会員名などはすべて操作イメージを示すための一例です。実際の画面ではご自身の登録データが表示されます。</p>
+    </div>
+  </div>
+
+  <!-- ===== Part 1: 初期設定ガイド ===== -->
+  <div style="maxWidth:880px;margin:0 auto;padding:56px 32px 0;">
+    <div style="display:flex;alignItems:baseline;gap:12px;marginBottom:8px;">
+      <div style="fontSize:13px;fontWeight:700;color:#C39425;letterSpacing:0.1em;">PART 1</div>
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;">初期設定ガイド（管理者向け）</div>
+    </div>
+    <div style="fontSize:14px;color:#6B7280;marginBottom:28px;">導入時に一度だけ行う設定です。上から順番に進めてください。</div>
+
+    <!-- 1. Googleログイン -->
+    <div id="setup-1" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:20px;">
+      <div style="display:flex;alignItems:center;gap:12px;marginBottom:14px;">
+        <div style="width:32px;height:32px;borderRadius:50%;background:#E7C15F;color:#3F414C;display:flex;alignItems:center;justifyContent:center;fontWeight:700;fontSize:15px;flexShrink:0;">1</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;">Googleログイン・認証メール登録</div>
+      </div>
+      <div style="fontSize:14px;lineHeight:1.9;paddingLeft:44px;">
+        <p style="margin:0 0 10px;">本ポータルはGoogleアカウントでログインします。誰でもログインできる状態を避けるため、必ず許可するメールアドレスを登録してください。</p>
+        <ol style="margin:0 0 10px;paddingLeft:20px;">
+          <li style="marginBottom:6px;">「設定」ページを開き、「ログイン管理」カードを表示する</li>
+          <li style="marginBottom:6px;">許可したいメールアドレスと表示名（役員名など）を入力し「追加」を押す</li>
+          <li style="marginBottom:6px;">追加したアカウントは「許可済みアカウント」一覧に表示される</li>
+          <li>一覧は「コピー」機能でスプレッドシート（GAS）側の許可リストにも反映できる</li>
+        </ol>
+        <div style="background:rgba(231,193,95,0.1);borderRadius:10px;padding:10px 14px;fontSize:12.5px;color:#8a6d1f;">⚠ 許可リストが空の状態では、全員がログイン可能な状態になります。運用開始前に必ず設定してください。</div>
+      </div>
+    </div>
+
+    <!-- 2. GAS連携 -->
+    <div id="setup-2" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:20px;">
+      <div style="display:flex;alignItems:center;gap:12px;marginBottom:14px;">
+        <div style="width:32px;height:32px;borderRadius:50%;background:#E7C15F;color:#3F414C;display:flex;alignItems:center;justifyContent:center;fontWeight:700;fontSize:15px;flexShrink:0;">2</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;">スプレッドシート（GAS）連携設定</div>
+      </div>
+      <div style="fontSize:14px;lineHeight:1.9;paddingLeft:44px;">
+        <p style="margin:0 0 10px;">会員・請求書・入出金などすべてのデータは、Googleスプレッドシートと連携するGASのWebアプリ経由で保存されます。</p>
+        <ol style="margin:0 0 10px;paddingLeft:20px;">
+          <li style="marginBottom:6px;">「設定」ページの「データ連携」カードを開く</li>
+          <li style="marginBottom:6px;">GAS WebアプリのURLとAPIキーを入力する</li>
+          <li style="marginBottom:6px;">「SSから読込」で初回データを取得するか、「保存」で接続情報のみ保存する</li>
+          <li>保存後は5分ごとに自動同期。すぐ最新化したいときは画面左下の「↻ 更新」を押す</li>
+        </ol>
+        <div style="background:rgba(175,195,215,0.18);borderRadius:10px;padding:10px 14px;fontSize:12.5px;color:#3F414C;">ℹ 通信が不安定な場合、左下の同期表示が「🔄 最新の情報を取得中…」になりますが、入力中のデータが消えることはありません。自動的に再接続され、接続後に保存内容がスプレッドシートへ送信されます。</div>
+      </div>
+    </div>
+
+    <!-- 3. 組織情報・期 -->
+    <div id="setup-3" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:20px;">
+      <div style="display:flex;alignItems:center;gap:12px;marginBottom:14px;">
+        <div style="width:32px;height:32px;borderRadius:50%;background:#E7C15F;color:#3F414C;display:flex;alignItems:center;justifyContent:center;fontWeight:700;fontSize:15px;flexShrink:0;">3</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;">組織情報・期（会計年度）の設定</div>
+      </div>
+      <div style="fontSize:14px;lineHeight:1.9;paddingLeft:44px;">
+        <p style="margin:0 0 10px;">商店会の基本情報と、会計年度（4/1〜翌3/31を1期とする）を設定します。ここで登録した内容は請求書・領収書・決算書などの帳票に自動的に反映されます。</p>
+        <ol style="margin:0 0 10px;paddingLeft:20px;">
+          <li style="marginBottom:6px;">「設定」ページの「期の管理」から「＋新しい期を追加」で年度を作成する</li>
+          <li style="marginBottom:6px;">各期の「選択」で操作対象の期を切替、「日付修正」で開始日・終了日を修正できる（要パスワード）</li>
+          <li>「代表者・団体情報」カードで団体名・代表者名・住所・電話・FAX・振込先銀行口座を入力し保存する</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 4. 会員データ初期登録 -->
+    <div id="setup-4" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:20px;">
+      <div style="display:flex;alignItems:center;gap:12px;marginBottom:14px;">
+        <div style="width:32px;height:32px;borderRadius:50%;background:#E7C15F;color:#3F414C;display:flex;alignItems:center;justifyContent:center;fontWeight:700;fontSize:15px;flexShrink:0;">4</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;">会員データの初期登録方法</div>
+      </div>
+      <div style="fontSize:14px;lineHeight:1.9;paddingLeft:44px;">
+        <p style="margin:0 0 10px;">「会員管理」ページから、加盟している店舗・会員を登録します。</p>
+        <ol style="margin:0 0 10px;paddingLeft:20px;">
+          <li style="marginBottom:6px;">「会員管理」ページの「＋新規会員登録」を押す</li>
+          <li style="marginBottom:6px;">氏名・店舗名・住所種別（正会員／大型店正会員 など）・電話／FAX・年会費・在籍状態を入力する</li>
+          <li>登録後は一覧の「CSV」で内容を書き出して確認できる</li>
+        </ol>
+        <div style="background:rgba(231,193,95,0.1);borderRadius:10px;padding:10px 14px;fontSize:12.5px;color:#8a6d1f;">標準の年会費は正会員 ¥24,000／大型店正会員 ¥72,000 です（会員ごとに個別の金額へ変更も可能）。</div>
+      </div>
+    </div>
+
+    <!-- 5. 印刷設定確認 -->
+    <div id="setup-5" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:12px;">
+      <div style="display:flex;alignItems:center;gap:12px;marginBottom:14px;">
+        <div style="width:32px;height:32px;borderRadius:50%;background:#E7C15F;color:#3F414C;display:flex;alignItems:center;justifyContent:center;fontWeight:700;fontSize:15px;flexShrink:0;">5</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;">印刷設定の確認方法</div>
+      </div>
+      <div style="fontSize:14px;lineHeight:1.9;paddingLeft:44px;">
+        <p style="margin:0 0 10px;">請求書・領収書・決算書などの帳票はA4縦・明朝体で出力されるよう設定済みです。初回のみ、お使いのブラウザの印刷設定を確認してください。</p>
+        <ol style="margin:0 0 10px;paddingLeft:20px;">
+          <li style="marginBottom:6px;">各帳票ページの「印刷」ボタンを押し、印刷プレビューを開く</li>
+          <li style="marginBottom:6px;">用紙サイズがA4、余白が適切か、ページ番号がフッター中央に表示されているか確認する</li>
+          <li>ブラウザ側の印刷設定で「ヘッダーとフッター」のチェックが入っていると日付やURLが余分に印刷されるため、チェックを外す</li>
+        </ol>
+        <div style="fontSize:12.5px;color:#6B7280;">推奨環境：Google Chrome の最新版。印刷崩れが見られる場合はブラウザを変えて再度お試しください。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Part 2: 管理者向け機能ガイド ===== -->
+  <div style="maxWidth:880px;margin:0 auto;padding:64px 32px 0;">
+    <div style="display:flex;alignItems:baseline;gap:12px;marginBottom:8px;">
+      <div style="fontSize:13px;fontWeight:700;color:#C39425;letterSpacing:0.1em;">PART 2</div>
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;">管理者向け機能ガイド（全13ページ）</div>
+    </div>
+    <div style="fontSize:14px;color:#6B7280;marginBottom:28px;">左メニューの各項目に対応する13ページの機能を、画面例つきで解説します。</div>
+
+    <!-- 2.1 ダッシュボード -->
+    <div id="page-dashboard" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/dashboard.png" alt="ダッシュボード画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.1</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">ダッシュボード</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">ログイン後に最初に表示される概要画面です。現在の期（会計年度）、未入金の請求件数、タスクの進捗、直近の入出金、直近の事業記録をひと目で確認できます。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「未入金件数」をクリックすると請求書管理ページへ直接移動</li>
+          <li>「タスク状況」で期限超過・未完了の件数を確認</li>
+          <li>直近の入出金・直近の事業記録を一覧で表示</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.2 役員名簿 -->
+    <div id="page-officers" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/officers.png" alt="役員名簿画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.2</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">役員名簿</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">会長・副会長・理事など役員の一覧を期ごとに管理します。役職・氏名・店舗名・電話番号・メモを登録できます。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋役員追加」で新しい役員を登録、一覧右の「編集」「削除」で管理</li>
+          <li>「印刷」で役員名簿を帳票形式で出力（総会資料の議案にも活用可能）</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.3 会員管理 -->
+    <div id="page-members" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/members.png" alt="会員管理画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.3</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">会員管理</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">加盟している店舗・会員の名簿です。氏名・店舗名・住所種別（正会員／大型店正会員 など）・電話／FAX・年会費・在籍状態を一覧で管理します。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋新規会員登録」で会員を追加、一覧の「編集」で情報更新・退会等の状態変更</li>
+          <li>「CSV」で名簿を書き出し、「印刷」で紙の名簿を出力</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.4 請求書管理 -->
+    <div id="page-invoices" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/invoices.png" alt="請求書管理画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.4</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">請求書管理・入金確認</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">年会費などの請求書発行と入金状況の確認を行います。月別・期別に絞り込み、入金済／未払いを管理できます。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「一括請求書発行」で会員全体に対する請求書をまとめて作成</li>
+          <li>「まとめて印刷」「一覧印刷」で複数の請求書・一覧表を出力</li>
+          <li>入金確認後はステータスを更新し、ダッシュボードの未入金件数に反映</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.5 入出金管理 -->
+    <div id="page-ledger" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/ledger.png" alt="入出金管理画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.5</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">入出金管理</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">収入・支出の記帳と、口座・現金の残高管理を行います。収入合計・支出合計・合計残高・現金残高を常時サマリー表示します。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>月・口座・現金でフィルタして取引を確認</li>
+          <li>「現金出納帳」で現金の入出金台帳（8列形式）を表示・印刷</li>
+          <li>「振替」で口座間・現金と口座間の資金移動を記録、「＋取引追加」で個別の入出金を記帳</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.6 予算管理 -->
+    <div id="page-budget" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/budget.png" alt="予算管理画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.6</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">予算管理</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">収入・支出を科目ごとに予算立てし、実績との差異・達成率をバー表示で確認します。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋科目追加」で予算科目を登録、一覧の「編集」「×」で管理</li>
+          <li>「翌年度予算を作る」で今年度実績を参考に来期の予算案を作成</li>
+          <li>「決算処理」で当期の収支を確定し、決算書ページへ自動登録（年度末に一度だけ実施）</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.7 決算書 -->
+    <div id="page-statements" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/statements.png" alt="決算書画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.7</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">決算書</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">予算管理ページの「決算処理」で確定した決算報告書が期ごとに蓄積されます。監査記録の追加や、正式な決算報告書としての印刷ができます。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「監査」で監査人名・監査日・所見を記録すると「監査済み」表示になる</li>
+          <li>「印刷」で決算報告書（監査報告書を含む）を明朝体の正式な帳票として出力</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.8 事業記録 -->
+    <div id="page-events" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/events.png" alt="事業記録画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.8</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">事業記録</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">実施したイベント・行事の開催日・種別・参加者・備考を記録します。総会資料や決算報告の裏付け資料として活用します。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋事業追加」で実施済みの事業を記録</li>
+          <li>「＋翌期計画追加」で来期実施予定の事業計画を登録</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.9 タスク管理 -->
+    <div id="page-tasks" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/tasks.png" alt="タスク管理画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.9</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">タスク管理</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">担当者・期限・カテゴリ（運営／広報 など）を持つToDoリストです。期限を過ぎたタスクは警告表示されます。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋タスク追加」で新しいタスクを登録、コメントを残せる</li>
+          <li>「全て／未完了／完了」で表示を切替</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.10 総会資料 -->
+    <div id="page-assembly" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/assembly.png" alt="総会資料画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.10</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">総会資料</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">総会（定時総会・臨時総会）の表紙情報（総会名・開催日・開催場所）と、議案構成をまとめて資料化します。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「編集」で表紙情報の入力、議案の追加・並び替え</li>
+          <li>「印刷／PDF」で総会資料一式を出力</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.11 議案作成 -->
+    <div id="page-proposals" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/proposals.png" alt="議案作成画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.11</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">議案作成</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">議案・稟議書・通知文・報告書などの文書を作成・管理します。カテゴリとステータス（起草中／承認済／廃案）で整理できます。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋新規作成」で文書の種類を選んで作成</li>
+          <li>種別・ステータスで絞り込み、「印刷」で個別に出力</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.12 資料庫 -->
+    <div id="page-archive" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:24px;">
+      <img src="screenshots/archive.png" alt="資料庫画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.12</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">資料庫</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">議事録・定款・規約・申請書類・通知文など、保管が必要な重要書類をカテゴリ別に登録・閲覧できる保管庫です。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「＋資料を追加」でファイルを登録</li>
+          <li>タブ（議事録／定款／規約／申請書類／通知文／その他）で分類・絞り込み</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2.13 設定 -->
+    <div id="page-settings" style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;overflow:hidden;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:12px;">
+      <img src="screenshots/settings.png" alt="設定画面" style="width:100%;display:block;borderBottom:1px solid #DDDEE2;">
+      <div style="padding:24px 30px;">
+        <div style="fontSize:11px;fontWeight:700;color:#C39425;letterSpacing:0.08em;marginBottom:4px;">2.13</div>
+        <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:18px;fontWeight:700;marginBottom:10px;">設定</div>
+        <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">Part 1で行った初期設定（期の管理・団体情報・データ連携・ログイン管理）をいつでも見直せる、管理者専用のページです。</p>
+        <ul style="fontSize:13.5px;lineHeight:1.9;margin:0;paddingLeft:20px;color:#3F414C;">
+          <li>「期の管理」で年度の追加・切替・日付修正</li>
+          <li>「代表者・団体情報」「データ連携」「ログイン管理」の各カードで各種設定を変更</li>
+        </ul>
+        <div style="marginTop:12px;background:rgba(229,115,115,0.08);borderRadius:10px;padding:10px 14px;fontSize:12.5px;color:#b23b3b;">⚠ 設定ページは商店会の運営に関わる重要な項目のため、管理者のみが操作してください。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Part 3: 会員向けガイド ===== -->
+  <div id="member-guide" style="maxWidth:880px;margin:0 auto;padding:64px 32px 0;">
+    <div style="display:flex;alignItems:baseline;gap:12px;marginBottom:8px;">
+      <div style="fontSize:13px;fontWeight:700;color:#C39425;letterSpacing:0.1em;">PART 3</div>
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;">会員（一般利用者）向けガイド</div>
+    </div>
+    <div style="fontSize:14px;color:#6B7280;marginBottom:28px;">日常的にポータルを利用する役員・スタッフ向けの簡易ガイドです。</div>
+
+    <div style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:28px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);marginBottom:20px;">
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:16px;fontWeight:700;marginBottom:12px;">ログインと基本操作</div>
+      <ul style="fontSize:14px;lineHeight:1.9;margin:0 0 14px;paddingLeft:20px;">
+        <li>お使いのGoogleアカウントでログインします（管理者から利用を許可されたアカウントのみログインできます）</li>
+        <li>左側のメニューから見たいページを選びます</li>
+        <li>画面左上のプルダウンで、確認したい期（年度）を切り替えられます</li>
+      </ul>
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:16px;fontWeight:700;marginBottom:12px;">よく使う画面</div>
+      <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">日常的な確認・入力には、主に次の画面を使います。</p>
+      <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;marginBottom:16px;">
+        <a href="#page-dashboard" style="fontSize:13.5px;color:#3F414C;textDecoration:none;background:#F5F6F8;borderRadius:8px;padding:9px 14px;">▸ ダッシュボードで全体状況を確認</a>
+        <a href="#page-invoices" style="fontSize:13.5px;color:#3F414C;textDecoration:none;background:#F5F6F8;borderRadius:8px;padding:9px 14px;">▸ 請求書管理で入金状況を確認</a>
+        <a href="#page-ledger" style="fontSize:13.5px;color:#3F414C;textDecoration:none;background:#F5F6F8;borderRadius:8px;padding:9px 14px;">▸ 入出金管理で収支を確認</a>
+        <a href="#page-events" style="fontSize:13.5px;color:#3F414C;textDecoration:none;background:#F5F6F8;borderRadius:8px;padding:9px 14px;">▸ 事業記録でイベントを記録・閲覧</a>
+        <a href="#page-tasks" style="fontSize:13.5px;color:#3F414C;textDecoration:none;background:#F5F6F8;borderRadius:8px;padding:9px 14px;">▸ タスク管理で担当業務を確認</a>
+        <a href="#page-archive" style="fontSize:13.5px;color:#3F414C;textDecoration:none;background:#F5F6F8;borderRadius:8px;padding:9px 14px;">▸ 資料庫で議事録・規約を閲覧</a>
+      </div>
+      <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:16px;fontWeight:700;marginBottom:12px;">管理者のみが行う操作</div>
+      <p style="fontSize:14px;lineHeight:1.9;margin:0 0 10px;">以下は商店会の運営・会計に関わる重要な操作のため、会長・会計担当など管理者役の方が行ってください。</p>
+      <ul style="fontSize:14px;lineHeight:1.9;margin:0;paddingLeft:20px;">
+        <li>予算管理の「決算処理」・決算書の確定と監査記録</li>
+        <li>総会資料・議案作成における正式な文書の発行</li>
+        <li>設定ページ（期の管理／団体情報／データ連携／ログイン管理）</li>
+        <li>会員の新規登録・退会処理、請求書の一括発行</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <div id="faq" style="maxWidth:880px;margin:0 auto;padding:56px 32px 0;">
+    <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:22px;fontWeight:700;marginBottom:20px;">よくある質問</div>
+    <div style="background:#fff;border:1px solid #DDDEE2;borderRadius:16px;padding:8px 32px;boxShadow:0 4px 16px rgba(0,0,0,0.04);">
+      <div style="padding:20px 0;borderBottom:1px solid #DDDEE2;">
+        <div style="fontSize:14.5px;fontWeight:700;marginBottom:6px;">Q. 画面左下が「🔄 最新の情報を取得中…」と表示されたままです。データは大丈夫ですか？</div>
+        <div style="fontSize:14px;lineHeight:1.8;color:#3F414C;">A. 問題ありません。通信が一時的に不安定なだけで、入力したデータは端末内に保存されています。5分ごとに自動で再接続を試み、つながり次第スプレッドシートへ送信されます。急ぐ場合は「↻ 更新」を押してください。</div>
+      </div>
+      <div style="padding:20px 0;borderBottom:1px solid #DDDEE2;">
+        <div style="fontSize:14.5px;fontWeight:700;marginBottom:6px;">Q. 関係のない人がログインできてしまいます。</div>
+        <div style="fontSize:14px;lineHeight:1.8;color:#3F414C;">A. 「設定」→「ログイン管理」で許可するメールアドレスを登録してください（<a href="#setup-1" style="color:#C39425;">1. Googleログイン・認証メール登録</a> 参照）。一覧が空のままだと誰でもログインできる状態になります。</div>
+      </div>
+      <div style="padding:20px 0;borderBottom:1px solid #DDDEE2;">
+        <div style="fontSize:14.5px;fontWeight:700;marginBottom:6px;">Q. 印刷すると余計な日付やURLが入ってしまいます。</div>
+        <div style="fontSize:14px;lineHeight:1.8;color:#3F414C;">A. ブラウザの印刷ダイアログにある「詳細設定」から「ヘッダーとフッター」のチェックを外してください（<a href="#setup-5" style="color:#C39425;">5. 印刷設定の確認方法</a> 参照）。</div>
+      </div>
+      <div style="padding:20px 0;">
+        <div style="fontSize:14.5px;fontWeight:700;marginBottom:6px;">Q. 期（会計年度）を間違えて表示しています。</div>
+        <div style="fontSize:14px;lineHeight:1.8;color:#3F414C;">A. 画面左上のプルダウンで正しい期を選び直してください。開始日・終了日自体を修正したい場合は「設定」ページの「日付修正」から行えます（パスワードが必要です）。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

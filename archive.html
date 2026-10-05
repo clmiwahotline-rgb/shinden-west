@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>/* auth-early-check (P0-AUTH-01: サーバー発行のセッション) */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_session_v1')||sessionStorage.getItem('nitta_session_v1')||'null');if(s&&s.token&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');if(s.role)document.documentElement.setAttribute('data-role',s.role);return;}}catch(e){}document.documentElement.setAttribute('data-needs-login','1');})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>&#x8cc7;&#x6599;&#x5eab; | &#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="portal-common.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="portal-auth.js"></script>
+</head>
+<body>
+<div id="auth-overlay" style="display:none"><div class="auth-card"><img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'"><div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div><div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div><div id="g_id_signin"></div><div id="auth-error"></div><div class="auto-row"><input type="checkbox" id="auto-login"><label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff08;30&#x65e5;&#x9593;&#xff09;</label></div></div></div>
+<div id="sync-progress-bar" class="hidden"></div>
+<script src="portal-shared.js"></script>
+<script src="support.js"></script>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="portal-common.css">
+  
+</helmet>
+
+<div style="height:100%;overflow:hidden;background:#e6e6ec;display:flex;justifyContent:center;">
+<div style="display:flex;width:100%;maxWidth:1440px;height:100%;overflow:hidden;background:#F5F6F8;boxShadow:0 0 40px rgba(0,0,0,0.08);">
+
+  <!-- ===== SIDEBAR ===== -->
+  <div style="width:220px;background:#fff;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(0,0,0,0.07);zIndex:10;">
+    <div style="padding:18px 16px 14px;">
+      <img src="uploads/logo-horizontal-clean.png" alt="新田西口商店会" style="width:100%;height:auto;display:block;marginBottom:4px;" onerror="this.style.display='none'" />
+      <div style="marginTop:10px;">
+        <select value="{{ currentPeriodId }}" onChange="{{ onChangePeriod }}" style="width:100%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.1);color:#3F414C;fontSize:12px;padding:5px 8px;borderRadius:7px;appearance:none;-webkit-appearance:none;">
+          <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="1">
+            <option value="{{ opt.id }}">{{ opt.name }}</option>
+          </sc-for>
+        </select>
+      </div>
+    </div>
+    <div style="flex:1;minHeight:0;overflowY:auto;padding:4px 8px 8px;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="13">
+        <div onClick="{{ item.onClick }}" style="{{ item.navStyle }}">{{ item.label }}</div>
+      </sc-for>
+    </div>
+    <div style="flexShrink:0;padding:10px 14px 14px;borderTop:1px solid rgba(0,0,0,0.06);">
+      <div style="display:flex;alignItems:center;gap:8px;marginBottom:8px;">
+        <div style="width:30px;height:30px;borderRadius:50%;background:#E7C15F;display:flex;alignItems:center;justifyContent:center;fontSize:12px;fontWeight:700;color:#3F414C;flexShrink:0;">{{ loginInitial }}</div>
+        <div style="flex:1;minWidth:0;">
+          <div style="fontSize:11px;fontWeight:600;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ loginDisplayName }}</div>
+          <div style="fontSize:9px;color:#A1A1AA;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;" title="{{ loginEmail }}">{{ loginEmail }}</div>
+        </div>
+      </div>
+      <div style="display:flex;alignItems:center;gap:6px;">
+        <div style="fontSize:10px;color:{{ syncStatusColor }};flex:1;">{{ syncStatusLabel }}</div>
+        <button data-variant="info" onClick="{{ onRefreshFromSS }}" style="border:none;background:rgba(231,193,95,0.08);color:#C39425;fontSize:11px;fontWeight:600;cursor:pointer;padding:3px 8px;borderRadius:6px;" style-hover="background:rgba(231,193,95,0.16);">↻ 更新</button>
+      </div>
+      <a onClick="{{ onLogout }}" style="fontSize:10px;color:#A1A1AA;textDecoration:none;cursor:pointer;">ログアウト</a>
+    </div>
+  </div>
+
+  <div id="sync-progress-bar" style="{{ syncProgressBarStyle }}"></div>
+
+  <!-- ===== MAIN ===== -->
+  <div id="main-scroll" ref="{{ mainScrollRef }}" style="flex:1;overflowY:auto;background:#F5F6F8;position:relative;">
+    <sc-if value="{{ showLoader }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:#FAF8F0;z-index:9990;display:flex;alignItems:center;justifyContent:center;">
+        <img src="uploads/logo-splash.png" style="width:180px;" onerror="this.style.display='none'" />
+      </div>
+    </sc-if>
+
+    <div style="padding:32px 36px;maxWidth:900px;">
+
+      <!-- Header -->
+      <div style="display:flex;alignItems:center;justifyContent:space-between;marginBottom:24px;">
+        <div>
+          <div style="fontFamily:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;fontSize:26px;fontWeight:700;color:#3F414C;letterSpacing:0.02em;">資料庫</div>
+          <div style="fontSize:13px;color:#6B7280;marginTop:4px;">議事録・定款・規約など重要資料の保管</div>
+        </div>
+        <button data-variant="primary" onClick="{{ onNew }}" style="border:none;background:#E7C15F;color:#fff;padding:10px 22px;borderRadius:12px;fontSize:14px;fontWeight:600;">＋ 資料を追加</button>
+      </div>
+
+      <!-- カテゴリフィルター -->
+      <div style="display:flex;gap:6px;marginBottom:24px;flexWrap:wrap;">
+        <sc-for list="{{ catFilters }}" as="cf" hint-placeholder-count="7">
+          <button onClick="{{ cf.onClick }}" style="{{ cf.btnStyle }}">{{ cf.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- 空状態 -->
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;padding:60px 40px;color:#A1A1AA;fontSize:14px;background:#fff;borderRadius:14px;border:1px solid #DDDEE2;">
+          <div style="fontSize:36px;marginBottom:14px;">📁</div>
+          <div style="fontWeight:600;marginBottom:6px;">資料がまだ登録されていません</div>
+          <div style="fontSize:12px;">「資料を追加」から登録してください</div>
+        </div>
+      </sc-if>
+
+      <!-- ドキュメントリスト -->
+      <div style="display:flex;flexDirection:column;gap:10px;">
+        <sc-for list="{{ docList }}" as="doc" hint-placeholder-count="3">
+          <div style="background:#fff;borderRadius:14px;padding:18px 22px;border:1px solid #DDDEE2;cursor:pointer;transition:box-shadow 0.15s,border-color 0.15s;" onClick="{{ doc.onEdit }}" style-hover="box-shadow:0 4px 16px rgba(0,0,0,0.08);border-color:#AFC3D7;">
+            <div style="display:flex;alignItems:center;justifyContent:space-between;marginBottom:10px;">
+              <div style="display:flex;alignItems:center;gap:8px;">
+                <span style="{{ doc.catStyle }}">{{ doc.category }}</span>
+                <span style="fontSize:12px;color:#A1A1AA;">{{ doc.date }}</span>
+              </div>
+              <div style="display:flex;alignItems:center;gap:8px;">
+                <sc-if value="{{ doc.hasUrl }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ doc.onOpen }}" style="border:1px solid #AFC3D7;background:rgba(175,195,215,0.15);color:#3F414C;padding:3px 10px;borderRadius:6px;fontSize:11px;" style-hover="background:rgba(175,195,215,0.3);">🔗 開く</button>
+                </sc-if>
+                <sc-if value="{{ doc.hasFile }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ doc.onPreview }}" style="border:1px solid #DDDEE2;background:#fff;color:#3F414C;padding:3px 10px;borderRadius:6px;fontSize:11px;" style-hover="background:#F5F6F8;">👁 内容確認</button>
+                  <a href="{{ doc.fileHref }}" download="{{ doc.file.name }}" target="_blank" rel="noopener" onClick="{{ doc.onDownloadClick }}" style="border:1px solid #AFC3D7;background:rgba(175,195,215,0.15);color:#3F414C;padding:3px 10px;borderRadius:6px;fontSize:11px;textDecoration:none;display:inline-block;" style-hover="background:rgba(175,195,215,0.3);">⬇ DL</a>
+                </sc-if>
+                <button data-variant="danger" onClick="{{ doc.onDelete }}" style="border:none;background:rgba(229,115,115,0.1);color:#E57373;padding:3px 10px;borderRadius:6px;fontSize:11px;" style-hover="background:rgba(229,115,115,0.18);">削除</button>
+              </div>
+            </div>
+            <div style="fontSize:15px;fontWeight:600;color:#3F414C;marginBottom:6px;">{{ doc.title }}</div>
+            <sc-if value="{{ doc.hasNotes }}" hint-placeholder-val="{{ false }}">
+              <div style="fontSize:12px;color:#6B7280;lineHeight:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">{{ doc.notesPreview }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 追加・編集モーダル ===== -->
+<sc-if value="{{ modalShow }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:200;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;" onClick="{{ onCloseModal }}">
+    <div style="background:#fff;borderRadius:16px;padding:28px;width:600px;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
+      <div style="display:flex;justifyContent:space-between;alignItems:center;marginBottom:22px;">
+        <div style="fontFamily:'Zen Kaku Gothic New',sans-serif;fontSize:18px;fontWeight:700;color:#3F414C;">{{ modalTitle }}</div>
+        <button data-variant="secondary" onClick="{{ onCloseModal }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 14px;borderRadius:8px;fontSize:13px;">✕ 閉じる</button>
+      </div>
+
+      <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:14px;marginBottom:16px;">
+        <div>
+          <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">カテゴリ</label>
+          <select data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
+            <option value="議事録">議事録</option>
+            <option value="定款">定款</option>
+            <option value="規約">規約</option>
+            <option value="申請書類">申請書類</option>
+            <option value="通知文">通知文</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">日付</label>
+          <input type="date" data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" />
+        </div>
+      </div>
+
+      <div style="marginBottom:14px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">タイトル *</label>
+        <input type="text" data-field="title" value="{{ formData.title }}" onChange="{{ onInput }}" placeholder="例：第39回定期総会 議事録" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;" />
+      </div>
+
+      <div style="marginBottom:14px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">リンク（Google Drive等）</label>
+        <input type="url" data-field="url" value="{{ formData.url }}" onChange="{{ onInput }}" placeholder="https://drive.google.com/..." style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;" />
+      </div>
+
+      <div style="marginBottom:14px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">ファイル添付（任意）</label>
+        <div onDragOver="{{ onDragOver }}" onDrop="{{ onDrop }}" onClick="{{ onDropZoneClick }}" style="border:2px dashed #DDDEE2;borderRadius:10px;padding:14px;textAlign:center;fontSize:12px;color:#A1A1AA;cursor:pointer;transition:border-color 0.15s;" style-hover="border-color:#E7C15F;background:rgba(231,193,95,0.04);">
+          <div style="fontSize:22px;marginBottom:4px;">📎</div>
+          <div>クリック または ファイルをドラッグ&ドロップで追加</div>
+          <div style="fontSize:11px;marginTop:3px;color:#C8C8CC;">画像（自動圧縮）/ PDF / Word / Excel / テキスト など ・ 上限2MB<br/>小さいファイルはそのまま保存、大きいファイルは自動でGoogle Driveにアップロードされます</div>
+        </div>
+        <input id="_archive_file_input" type="file" accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.json" onChange="{{ onFileSelect }}" style="display:none;" />
+        <sc-if value="{{ hasFile }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;alignItems:center;gap:10px;marginTop:10px;background:#F5F6F8;borderRadius:8px;padding:8px 12px;">
+            <div style="fontSize:20px;">{{ fileIcon }}</div>
+            <div style="flex:1;minWidth:0;fontSize:12px;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ formData.file.name }}</div>
+            <sc-if value="{{ fileUploading }}" hint-placeholder-val="{{ false }}">
+              <div style="fontSize:11px;color:#C39425;flexShrink:0;">☁ アップロード中…</div>
+            </sc-if>
+            <button onClick="{{ onRemoveFile }}" style="border:none;background:rgba(229,115,115,0.12);color:#E57373;padding:3px 10px;borderRadius:6px;fontSize:11px;cursor:pointer;flexShrink:0;">削除</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="marginBottom:22px;">
+        <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">メモ・内容</label>
+        <textarea data-field="notes" value="{{ formData.notes }}" onChange="{{ onInput }}" rows="6" placeholder="内容の要約やメモを入力..." style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 12px;fontSize:13px;resize:vertical;lineHeight:1.8;"></textarea>
+      </div>
+
+      <div style="display:flex;justifyContent:flex-end;gap:8px;paddingTop:18px;borderTop:1px solid rgba(0,0,0,0.07);">
+        <button data-variant="secondary" onClick="{{ onCloseModal }}" style="border:none;background:rgba(0,0,0,0.06);color:#3F414C;padding:9px 18px;borderRadius:8px;fontSize:13px;fontWeight:500;">キャンセル</button>
+        <button data-variant="primary" onClick="{{ onSave }}" style="border:none;background:#E7C15F;color:#fff;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:600;">保存</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:28px;right:28px;background:#3F414C;color:#fff;padding:12px 20px;borderRadius:10px;fontSize:13px;fontWeight:500;zIndex:300;boxShadow:0 4px 16px rgba(0,0,0,0.25);">{{ toast }}</div>
+</sc-if>
+
+<sc-if value="{{ previewShow }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,0.35);zIndex:210;display:flex;alignItems:flex-start;justifyContent:center;overflowY:auto;paddingTop:40px;paddingBottom:40px;" onClick="{{ onClosePreview }}">
+    <div style="background:#fff;borderRadius:16px;padding:24px;width:640px;maxWidth:92vw;boxShadow:0 20px 60px rgba(0,0,0,0.25);marginBottom:40px;" onClick="{{ stopProp }}">
+      <div style="display:flex;justifyContent:space-between;alignItems:center;marginBottom:16px;">
+        <div style="fontFamily:'Zen Kaku Gothic New',sans-serif;fontSize:16px;fontWeight:700;color:#3F414C;overflow:hidden;textOverflow:ellipsis;whiteSpace:nowrap;">{{ previewFileName }}</div>
+        <button data-variant="secondary" onClick="{{ onClosePreview }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 14px;borderRadius:8px;fontSize:13px;flexShrink:0;marginLeft:12px;">✕ 閉じる</button>
+      </div>
+      <sc-if value="{{ previewIsImage }}" hint-placeholder-val="{{ false }}">
+        <img src="{{ previewImgSrc }}" style="width:100%;maxHeight:70vh;objectFit:contain;borderRadius:8px;background:#F5F6F8;" />
+      </sc-if>
+      <sc-if value="{{ previewHasText }}" hint-placeholder-val="{{ false }}">
+        <pre style="whiteSpace:pre-wrap;wordBreak:break-word;background:#F5F6F8;borderRadius:8px;padding:14px;fontSize:12px;lineHeight:1.7;color:#3F414C;maxHeight:60vh;overflowY:auto;fontFamily:'BIZ UDPGothic','Noto Sans JP',sans-serif;margin:0;">{{ previewTextContent }}</pre>
+      </sc-if>
+      <sc-if value="{{ previewNoPreview }}" hint-placeholder-val="{{ false }}">
+        <div style="textAlign:center;padding:40px 20px;color:#A1A1AA;fontSize:13px;">
+          <div style="fontSize:32px;marginBottom:10px;">{{ previewIcon }}</div>
+          <div>このファイル形式は簡易プレビューに対応していません。<br/>ダウンロードしてご確認ください。</div>
+        </div>
+      </sc-if>
+      <div style="display:flex;justifyContent:flex-end;marginTop:18px;paddingTop:16px;borderTop:1px solid rgba(0,0,0,0.07);">
+        <a href="{{ previewDownloadHref }}" download="{{ previewFileName }}" target="_blank" rel="noopener" style="border:none;background:#E7C15F;color:#fff;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:600;textDecoration:none;">⬇ ダウンロード</a>
+      </div>
+    </div>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    archiveDocs:[],periods:[],members:[],officers:[],
+    currentPeriodId:null,
+    toast:null,_tt:null,
+    scriptUrl:'',
+    syncStatus:null,loading:false,ssReady:false,syncPaused:false,
+    modal:{show:false,editId:null},
+    formData:{},
+    filterCat:'全て',
+    previewDoc:null,
+  };
+
+  _portalInit=(()=>{
+    if(window.PortalMethods)Object.assign(this,window.PortalMethods);
+    this._myPages=['archive'];
+  })();
+
+  _mainScrollRef=React.createRef();
+
+  componentDidMount(){
+    if(window.PortalMethods)Object.assign(this,window.PortalMethods);
+    const url=window.__GAS_URL__||'https://script.google.com/macros/s/AKfycbxU09SfytsO8ylYla2wKNKr_Afuc8vB7HkHCX00htQuU6618fa3iBKGLCOqTN3TDOAtZA/exec';
+    const session=(window.PortalAuth&&PortalAuth.token())||''; // P0-AUTH-01: サーバー発行のセッション
+    localStorage.setItem('nitta_script_url',url);
+    this.setState({scriptUrl:url});
+    if(url&&session){
+      this.loadLocal();
+      this.setState({syncStatus:'syncing'});
+      setTimeout(()=>this.fetchSheets(url,'',true),50);
+      this._timer=setInterval(()=>this.refreshFromSS(true),5*60*1000);
+    }else{
+      this.loadLocal();
+    }
+  }
+
+  componentWillUnmount(){if(this._timer)clearInterval(this._timer);}
+
+  // ── D&D ファイル添付 ─────────────────────────────
+  _fileIcon(file){
+    if(!file)return '📄';
+    if(file.type==='image')return '🖼';
+    if(file.type==='text')return '📝';
+    const ext=(file.name||'').split('.').pop().toLowerCase();
+    return ext==='pdf'?'📕':(ext==='doc'||ext==='docx')?'📘':(ext==='xls'||ext==='xlsx')?'📗':(ext==='ppt'||ext==='pptx')?'📙':'📄';
+  }
+  handleDrop(e){e.preventDefault();const f=(e.dataTransfer&&e.dataTransfer.files)||[];if(f[0])this._processFile(f[0]);}
+  handleFileSelect(e){const f=(e.target.files)||[];if(f[0])this._processFile(f[0]);e.target.value='';}
+  _uploadFileToDrive(filename,mimeType,dataUrl){
+    const url=this.state.scriptUrl||localStorage.getItem('nitta_script_url')||'';
+    const key=''; // P0-AUTH-01: APIキーは使わない（セッションは _authBody が付ける）
+    const base64=(dataUrl.split(',')[1])||'';
+    if(!url||!key)return Promise.reject(new Error('no-cloud'));
+    return fetch(url,{method:'POST',body:JSON.stringify({key,action:'uploadFile',filename,mimeType,base64})})
+      .then(r=>r.json())
+      .then(res=>{if(res.ok)return res;throw new Error(res.error||'upload failed');});
+  }
+  _processFile(file){
+    const MAX=2*1024*1024;
+    const CELL_SAFE=32*1024; // Base64化後もSheetsの1セル上限(5万字)に収まる目安。超える場合は自動でDriveにアップロードする
+    if(file.size>MAX){this.showToast(`${file.name} は2MBを超えています。大きいファイルはGoogle Drive等にアップロードし、上の「リンク」欄にURLを入力してください`);return;}
+    const isImg=(file.type||'').startsWith('image/');
+    const isTextLike=(file.type||'').startsWith('text/')||file.type==='application/json'||/\.(txt|csv|md|json)$/i.test(file.name||'');
+    const extractText=dataUrl=>{if(!isTextLike)return null;try{const b64=dataUrl.split(',')[1]||'';return decodeURIComponent(escape(atob(b64))).slice(0,8000);}catch(e){return null;}};
+    const finalize=(name,mimeType,type,dataUrl,textContent)=>{
+      // 埋め込み可能な小さいファイルはそのままSSに同期。大きいファイルは自動でDriveにアップロードし、
+      // リンクとして保存する（ユーザーが手動でURLをコピペする必要をなくす）
+      if(dataUrl.length<=CELL_SAFE*1.3){
+        this.setState(s=>({formData:{...s.formData,file:{name,dataUrl,mimeType,type,textContent}}}));
+        return;
+      }
+      this.setState(s=>({formData:{...s.formData,_uploading:true,file:{name,mimeType,type,textContent,_uploading:true}}}));
+      this._uploadFileToDrive(name,mimeType,dataUrl).then(res=>{
+        this.setState(s=>({
+          formData:{...s.formData,_uploading:false,url:res.url,
+            file:{name,mimeType,type,textContent,downloadUrl:res.downloadUrl,imgUrl:res.imgUrl,uploaded:true}},
+        }));
+        this.showToast(`${name} をアップロードしました（Google Driveに保存・自動でリンク設定）`);
+      }).catch(err=>{
+        console.warn('Drive upload failed:',err.message);
+        // アップロード失敗時はこの端末限定でそのまま保持（他端末には同期されない旨を警告）
+        this.setState(s=>({formData:{...s.formData,_uploading:false,file:{name,dataUrl,mimeType,type,textContent}}}));
+        this.showToast(`⚠️ ${name} はサイズが大きくアップロードにも失敗したため、この端末でのみ表示されます`);
+      });
+    };
+    if(isImg){
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const img=new Image();
+        img.onload=()=>{
+          const S=1000;const scale=Math.min(1,S/Math.max(img.width,img.height,1));
+          const canvas=document.createElement('canvas');
+          canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+          canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+          let quality=0.8,dataUrl=canvas.toDataURL('image/jpeg',quality);
+          while(dataUrl.length>CELL_SAFE*1.3&&quality>0.3){quality-=0.15;dataUrl=canvas.toDataURL('image/jpeg',quality);}
+          finalize(file.name,'image/jpeg','image',dataUrl,null);
+        };
+        img.src=ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }else{
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const dataUrl=ev.target.result;
+        finalize(file.name,file.type||'',isTextLike?'text':'doc',dataUrl,extractText(dataUrl));
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  renderVals(){
+    const{archiveDocs,periods,currentPeriodId,modal,formData,toast,filterCat,syncStatus}=this.state;
+    const cp=periods.find(p=>p.id===currentPeriodId)||{};
+    const CATS=['全て','議事録','定款','規約','申請書類','通知文','その他'];
+    const catPal={
+      '議事録':['#dbeafe','#1d4ed8'],'定款':['#dcfce7','#166534'],
+      '規約':['#fef9c3','#854d0e'],'申請書類':['#fff7ed','#c2410c'],
+      '通知文':['#f3e8ff','#7e22ce'],'その他':['#f1f5f9','#475569'],
+    };
+    const badge=(bg,fg)=>({display:'inline-block',padding:'2px 10px',borderRadius:'20px',fontSize:'11px',fontWeight:'600',background:bg,color:fg,whiteSpace:'nowrap'});
+    const fBtn=(label,active,onClick)=>({label,onClick,btnStyle:{border:active?'none':'1px solid #DDDEE2',background:active?'#E7C15F':'#fff',color:active?'#fff':'#3F414C',padding:'5px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:active?'600':'400',cursor:'pointer'}});
+    const catFilters=CATS.map(c=>fBtn(c,filterCat===c,()=>this.setState({filterCat:c})));
+    const filtered=(archiveDocs||[]).filter(d=>filterCat==='全て'||d.category===filterCat)
+      .sort((a,b)=>(b.date||b.addedAt||'').localeCompare(a.date||a.addedAt||''));
+    const docList=filtered.map(doc=>{
+      const cp=catPal[doc.category]||catPal['その他'];
+      return{...doc,
+        catStyle:badge(cp[0],cp[1]),
+        hasUrl:!!(doc.url&&doc.url.trim()),
+        hasNotes:!!(doc.notes&&doc.notes.trim()),
+        notesPreview:(doc.notes||'').slice(0,120),
+        hasFile:!!doc.file,
+        fileHref:doc.file?(doc.file.dataUrl||doc.file.downloadUrl||''):'',
+        onEdit:()=>this.setState({modal:{show:true,editId:doc.id},formData:{...doc}}),
+        onOpen:(e)=>{e.stopPropagation();if(doc.url)window.open(doc.url,'_blank');},
+        onPreview:(e)=>{e.stopPropagation();this.setState({previewDoc:doc});},
+        onDownloadClick:(e)=>{e.stopPropagation();},
+        onDelete:(e)=>{e.stopPropagation();if(!confirm(`「${doc.title}」を削除しますか？`))return;this.setState(s=>({archiveDocs:s.archiveDocs.filter(d=>d.id!==doc.id)}),()=>this.persist());this.showToast('削除しました');},
+      };
+    });
+    const NAV=[
+      {id:'dashboard',label:'ダッシュボード'},{id:'officers',label:'役員名簿'},
+      {id:'members',label:'会員管理'},{id:'invoices',label:'請求書管理'},
+      {id:'ledger',label:'入出金管理'},{id:'budget',label:'予算管理'},
+      {id:'statements',label:'決算書'},{id:'events',label:'事業記録'},
+      {id:'tasks',label:'タスク管理'},{id:'assembly',label:'総会資料'},
+      {id:'proposals',label:'議案作成'},{id:'archive',label:'資料庫'},
+      {id:'settings',label:'設定'},
+    ];
+    const navS=(a)=>a
+      ?{display:'block',padding:'7px 12px',fontSize:'13px',fontWeight:'500',color:'#C39425',background:'rgba(231,193,95,0.18)',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'}
+      :{display:'block',padding:'7px 12px',fontSize:'13px',color:'#3F414C',borderRadius:'7px',marginBottom:'2px',cursor:'pointer',userSelect:'none'};
+    return{
+      showLoader:false,
+      navItems:(window.PortalAuth?PortalAuth.nav(NAV):NAV).map(n=>({...n,onClick:()=>this.nav(n.id),navStyle:navS(n.id==='archive')})),
+      periodOptions:(this.state.periods||[]).map(p=>({...p})),
+      currentPeriodId,
+      onChangePeriod:(e)=>this.setState({currentPeriodId:e.target.value}),
+      currentPeriodName:cp.name||'',
+      catFilters,docList,isEmpty:docList.length===0,
+      onNew:()=>{
+        const today=new Date().toISOString().slice(0,10);
+        this.setState({modal:{show:true,editId:null},formData:{category:'議事録',title:'',date:today,url:'',notes:'',file:null}});
+      },
+      modalShow:modal.show,
+      modalTitle:modal.editId?'資料を編集':'資料を追加',
+      formData,
+      hasFile:!!formData.file,
+      fileIcon:formData.file?this._fileIcon(formData.file):'',
+      fileUploading:!!(formData.file&&formData.file._uploading),
+      onDragOver:(e)=>e.preventDefault(),
+      onDrop:(e)=>this.handleDrop(e),
+      onFileSelect:(e)=>this.handleFileSelect(e),
+      onDropZoneClick:()=>{const el=document.getElementById('_archive_file_input');if(el)el.click();},
+      onRemoveFile:()=>this.setState(s=>({formData:{...s.formData,file:null}})),
+      onInput:(e)=>this.setField(e.target.dataset.field,e.target.value),
+      onSave:()=>{
+        const{formData:f,modal:m}=this.state;
+        if(!f.title){this.showToast('タイトルを入力してください');return;}
+        if(f._uploading){this.showToast('ファイルをアップロード中です。完了までお待ちください');return;}
+        if(m.editId){
+          this.setState(s=>({archiveDocs:s.archiveDocs.map(d=>d.id===m.editId?{...d,...f}:d),modal:{show:false}}),()=>this.persist());
+        }else{
+          const n={...f,id:this.gen(),addedAt:new Date().toISOString()};
+          this.setState(s=>({archiveDocs:[...s.archiveDocs,n],modal:{show:false}}),()=>this.persist());
+        }
+        this.showToast('保存しました');
+      },
+      onCloseModal:()=>this.setState({modal:{show:false}}),
+      stopProp:(e)=>e.stopPropagation(),
+      previewDoc:this.state.previewDoc,
+      previewShow:!!this.state.previewDoc,
+      previewFileName:(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.name)||'',
+      previewImgSrc:(this.state.previewDoc&&this.state.previewDoc.file&&(this.state.previewDoc.file.dataUrl||this.state.previewDoc.file.imgUrl))||'',
+      previewDownloadHref:(this.state.previewDoc&&this.state.previewDoc.file&&(this.state.previewDoc.file.dataUrl||this.state.previewDoc.file.downloadUrl))||'',
+      previewIsImage:!!(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.type==='image'),
+      previewHasText:!!(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.textContent),
+      previewTextContent:(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.textContent)||'',
+      previewNoPreview:!!(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.type!=='image'&&!this.state.previewDoc.file.textContent),
+      previewIcon:(this.state.previewDoc&&this.state.previewDoc.file)?this._fileIcon(this.state.previewDoc.file):'📄',
+      onClosePreview:()=>this.setState({previewDoc:null}),
+      loginEmail:(window.PortalAuth?PortalAuth.email():''),
+      loginDisplayName:(window.PortalAuth?PortalAuth.displayName(this.state.authEmails)+(PortalAuth.roleLabel()?'・'+PortalAuth.roleLabel():''):'ゲスト'),
+      loginInitial:(window.PortalAuth?PortalAuth.initial(this.state.authEmails):'?'),
+      syncStatusColor:{null:'#A1A1AA',syncing:'#f59e0b',ok:'#7BC095',error:'#E57373'}[String(syncStatus)]||'#A1A1AA',
+      syncStatusLabel:syncStatus==='syncing'?'同期中...':syncStatus==='ok'?'✓ 同期済':syncStatus==='error'?'🔄 最新の情報を取得中…':'未連携',
+      syncProgressBarStyle:syncStatus==='syncing'?{}:{opacity:0,pointerEvents:'none'},
+      onRefreshFromSS:()=>this.refreshFromSS(false),
+      onLogout:()=>{ if(window.PortalAuth) PortalAuth.logout(); },
+      mainScrollRef:this._mainScrollRef,
+      toast,showToast:!!toast,
+    };
+  }
+}
+</script>
+</body>
+</html>

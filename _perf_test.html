@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ロード時間計測 — Before / After</title>
+<style>
+  body { font-family:'Noto Sans JP',sans-serif; background:#F5F6F8; padding:32px; color:#3F414C; margin:0; }
+  h2 { font-size:20px; margin-bottom:6px; }
+  .subtitle { font-size:13px; color:#6B7280; margin-bottom:24px; }
+  #status { margin-bottom:16px; font-size:13px; color:#6B7280; min-height:20px; }
+  table { border-collapse:collapse; width:100%; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08); margin-bottom:24px; }
+  th { background:#E7C15F; color:#fff; padding:10px 14px; text-align:left; font-size:12px; font-weight:600; }
+  td { padding:10px 14px; font-size:13px; border-bottom:1px solid #DDDEE2; }
+  tr:last-child td { border-bottom:none; }
+  .num { font-family:'BIZ UDPGothic',monospace; text-align:right; width:90px; }
+  .diff-good { color:#7BC095; font-weight:700; }
+  .diff-bad  { color:#E57373; font-weight:700; }
+  .diff-same { color:#A1A1AA; }
+  .bar-wrap { display:flex; align-items:center; gap:6px; }
+  .bar { height:12px; border-radius:3px; display:inline-block; min-width:2px; }
+  .bar-before { background:#AFC3D7; opacity:0.6; }
+  .bar-after  { background:#E7C15F; }
+  .bar-after.fast { background:#7BC095; }
+  .tag { display:inline-block; font-size:10px; padding:1px 7px; border-radius:10px; margin-left:4px; }
+  .tag-sw  { background:#dcfce7; color:#166534; }
+  .tag-new { background:#dbeafe; color:#1d4ed8; }
+  .summary { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:24px; }
+  .card { background:#fff; border-radius:12px; padding:18px 22px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+  .card-val { font-size:28px; font-weight:700; font-family:'BIZ UDPGothic',monospace; }
+  .card-label { font-size:12px; color:#6B7280; margin-top:4px; }
+</style>
+</head>
+<body>
+<h2>📊 ページロード時間 — Before / After</h2>
+<div class="subtitle">Service Worker・操作ロック・楽観的ロック 実装後の計測</div>
+<div id="status">計測中...</div>
+
+<div class="summary" id="summary"></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:130px">ページ</th>
+      <th class="num">Before</th>
+      <th class="num">After</th>
+      <th class="num">差分</th>
+      <th>グラフ（青:Before / 金:After）</th>
+    </tr>
+  </thead>
+  <tbody id="results"></tbody>
+</table>
+
+<div style="font-size:11px;color:#A1A1AA;line-height:1.8;">
+  ※ <span style="background:#dcfce7;color:#166534;padding:1px 6px;border-radius:8px;font-size:10px;">SW</span> … Service Workerキャッシュから返答（2回目以降）<br>
+  ※ Before は 2026-06-30 初回計測値（GASキャッシュ最適化前）
+</div>
+
+<script>
+const BEFORE = {
+  'index.html':      { ms:1075, kb:138 },
+  'officers.html':   { ms:2005, kb:137 },
+  'members.html':    { ms:1077, kb:144 },
+  'invoices.html':   { ms:2058, kb:184 },
+  'ledger.html':     { ms:1078, kb:163 },
+  'budget.html':     { ms:2042, kb:155 },
+  'statements.html': { ms:1077, kb:158 },
+  'events.html':     { ms:1071, kb:139 },
+  'tasks.html':      { ms:1059, kb:139 },
+  'assembly.html':   { ms:1073, kb:171 },
+  'proposals.html':  { ms:911,  kb:46  },
+  'archive.html':    { ms:992,  kb:42  },
+  'settings.html':   { ms:1076, kb:147 },
+};
+
+const pages = [
+  { name:'ダッシュボード', file:'index.html' },
+  { name:'役員',          file:'officers.html' },
+  { name:'会員名簿',      file:'members.html' },
+  { name:'請求管理',      file:'invoices.html' },
+  { name:'入出金',        file:'ledger.html' },
+  { name:'予算',          file:'budget.html' },
+  { name:'決算',          file:'statements.html' },
+  { name:'事業',          file:'events.html' },
+  { name:'タスク管理',    file:'tasks.html' },
+  { name:'総会資料',      file:'assembly.html' },
+  { name:'議案作成',      file:'proposals.html' },
+  { name:'資料庫',        file:'archive.html' },
+  { name:'設定',          file:'settings.html' },
+];
+
+const tbody = document.getElementById('results');
+const status = document.getElementById('status');
+const MAX_BAR = 320; // px
+
+// SWが使えるか確認
+const swActive = 'serviceWorker' in navigator && navigator.serviceWorker.controller !== null;
+
+async function measurePage(p) {
+  const t0 = performance.now();
+  const res = await fetch(p.file + '?_t=' + Date.now());
+  const html = await res.text();
+  const ms = Math.round(performance.now() - t0);
+  const fromSW = res.headers && res.headers.get('x-from-sw') === '1';
+  return { ms, kb: Math.round(html.length / 1024), fromSW };
+}
+
+async function run() {
+  const results = [];
+  const beforeAvg = Math.round(Object.values(BEFORE).reduce((s,v)=>s+v.ms,0) / pages.length);
+  const maxBefore = Math.max(...Object.values(BEFORE).map(v=>v.ms));
+
+  for (const p of pages) {
+    status.textContent = `計測中: ${p.name}...`;
+    try {
+      const r = await measurePage(p);
+      results.push({ ...p, ...r });
+
+      const bef = BEFORE[p.file].ms;
+      const diff = r.ms - bef;
+      const diffStr = diff > 0 ? `+${diff}` : String(diff);
+      const diffCls = diff < -50 ? 'diff-good' : diff > 50 ? 'diff-bad' : 'diff-same';
+
+      const maxMs = Math.max(maxBefore, r.ms);
+      const wBef = Math.round(bef / maxMs * MAX_BAR);
+      const wAft = Math.round(r.ms / maxMs * MAX_BAR);
+      const aftCls = r.ms < 100 ? 'fast' : '';
+
+      const tr = document.createElement('tr');
+      const td1 = document.createElement('td'); td1.textContent = p.name;
+      const td2 = document.createElement('td'); td2.className='num'; td2.style.color='#9ca3af'; td2.textContent = bef+' ms';
+      const td3 = document.createElement('td'); td3.className='num'; td3.innerHTML = '<strong>'+r.ms+' ms</strong> <span style="color:#A1A1AA;font-size:10px;">'+r.kb+'KB</span>';
+      const td4 = document.createElement('td'); td4.className='num'; td4.innerHTML = '<span class="'+diffCls+'">'+diffStr+' ms</span>';
+      const td5 = document.createElement('td');
+      td5.innerHTML = '<div class="bar-wrap"><span class="bar bar-before" style="width:'+wBef+'px"></span></div>'
+        +'<div class="bar-wrap" style="margin-top:3px"><span class="bar bar-after '+aftCls+'" style="width:'+wAft+'px"></span>'
+        +(r.ms < 100 ? '<span class="tag tag-sw">SW</span>' : '')+'</div>';
+      tr.append(td1,td2,td3,td4,td5);
+      tbody.appendChild(tr);
+    } catch(e) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${p.name}</td><td colspan="4" style="color:#E57373">エラー: ${e.message}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  const afterAvg = Math.round(results.reduce((s,r)=>s+r.ms,0) / results.length);
+  const afterMax = Math.max(...results.map(r=>r.ms));
+  const avgDiff  = afterAvg - beforeAvg;
+  const pct = Math.round((1 - afterAvg/beforeAvg)*100);
+
+  document.getElementById('summary').innerHTML = `
+    <div class="card">
+      <div class="card-val" style="color:#9ca3af">${beforeAvg} ms</div>
+      <div class="card-label">Before 平均</div>
+    </div>
+    <div class="card">
+      <div class="card-val" style="color:#E7C15F">${afterAvg} ms</div>
+      <div class="card-label">After 平均　<span class="${avgDiff<0?'diff-good':'diff-bad'}">${avgDiff>0?'+':''}${avgDiff} ms</span></div>
+    </div>
+    <div class="card">
+      <div class="card-val" style="color:${pct>0?'#7BC095':'#E57373'}">${pct>0?'▼'+pct+'%':'▲'+Math.abs(pct)+'%'}</div>
+      <div class="card-label">平均改善率</div>
+    </div>
+  `;
+
+  status.textContent = `計測完了 ✅　SW状態: ${swActive ? 'アクティブ（キャッシュから返答中）' : '未アクティブ（初回 or 未登録）'}`;
+}
+
+run();
+</script>
+</body>
+</html>

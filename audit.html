@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>/* auth-early-check (P0-AUTH-01: サーバー発行のセッション) */(function(){try{var s=JSON.parse(localStorage.getItem('nitta_session_v1')||sessionStorage.getItem('nitta_session_v1')||'null');if(s&&s.token&&s.exp>Date.now()){document.documentElement.setAttribute('data-authed','1');if(s.role)document.documentElement.setAttribute('data-role',s.role);return;}}catch(e){}document.documentElement.setAttribute('data-needs-login','1');})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>&#x5909;&#x66f4;&#x5c65;&#x6b74; | &#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="portal-common.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="portal-auth.js"></script>
+<script>/* v34: 未ログインで直接開いた場合は、トップページ（ログイン画面）へ移動する */if(!(window.PortalAuth&&PortalAuth.session()))location.replace('./');</script>
+<style>
+  body { margin: 0; background: #F5F6F8; color: #3F414C; font-family: 'Noto Sans JP', sans-serif; }
+  .au-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+  .au-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .au-title { font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.02em; }
+  .au-back { color: #C39425; text-decoration: none; font-size: 13px; font-weight: 500; }
+  .au-card { background: #fff; border: 1px solid #DDDEE2; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); padding: 18px; margin-bottom: 16px; }
+  .au-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; }
+  .au-filters label { display: block; font-size: 11px; font-weight: 600; color: #6B7280; margin-bottom: 3px; }
+  .au-filters input, .au-filters select { width: 100%; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.15); border-radius: 7px; padding: 7px 9px; font-size: 13px; background: #fff; color: #3F414C; }
+  .au-btn { border: none; background: #E7C15F; color: #3F414C; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .au-btn.sub { background: rgba(0,0,0,0.05); }
+  .au-btn:disabled { opacity: 0.5; cursor: default; }
+  .au-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .au-msg { font-size: 12px; color: #6B7280; }
+  .au-msg.ng { color: #E57373; font-weight: 600; }
+  .au-msg.ok { color: #4F9A6A; font-weight: 600; }
+  .au-table-wrap { overflow-x: auto; }
+  table.au-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 900px; }
+  .au-table th { text-align: left; font-size: 11px; color: #6B7280; font-weight: 600; padding: 8px; border-bottom: 1px solid #DDDEE2; white-space: nowrap; }
+  .au-table td { padding: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: top; }
+  .au-table tr.denied td { background: rgba(229,115,115,0.06); }
+  .au-table tr.rolled td { background: rgba(0,0,0,0.03); color: #A1A1AA; }
+  .au-table td.nw { white-space: nowrap; }
+  .au-badge { white-space: nowrap; display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: rgba(0,0,0,0.05); }
+  .au-badge.full { background: rgba(231,193,95,0.18); color: #9A7414; }
+  .au-badge.director { background: rgba(175,195,215,0.25); color: #4C6A86; }
+  .au-val { font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; min-width: 180px; max-width: 320px; max-height: 140px; overflow: auto; }
+  .au-empty { text-align: center; color: #A1A1AA; padding: 24px; font-size: 13px; }
+  .au-denied-page { text-align: center; padding: 48px 16px; color: #6B7280; font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="auth-overlay" style="display:none"><div class="auth-card"><img src="uploads/logo-splash.png" class="auth-logo" alt="&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;" onerror="this.style.display='none'"><div class="auth-title">&#x7ba1;&#x7406;&#x30dd;&#x30fc;&#x30bf;&#x30eb;</div><div class="auth-sub">&#x65b0;&#x7530;&#x897f;&#x53e3;&#x5546;&#x5e97;&#x4f1a;</div><div id="g_id_signin"></div><div id="auth-error"></div><div class="auto-row"><input type="checkbox" id="auto-login"><label for="auto-login" style="cursor:pointer">&#x3053;&#x306e;&#x30d6;&#x30e9;&#x30a6;&#x30b6;&#x3067;&#x30ed;&#x30b0;&#x30a4;&#x30f3;&#x72b6;&#x614b;&#x3092;&#x7dad;&#x6301;&#x3059;&#x308b;&#xff08;30&#x65e5;&#x9593;&#xff09;</label></div></div></div>
+
+<div class="au-wrap">
+  <div class="au-top">
+    <div class="au-title">変更履歴</div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <span id="au-user" style="font-size:12px;color:#6B7280;"></span>
+      <a class="au-back" href="#" id="au-logout" style="color:#A1A1AA;">ログアウト</a>
+      <a class="au-back" href="./">← ポータルに戻る</a>
+    </div>
+  </div>
+  <div id="au-denied" class="au-card au-denied-page" style="display:none">このページは全権限ユーザーのみ閲覧できます。</div>
+  <div id="au-main" style="display:none">
+    <div class="au-card">
+      <div class="au-filters">
+        <div><label for="f-from">期間（から）</label><input type="date" id="f-from"></div>
+        <div><label for="f-to">期間（まで）</label><input type="date" id="f-to"></div>
+        <div><label for="f-email">ユーザー（メールの一部）</label><input type="text" id="f-email" placeholder="example@"></div>
+        <div><label for="f-feature">機能</label><select id="f-feature"><option value="">すべて</option></select></div>
+        <div><label for="f-action">操作</label><select id="f-action"><option value="">すべて</option></select></div>
+        <div><label for="f-record">レコードID</label><input type="text" id="f-record"></div>
+      </div>
+      <div class="au-actions">
+        <button class="au-btn" id="b-search">検索</button>
+        <button class="au-btn sub" id="b-clear">条件をクリア</button>
+        <span style="flex:1"></span>
+        <button class="au-btn sub" id="b-verify">改ざんチェック</button>
+        <span class="au-msg" id="m-verify"></span>
+      </div>
+    </div>
+    <div class="au-card">
+      <div class="au-msg" id="m-list" style="margin-bottom:8px;"></div>
+      <div class="au-table-wrap">
+        <table class="au-table">
+          <thead><tr><th>日時</th><th>ユーザー</th><th>権限</th><th>操作</th><th>機能</th><th>レコードID</th><th>変更項目</th><th>変更前</th><th>変更後</th><th>結果</th></tr></thead>
+          <tbody id="t-body"></tbody>
+        </table>
+      </div>
+      <div class="au-actions"><button class="au-btn sub" id="b-more" style="display:none">さらに読み込む</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// P0-AUTH-01: 変更履歴（全権限のみ）。ページは静的で、データはサーバーが全権限のセッションにだけ返す。
+// 取得した履歴は端末に保存しない。表示は textContent だけで行う（履歴の値をHTMLとして解釈しない）。
+(function() {
+  'use strict';
+  var FEATURES = ['請求書管理', '入出金管理', '予算管理', '決算', '期と口座', '会員管理', '役員名簿', '事業記録', 'タスク', '総会資料', '議案作成', '資料庫', '団体情報', '表示する期', '認証ユーザー管理', 'ログイン', '変更履歴', 'スプレッドシート'];
+  var ACTIONS = [['create', '作成'], ['update', '変更'], ['delete', '削除'], ['upload', 'アップロード'], ['user_add', 'ユーザー追加'], ['user_remove', 'ユーザー削除'],
+    ['role_change', '権限変更'], ['sessions_revoke', '端末のログアウト'], ['login_success', 'ログイン'], ['login_denied', 'ログイン拒否'], ['logout', 'ログアウト'],
+    ['permission_denied', '権限による拒否'], ['rollback', '保存の取り消し'], ['external_change', '手動編集・復元の検知'], ['user_init', '初期移行'], ['emergency_recovery', '緊急復旧'], ['api_key_reset', 'APIキー変更']];
+  var ACTION_LABEL = {}; ACTIONS.forEach(function(a) { ACTION_LABEL[a[0]] = a[1]; });
+  var ROLE_LABEL = { full: '全権限', director: '理事', legacy: '旧APIキー', system: 'システム', '-': '—' };
+  var $ = function(id) { return document.getElementById(id); };
+  var cursor = null, busy = false, shown = 0;
+
+  function opt(sel, value, label) { var o = document.createElement('option'); o.value = value; o.textContent = label; sel.appendChild(o); }
+  FEATURES.forEach(function(f) { opt($('f-feature'), f, f); });
+  ACTIONS.forEach(function(a) { opt($('f-action'), a[0], a[1]); });
+
+  function cell(tr, text, cls, nowrap) { var td = document.createElement('td'); if (nowrap) td.className = 'nw'; if (cls) { var d = document.createElement('div'); d.className = cls; d.textContent = text; td.appendChild(d); } else td.textContent = text; tr.appendChild(td); return td; }
+  function pretty(v) {
+    v = String(v || '').replace(/^ /, '');
+    if (!v) return '';
+    var o;
+    try { o = JSON.parse(v); } catch (e) { return v; }
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return typeof o === 'string' ? o : JSON.stringify(o);
+    // 「項目: 値」の形で1行ずつ（値が配列・オブジェクトなら短い JSON）
+    return Object.keys(o).map(function(k) {
+      var x = o[k];
+      return k + ': ' + (x === null || x === undefined ? '（なし）' : typeof x === 'object' ? JSON.stringify(x) : String(x));
+    }).join('\n');
+  }
+  function fmtAt(at) { return String(at || '').replace('T', ' ').replace(/\.\d+\+09:00$/, ''); }
+
+  function render(entries, append) {
+    var tb = $('t-body');
+    if (!append) tb.textContent = '';
+    var empty = tb.querySelector('.au-empty');
+    if (empty) tb.removeChild(empty.parentNode);
+    entries.forEach(function(e) {
+      var tr = document.createElement('tr');
+      if (e.result === 'denied') tr.className = 'denied';
+      if (e.result === 'rolled_back') tr.className = 'rolled';
+      cell(tr, fmtAt(e.at), null, true);
+      cell(tr, String(e.email || '').trim());
+      var tdRole = cell(tr, '', null, true);
+      var b = document.createElement('span'); b.className = 'au-badge ' + (e.role || ''); b.textContent = ROLE_LABEL[e.role] || e.role || ''; tdRole.appendChild(b);
+      cell(tr, ACTION_LABEL[e.action] || e.action, null, true);
+      cell(tr, e.feature || '', null, true);
+      cell(tr, String(e.recordId || '').replace(/^ /, ''));
+      cell(tr, String(e.fields || '').replace(/^ /, '').split(',').join(', '));
+      cell(tr, pretty(e.before), 'au-val');
+      cell(tr, pretty(e.after), 'au-val');
+      cell(tr, (e.result === 'ok' ? '' : e.result === 'denied' ? '拒否' : e.result === 'rolled_back' ? '取り消し（保存失敗）' : e.result) + (e.reason ? '（' + e.reason + '）' : ''));
+      tb.appendChild(tr);
+    });
+    if (!tb.children.length) {
+      var tr = document.createElement('tr'); var td = document.createElement('td'); td.colSpan = 10; td.className = 'au-empty'; td.textContent = '該当する履歴はありません'; tr.appendChild(td); tb.appendChild(tr);
+    }
+  }
+
+  function filters() {
+    return { from: $('f-from').value, to: $('f-to').value, email: $('f-email').value.trim(), feature: $('f-feature').value, action: $('f-action').value, recordId: $('f-record').value.trim() };
+  }
+
+  function load(append) {
+    if (busy) return;
+    busy = true;
+    $('m-list').className = 'au-msg'; $('m-list').textContent = '読み込んでいます…';
+    $('b-more').disabled = true;
+    PortalAuth.post({ action: 'auditLog', filters: filters(), limit: 100, cursor: append ? cursor : null })
+      .then(function(r) {
+        busy = false; $('b-more').disabled = false;
+        if (PortalAuth.handleAuthError(r)) return;
+        if (r.forbidden) { showDenied(); return; }
+        if (!r.ok) { $('m-list').className = 'au-msg ng'; $('m-list').textContent = r.error || '読み込めませんでした'; return; }
+        render(r.entries || [], append);
+        shown = (append ? shown : 0) + (r.entries || []).length;
+        cursor = r.nextCursor;
+        $('b-more').style.display = cursor ? '' : 'none';
+        $('m-list').textContent = '新しい順に表示しています（' + shown + '件' + (cursor ? '・続きがあります' : '') + '）';
+      })
+      .catch(function() { busy = false; $('b-more').disabled = false; $('m-list').className = 'au-msg ng'; $('m-list').textContent = '通信に失敗しました'; });
+  }
+
+  function verify() {
+    $('b-verify').disabled = true;
+    $('m-verify').className = 'au-msg'; $('m-verify').textContent = '確認しています…';
+    PortalAuth.post({ action: 'auditVerify' }).then(function(r) {
+      $('b-verify').disabled = false;
+      if (PortalAuth.handleAuthError(r)) return;
+      if (r.ok === false && !r.message) { $('m-verify').className = 'au-msg ng'; $('m-verify').textContent = r.error || '確認できませんでした'; return; }
+      if (r.ok) { $('m-verify').className = 'au-msg ok'; $('m-verify').textContent = '✓ ' + r.message + '（' + r.checked + '件）'; }
+      else { $('m-verify').className = 'au-msg ng'; $('m-verify').textContent = '⚠ ' + r.message + '（通し番号 ' + r.badSeq + (r.sheet ? '・シート ' + r.sheet + ' の ' + r.row + '行目' : '') + '）'; }
+    }).catch(function() { $('b-verify').disabled = false; $('m-verify').className = 'au-msg ng'; $('m-verify').textContent = '通信に失敗しました'; });
+  }
+
+  function showDenied() { $('au-main').style.display = 'none'; $('au-denied').style.display = ''; }
+
+  function start() {
+    if (!PortalAuth.session()) return;           // ログイン画面が表示される
+    $('au-user').textContent = PortalAuth.displayName() + (PortalAuth.roleLabel() ? '・' + PortalAuth.roleLabel() : '') + '（' + PortalAuth.email() + '）';
+    $('au-logout').addEventListener('click', function(ev) { ev.preventDefault(); PortalAuth.logout(); });
+    if (!PortalAuth.isFull()) { showDenied(); return; } // 理事はAPIも呼ばない（呼んでもサーバーが拒否する）
+    $('au-main').style.display = '';
+    $('b-search').addEventListener('click', function() { load(false); });
+    $('b-more').addEventListener('click', function() { load(true); });
+    $('b-verify').addEventListener('click', verify);
+    $('b-clear').addEventListener('click', function() { ['f-from', 'f-to', 'f-email', 'f-record'].forEach(function(k) { $(k).value = ''; }); $('f-feature').value = ''; $('f-action').value = ''; load(false); });
+    load(false);
+  }
+  start();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(e){console.warn('SW registration failed:',e);});
+  });
+}
+</script>
+</body>
+</html>
