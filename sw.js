@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v36'; // v36: 入金済の請求書でも領収書を印刷できるように修正
+const CACHE = 'nitta-portal-v37'; // v37: P1-NET-01 Google 側の不調への耐性（タイムアウト・再試行・接続できないときの表示・誤ったログアウトの防止）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

@@ -18,16 +18,10 @@
     return t ? { session: t } : {};
   },
   _hasAuth() { return !!this._authBody().session; },
-  // 読み込み（POST）。本文が届かない一時的な障害（authError:missing）は1回だけ再試行する
+  // 読み込み（POST）。P1-NET-01: タイムアウト・送り直し・ログアウト前の再確認は PortalAuth.post が行う
   _postLoad(url, ts) {
     window.__portalInstance = this;
-    const send = () => fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify(Object.assign({ action: 'load', ts: String(ts || '0') }, this._authBody())),
-    }).then(r => r.text()).then(text => JSON.parse(text.trim().replace(/^\uFEFF/,'')));
-    return send()
-      .then(d => (d && d.authError === 'missing') ? send() : d)
+    return window.PortalAuth.post({ action: 'load', ts: String(ts || '0') }, { url })
       .then(d => {
         if (d && d.authError) {
           if (window.PortalAuth && window.PortalAuth.handleAuthError(d)) { const e = new Error('ログインが必要です'); e.authHandled = true; throw e; }
@@ -253,9 +247,10 @@
     this._installTabSync();
     // P0-TAB-01: 差分確認には、共有の版番号ではなく「このタブが表示しているデータの版番号」を使う
     const lastTs = this._tabTs || '0';
-    this._postLoad(url, lastTs)
+    return this._postLoad(url, lastTs)
       .then(d => {
         if (d.error) throw new Error(d.error);
+        this._netOk(); // P1-NET-01: 接続できた → 表示を戻し、自動の読み直しを止める
         this._lastSyncCheckAt = Date.now();
         const knownTs = this._tabTs || '0';
         // 変更なし → スキップ
@@ -333,6 +328,7 @@
         if (err && err.authHandled) return; // ログイン画面に戻る
         if (!silent) { this.loadLocal(); this.showToast('スプレッドシート接続失敗。ローカルデータを使用します'); }
         this.setState({ syncStatus: 'error', loading: false });
+        this._netFail(url); // P1-NET-01: 取得できていないことを表示し、60秒後に自動で読み直す
       });
   },
 
@@ -356,6 +352,7 @@
     this._postLoad(url, lastTs)
       .then(d=>{ if(!d.ok) throw new Error(d.error||'エラー'); return d; })
       .then(d=>{
+        this._netOk(); // P1-NET-01
         this._lastSyncCheckAt = Date.now();
         const knownTs = this._tabTs || '0';
         if (d.modified === false) {
@@ -402,7 +399,7 @@
         this._writeCache(merged);
         if (!silent) { this._hideSsLock(); this.showToast('SSから最新データを取得しました'); }
       })
-      .catch(()=>{ if(!silent){ this._hideSsLock(); this.showToast('SS再読み込みに失敗しました'); } });
+      .catch((err)=>{ if(!silent){ this._hideSsLock(); this.showToast('SS再読み込みに失敗しました'); } if (!(err && err.authHandled)) this._netFail(url); /* P1-NET-01: まだ一度も読み込めていない場合だけ表示・自動の読み直し */ });
   },
 
   loadFromSS() {
@@ -506,7 +503,13 @@
           this._persistInFlight = false;
           this._pendingPersist = true;
           this.setState({ syncStatus: 'error' });
-          if (res.authError !== 'missing' && window.PortalAuth) window.PortalAuth.handleAuthError(res);
+          // P1-NET-01: すぐにはログアウトせず、読み込みで確かめる（読み込み側で再確認し、本当に無効ならログアウト）。
+          // 読み込みが成功すれば、保留中の変更は通常どおり送り直される。確認を繰り返す場合は今までどおりログアウトする
+          if (res.authError !== 'missing') {
+            this._saveAuthRechecks = (this._saveAuthRechecks || 0) + 1;
+            if (this._saveAuthRechecks > 2) { if (window.PortalAuth) window.PortalAuth.handleAuthError(res); }
+            else this.refreshFromSS(true);
+          }
           if (onResult) onResult('authError', res.authError);
           if (res.authError === 'missing') this._afterPersistSettled(false);
           return;
@@ -536,6 +539,7 @@
           // P0-RESURRECT-01: 保存に成功した項目は既知ID台帳に登録する（以後、他端末で削除されても未同期の新規と誤判定しない）
           this._saveKnownIds(SYNC_ID_KEYS, dataForSend);
           this._conflictRecoveries = 0;
+          this._saveAuthRechecks = 0; // P1-NET-01
           this._snapReadonly(d); // P0-AUTH-01
           // P0-TAB-01: このタブ自身の保存が成功した → タブの版番号を更新し、キャッシュの基準も新しい版にする
           // （他のタブは storage イベントでこれを受け取り、自分より新しい版なら読み直す）
@@ -779,17 +783,95 @@
     const el = document.createElement('div');
     el.id = '_ss_lock';
     el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(245,246,248,0.85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:9994;align-items:center;justify-content:center;flex-direction:column;gap:16px;pointer-events:all;';
-    el.innerHTML = '<div style="width:38px;height:38px;border:3px solid #DDDEE2;border-top-color:#E7C15F;border-radius:50%;animation:_spin 0.8s linear infinite;"></div><div style="font-size:13px;color:#6B7280;font-family:sans-serif;font-weight:500;letter-spacing:0.04em;">\u30c7\u30fc\u30bf\u3092\u540c\u671f\u4e2d...</div>';
+    el.innerHTML = '<div style="width:38px;height:38px;border:3px solid #DDDEE2;border-top-color:#E7C15F;border-radius:50%;animation:_spin 0.8s linear infinite;"></div><div id="_ss_lock_msg" style="font-size:13px;color:#6B7280;font-family:sans-serif;font-weight:500;letter-spacing:0.04em;text-align:center;max-width:320px;line-height:1.6;">\u30c7\u30fc\u30bf\u3092\u540c\u671f\u4e2d...</div>'
+      + '<button id="_ss_lock_retry" type="button" style="display:none;border:none;background:#E7C15F;color:#fff;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">今すぐ再試行</button>';
     document.body.appendChild(el);
+    el.querySelector('#_ss_lock_retry').addEventListener('click', () => this._netRetryNow()); // P1-NET-01
   },
   _showSsLock() {
     this._injectSsLockMask();
     const el = document.getElementById('_ss_lock');
+    // P1-NET-01: 通常の「同期中」の表示に戻す
+    const msg = document.getElementById('_ss_lock_msg'), btn = document.getElementById('_ss_lock_retry');
+    if (msg) msg.textContent = 'データを同期中...';
+    if (btn) btn.style.display = 'none';
+    this._netLockErr = false;
     if (el) el.style.display = 'flex';
   },
   _hideSsLock() {
     const el = document.getElementById('_ss_lock');
     if (el) el.style.display = 'none';
+  },
+
+  // -----------------------------------------------
+  // P1-NET-01: サーバー（GAS）から一度も読み込めていない間の表示と、自動の読み直し
+  //  ・端末にデータが無い（新しいブラウザ）→「同期中」の画面のまま、接続できないことと「今すぐ再試行」を出す（0件の画面を見せない）
+  //  ・端末に前回のデータがある → 画面上部の帯で知らせる（前回の内容は見られる。変更は接続後に送られる）
+  //  ・60秒ごとに自動で読み直し、成功したら表示を消す。読み込めた後の自動更新の失敗では表示しない
+  // -----------------------------------------------
+  _netFail(url) {
+    if (this.state.ssReady) return;
+    if (url) this._netUrl = url;
+    let hasLocal = false;
+    try { hasLocal = !!localStorage.getItem('nitta_v5'); } catch (e) {}
+    if (hasLocal) this._showNetBanner(); else this._showSsLockError();
+    clearTimeout(this._netRetryTimer);
+    const ms = (window.PortalAuth && window.PortalAuth.net && window.PortalAuth.net.bgRetryMs) || 60000;
+    this._netRetryTimer = setTimeout(() => this._netRetryNow(), ms);
+  },
+  _netOk() {
+    clearTimeout(this._netRetryTimer);
+    this._netRetryTimer = null;
+    const b = document.getElementById('_net_banner');
+    if (b) b.style.display = 'none';
+    if (this._netLockErr) { this._netLockErr = false; this._hideSsLock(); }
+  },
+  _netRetryNow() {
+    clearTimeout(this._netRetryTimer);
+    this._netRetryTimer = null;
+    if (this.state.ssReady || this._netRetrying) return;
+    let url = this._netUrl || this.state.scriptUrl || '';
+    try { url = url || localStorage.getItem('nitta_script_url') || ''; } catch (e) {}
+    if (!url) return;
+    this._netRetrying = true;
+    this._netSetBusy(true);
+    const end = () => { this._netRetrying = false; this._netSetBusy(false); };
+    Promise.resolve(this.fetchSheets(url, '', true)).then(end, end);
+  },
+  _showSsLockError() {
+    this._injectSsLockMask();
+    const el = document.getElementById('_ss_lock'), msg = document.getElementById('_ss_lock_msg'), btn = document.getElementById('_ss_lock_retry');
+    if (msg) msg.textContent = 'サーバーに接続できません。自動で再試行しています（Google 側の一時的な不調の可能性があります）';
+    if (btn) { btn.style.display = ''; btn.disabled = false; btn.textContent = '今すぐ再試行'; }
+    this._netLockErr = true;
+    if (el) el.style.display = 'flex';
+  },
+  _showNetBanner() {
+    let b = document.getElementById('_net_banner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = '_net_banner';
+      b.setAttribute('role', 'status');
+      b.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;z-index:9993;background:#FFF7E0;border-bottom:1px solid #E7C15F;color:#6B4E00;font-size:12px;font-family:sans-serif;padding:6px 12px;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;';
+      const t = document.createElement('span');
+      t.textContent = '⚠ サーバーに接続できません。前回の内容を表示しています（変更は接続後に送信されます）';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = '_net_banner_retry';
+      btn.textContent = '今すぐ再試行';
+      btn.style.cssText = 'border:1px solid #E7C15F;background:#fff;color:#6B4E00;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;';
+      btn.addEventListener('click', () => this._netRetryNow());
+      b.appendChild(t);
+      b.appendChild(btn);
+      document.body.appendChild(b);
+    }
+    b.style.display = 'flex';
+  },
+  _netSetBusy(busy) {
+    ['_net_banner_retry', '_ss_lock_retry'].forEach(id => {
+      const x = document.getElementById(id);
+      if (x) { x.disabled = busy; x.textContent = busy ? '再試行中…' : '今すぐ再試行'; }
+    });
   },
 
   };

@@ -54,24 +54,66 @@
     (document.head || document.documentElement).appendChild(st);
   }
 
-  // GAS への POST（本文にセッションを入れる）。本文が届かない一時的な障害（authError:missing）は1回だけ再試行する
+  // P1-NET-01: Google 側の一時的な不調（結果の受け渡しの 404・応答が来ない・本文が届かない）への耐性。
+  // 読むだけの操作は、タイムアウトつきで送り直してよい（何度送ってもデータは変わらない）。
+  // 保存・ログイン・ユーザーの変更は送り直さない（二重になる／ログインの使い捨てトークンは再利用できない）。
+  var READ_ACTIONS = ['load', 'users.list', 'sessions.list', 'auditLog', 'auditVerify', 'getHanko'];
+  var NET = { timeoutMs: 45000, retryWaits: [3000, 10000], recheckWaitMs: 2000, bgRetryMs: 60000 };
+  var AUTH_FAIL = ['invalid', 'expired', 'revoked', 'users_unavailable'];
+  function wait(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+  // GAS への POST（本文にセッションを入れる）
+  //  ・本文が届かない一時的な障害（authError:missing）は送り直す（読むだけの操作は最大2回、それ以外は1回）
+  //  ・読むだけの操作は、タイムアウト・通信エラー・JSON でない応答（404 のページなど）も送り直す
+  //  ・読むだけの操作で「ログインが無効」と返ったら、ログアウトの前に1回だけ送り直して確かめる
   function post(body, opts) {
     opts = opts || {};
     var s = read();
     var payload = Object.assign({}, body);
     if (!opts.noSession && s) payload.session = s.token;
+    var url = opts.url || gasUrl();
+    var isRead = READ_ACTIONS.indexOf(payload.action) >= 0 && !opts.noRetry;
     var send = function() {
-      return fetch(gasUrl(), {
+      var ctrl = (isRead && typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, NET.timeoutMs) : null;
+      var done = function() { if (timer) clearTimeout(timer); };
+      return fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
         keepalive: !!opts.keepalive,
-      }).then(function(r) { return r.text(); }).then(function(t) { return JSON.parse(String(t).trim().replace(/^﻿/, '')); });
+        signal: ctrl ? ctrl.signal : undefined,
+      }).then(function(r) { return r.text(); }).then(function(t) {
+        done();
+        try { return JSON.parse(String(t).trim().replace(/^﻿/, '')); }
+        catch (e) { throw new Error('サーバーの応答を読み取れませんでした'); }
+      }, function(err) { done(); throw err; });
     };
-    return send().then(function(res) {
-      if (res && res.authError === 'missing' && !opts.noRetry) return send();
-      return res;
-    });
+    if (!isRead) {
+      return send().then(function(res) {
+        if (res && res.authError === 'missing' && !opts.noRetry) return send();
+        return res;
+      });
+    }
+    var attempt = 0, rechecked = false;
+    var next = function() {
+      if (attempt >= NET.retryWaits.length) return null;
+      return wait(NET.retryWaits[attempt++]).then(go);
+    };
+    var go = function() {
+      return send().then(function(res) {
+        if (res && res.authError === 'missing') { var n = next(); if (n) return n; }
+        if (res && AUTH_FAIL.indexOf(res.authError) >= 0 && !rechecked) {
+          rechecked = true;
+          return wait(NET.recheckWaitMs).then(go);
+        }
+        return res;
+      }, function(err) {
+        var n = next(); if (n) return n;
+        throw err;
+      });
+    };
+    return go();
   }
 
   // 認証エラーの共通処理。true を返したら呼び出し元は処理を止める
@@ -168,6 +210,7 @@
       return list;
     },
     post: post,
+    net: NET, // P1-NET-01: タイムアウト・再試行の設定（テストで短くするために公開）
     handleAuthError: handleAuthError,
     logout: logout,
     // サーバーの応答の me（ロール）を画面に反映する
