@@ -165,7 +165,13 @@
         // __baseTs はキャッシュ専用のメタデータなので state には入れない（サーバーにも送らない）。
         // 古いキャッシュ（__baseTs なし）は版番号 '0' として、サーバーから全データを読み直させる（安全側）。
         this._tabTs = (cached && cached.__baseTs) ? String(cached.__baseTs) : '0';
-        if (cached) delete cached.__baseTs;
+        // P1-SAVE-02: 前回のページで送信が終わらなかった変更（送信中の F5・タブを閉じた・通信の失敗）。
+        // 保留扱いにして、読み込みの後に送り直す。サーバーが先に変わっていれば、競合と同じくサーバーを優先し、利用者に知らせる
+        // （送信は fetchSheets がサーバーの版を確かめてから行う。版番号での競合判定があるため古い内容で上書きはしない）
+        if (cached && cached.__unsent) this._pendingPersist = true;
+        if (cached) { delete cached.__baseTs; delete cached.__unsent; }
+        // P1-SAVE-02: 保存のときに画面の状態ごと書かれた「接続済み」などは持ち込まない（起動直後はまだサーバーに接続していない）
+        if (cached) { delete cached.ssReady; delete cached.lastSyncAt; }
         const d = this.migrate(cached);
         // 注意: ここでpersist()は呼ばない。起動直後はSS接続前(ssReady=false)のため
         // persist()は実際には送信されず「送信保留」フラグだけを立ててしまい、
@@ -457,7 +463,7 @@
         this.showToast('理事の権限では変更できない項目は、元に戻しました（閲覧のみ）');
       }
     }
-    this._writeCache(d); // このタブの版番号を基準として、手元の変更を含むキャッシュを書く
+    this._writeCache(d, true); // このタブの版番号を基準として、手元の変更を含むキャッシュを書く（P1-SAVE-02: 保存が確認できるまで「未送信」）
     const auth = this._authBody(); // P0-AUTH-01: セッション（本文で送る）
     const hasSession = !!auth.session;
     const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
@@ -482,6 +488,12 @@
     if (Array.isArray(dataForSend.periods)) {
       dataForSend.periods = dataForSend.periods.map(p => ({ bankAccounts: [], ...p }));
     }
+    // P1-SAVE-02: 送信中に次の変更があった → 同時には送らず、今の保存が終わってから送る（同じ版番号で2つ送ると後の方が競合になり、変更が取り消される）
+    if (url && hasSession && this.state.ssReady && this._persistInFlight) {
+      this._queuedPersist = true;
+      if (onResult) onResult('queued');
+      return;
+    }
     if (url && hasSession && this.state.ssReady) {
       // 注意: ここで_pendingPersistをfalseにしない。送信中(_persistInFlight)は別のフラグで表す。
       // 以前はここでfalseにしていたため、この送信が完了する前に自動更新等が届いた古い
@@ -502,6 +514,7 @@
         if (res && res.authError) {
           this._persistInFlight = false;
           this._pendingPersist = true;
+          this._queuedPersist = false; // P1-SAVE-02: 保留にまとめる（送り直すときに最新の内容を送る）
           this.setState({ syncStatus: 'error' });
           // P1-NET-01: すぐにはログアウトせず、読み込みで確かめる（読み込み側で再確認し、本当に無効ならログアウト）。
           // 読み込みが成功すれば、保留中の変更は通常どおり送り直される。確認を繰り返す場合は今までどおりログアウトする
@@ -517,6 +530,7 @@
         // P0-AUTH-01: 権限で拒否された（理事が閲覧専用のデータを変更していた）→ 何も保存されていない。サーバーから読み直す
         if (res && res.forbidden) {
           this._persistInFlight = false;
+          this._queuedPersist = false; // P1-SAVE-02
           this.setState({ syncStatus: 'error' });
           this._recoverForbidden(res);
           if (onResult) onResult('forbidden', res.sheetErrors);
@@ -524,6 +538,7 @@
         }
         if (res.conflict) {
           this._persistInFlight = false;
+          this._queuedPersist = false; // P1-SAVE-02: 保留にまとめる（読み直しでサーバーを優先し、利用者に知らせる）
           this.setState({ syncStatus: 'error' });
           this._pendingPersist = true; // 競合時は保留扱い（復旧の読み直しで、サーバーを優先して取り込む）
           this.showToast('⚠️ 他の端末で更新がありました。最新の内容を確認しています…');
@@ -533,8 +548,11 @@
         }
         this._persistInFlight = false;
         if (res.lastModified) localStorage.setItem('nitta_last_modified', res.lastModified);
-        this.setState({ syncStatus: res.ok ? 'ok' : 'error' });
-        this._pendingPersist = !res.ok; // 成功時は解除、失敗時は保留扱いにして再送信できるようにする
+        // P1-SAVE-02: 送信中に次の変更があった → 成功ならこの後すぐ送る。失敗なら保留にまとめる
+        const queued = !!this._queuedPersist;
+        this._queuedPersist = false;
+        this.setState({ syncStatus: (res.ok && !queued) ? 'ok' : (res.ok ? 'syncing' : 'error') });
+        this._pendingPersist = !res.ok || queued; // 成功時は解除、失敗時は保留扱いにして再送信できるようにする
         if (res.ok) {
           // P0-RESURRECT-01: 保存に成功した項目は既知ID台帳に登録する（以後、他端末で削除されても未同期の新規と誤判定しない）
           this._saveKnownIds(SYNC_ID_KEYS, dataForSend);
@@ -546,8 +564,9 @@
           if (res.lastModified) {
             this._tabTs = String(res.lastModified);
             const {page,modal,formData,toast,_tt,loading,syncStatus,syncPaused,scriptUrl,scriptUrlInput,orgInfoInput,gasUser,...cur} = this.state;
-            this._writeCache(cur);
+            this._writeCache(cur, queued); // P1-SAVE-02: 送信中の変更が残っていれば「未送信」のまま
           }
+          if (queued) this.persist(); // P1-SAVE-02: 送信中にあった変更を、新しい版番号で送る
         }
         this._afterPersistSettled(false);
         if (res.sheetErrors && res.sheetErrors.length) {
@@ -558,7 +577,7 @@
         }
         if (onResult) onResult(res.ok ? 'ok' : 'error');
       })
-      .catch((err) => { this._persistInFlight = false; this.setState({ syncStatus: 'error' }); this._pendingPersist = true; if (onResult) onResult('networkError', err); this._afterPersistSettled(false); });
+      .catch((err) => { this._persistInFlight = false; this._queuedPersist = false; this.setState({ syncStatus: 'error' }); this._pendingPersist = true; if (onResult) onResult('networkError', err); this._afterPersistSettled(false); });
     } else {
       // クラウド未接続 or SS未初期化 → ローカル保存のみ。SS準備でき次第、自動的に再送信する
       const reason = !url ? 'no-url' : !hasSession ? 'no-session' : 'not-ready';
@@ -571,8 +590,12 @@
   // P0-TAB-01: データのキャッシュと「そのデータの基準になった版番号（__baseTs）」を1つのキーに一体で書く。
   // 別々のキーにすると、タブの書き込みが前後したときに「新しい版番号＋古いデータ」の組み合わせが残り、
   // そこから開いたタブが他のタブの変更を上書きしてしまう。
-  _writeCache(data) {
-    try { localStorage.setItem('nitta_v5', JSON.stringify(Object.assign({}, data, { __baseTs: this._tabTs || '0' }))); } catch(e) {}
+  // P1-SAVE-02: __unsent はサーバーへの保存が確認できていない変更を含むこと（省略時は送信中・保留中かどうかで決める）
+  _writeCache(data, unsent) {
+    if (unsent === undefined) unsent = !!(this._persistInFlight || this._pendingPersist || this._queuedPersist);
+    const meta = { __baseTs: this._tabTs || '0' };
+    if (unsent) meta.__unsent = true;
+    try { localStorage.setItem('nitta_v5', JSON.stringify(Object.assign({}, data, meta))); } catch(e) {}
     if (this._tabTs) { try { localStorage.setItem('nitta_last_modified', this._tabTs); } catch(e) {} } // 互換のため書く（競合判定には使わない）
   },
 
@@ -582,6 +605,15 @@
     window.__portalInstance = this; // P0-AUTH-01: ログアウト時に未送信の変更を確認するため
     if (this._tabSyncInstalled || typeof window === 'undefined' || !window.addEventListener) return;
     this._tabSyncInstalled = true;
+    // P1-SAVE-02: 送信が終わっていない変更があるときは、閉じる・再読み込みの前にブラウザの確認を出す。
+    // ポータル内のページ移動（nav）では出さない（未送信の印がキャッシュにあり、移動先のページが送り直すため）
+    window.addEventListener('beforeunload', (e) => {
+      if (this._navigating) return;
+      if (!(this._persistInFlight || this._pendingPersist || this._queuedPersist)) return;
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    });
     window.addEventListener('storage', (e) => {
       if (!e || e.key !== 'nitta_v5' || !e.newValue) return;
       const m = /"__baseTs":"(\d+)"/.exec(e.newValue);
@@ -674,6 +706,7 @@
         settings:   'settings.html',
         audit:      'audit.html',
       };
+      this._navigating = true; // P1-SAVE-02: ポータル内の移動では「ページを離れますか？」を出さない
       window.location.href = map[id] || './';
     }
   },

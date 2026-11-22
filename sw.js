@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v37'; // v37: P1-NET-01 Google 側の不調への耐性（タイムアウト・再試行・接続できないときの表示・誤ったログアウトの防止）
+const CACHE = 'nitta-portal-v38'; // v38: P1-SAVE-02 送信が終わらなかった変更を送り直す・保存を1つずつ送る・未送信のまま閉じる前に確認
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
