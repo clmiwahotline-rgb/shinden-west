@@ -821,7 +821,8 @@ class Component extends DCLogic {
     if (this._canEdit && !this._canEdit('settlements')) return; // P0-AUTH-01
     const cp = (this.state.periods||[]).find(p=>p.id===this.state.currentPeriodId)||{};
     const pid = cp.id;
-    const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid);
+    // P1-STMT-01: 振替処理は収入・支出に含めない（予算管理のページの決算確定と同じ。口座間の資金移動であり実質的な収支ではないため。groupTypeが未設定の古いデータもcategoryで判定して除外）
+    const txs = (this.state.transactions||[]).filter(t=>t.periodId===pid && t.groupType!=='振替' && t.category!=='振替');
     const budgets = (this.state.budgetItems||[]).filter(b=>b.periodId===pid);
     const totalI = txs.reduce((s,t)=>s+(t.income||0),0);
     const totalE = txs.reduce((s,t)=>s+(t.expense||0),0);

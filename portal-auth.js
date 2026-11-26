@@ -160,15 +160,25 @@
   }
 
   // ログアウト: サーバーのセッションを無効にし、この端末のデータ（キャッシュ）を消す
+  // P1-LOGOUT-01: 未送信の変更があれば先に送る（最大60秒）。送れなければ、失われることを確認してからログアウトする
   function logout(opts) {
     opts = opts || {};
     var inst = window.__portalInstance;
-    var pending = !!(inst && (inst._pendingPersist || inst._persistInFlight));
-    if (pending && !opts.force) {
-      if (!confirm('まだ送信されていない変更があります。ログアウトすると、この変更は失われます。ログアウトしますか？')) return;
+    if (hasPending(inst) && !opts.force) {
+      showIdleLock('未送信の変更を送信しています…', true);
+      flushPending(inst, IDLE.flushMs).then(function(ok) {
+        hideIdleLock();
+        if (ok || confirm('未送信の変更を送信できませんでした。ログアウトすると、この変更は失われます。ログアウトしますか？')) doLogout(opts);
+      });
+      return;
     }
+    doLogout(opts);
+  }
+  function doLogout(opts) {
+    opts = opts || {};
     var s = read();
     var done = function() {
+      writeUnsent(false);
       clearSession();
       ['nitta_v5', 'nitta_known_ids', 'nitta_last_modified'].forEach(function(k) { try { localStorage.removeItem(k); } catch (e) {} });
       setRoleAttr(null);
@@ -176,6 +186,154 @@
     };
     if (!s) { done(); return; }
     post({ action: 'logout' }, { keepalive: true, noRetry: true }).then(done, done);
+  }
+
+  // ===== P1-LOGOUT-01: 自動ログアウト（1時間無操作） =====
+  //  ・無操作の時間は全タブで共有する（どれかのタブで操作があればログアウトしない）
+  //  ・55分で予告し、60分でログアウト。未送信の変更があれば先に送る。送れなければ画面をロック（データを隠す）し、送れてからログアウト
+  //  ・他のタブに未送信の変更があるときは、そのタブが送ってログアウトするのを待つ（ログアウトは全タブ共通のため）
+  //  ・各ページの既存のタイマー（_inactivityTimer）は残す。そこから呼ばれる __logout もこの判定を通る
+  //  ・自動ログアウトのタイマーが無いページ（議案作成・資料庫・変更履歴など）では予告・ログアウトはしないが、操作は記録する
+  var IDLE = { timeoutMs: 60 * 60 * 1000, warnMs: 55 * 60 * 1000, tickMs: 15000, writeMs: 30000, flushMs: 60000, retryMs: 60000, pollMs: 1000, resendMs: 10000 };
+  var ACTIVITY_KEY = 'nitta_last_activity', UNSENT_KEY = 'nitta_unsent_tabs';
+  var TAB_ID = Math.random().toString(36).slice(2, 10);
+  var lastLocal = Date.now(), lastWrite = 0, lastUnsent = false, idleBusy = false;
+
+  function hasPending(inst) { return !!(inst && (inst._pendingPersist || inst._persistInFlight || inst._queuedPersist)); }
+  function sharedActivity() {
+    var v = 0;
+    try { v = Number(localStorage.getItem(ACTIVITY_KEY)) || 0; } catch (e) {}
+    return Math.max(v, lastLocal);
+  }
+  function noteActivity() {
+    lastLocal = Date.now();
+    if (lastLocal - lastWrite >= IDLE.writeMs) {
+      lastWrite = lastLocal;
+      try { localStorage.setItem(ACTIVITY_KEY, String(lastLocal)); } catch (e) {}
+    }
+    hideIdleWarning();
+  }
+  function readUnsent() {
+    try { var m = JSON.parse(localStorage.getItem(UNSENT_KEY) || '{}'); return (m && typeof m === 'object') ? m : {}; } catch (e) { return {}; }
+  }
+  function writeUnsent(flag) {
+    try {
+      var m = readUnsent();
+      if (flag) m[TAB_ID] = Date.now(); else delete m[TAB_ID];
+      localStorage.setItem(UNSENT_KEY, JSON.stringify(m));
+    } catch (e) {}
+  }
+  function otherTabUnsent() {
+    var m = readUnsent(), now = Date.now();
+    return Object.keys(m).some(function(k) { return k !== TAB_ID && now - Number(m[k]) < IDLE.tickMs * 3; });
+  }
+  // 未送信の変更を送る。送れたら true、時間内に送れなければ false
+  function flushPending(inst, ms) {
+    return new Promise(function(resolve) {
+      var end = Date.now() + ms, lastKick = 0;
+      var check = function() {
+        if (!hasPending(inst)) { resolve(true); return; }
+        if (Date.now() >= end) { resolve(false); return; }
+        if (!inst._persistInFlight && Date.now() - lastKick >= IDLE.resendMs) {
+          lastKick = Date.now();
+          if (inst.state && inst.state.ssReady && inst._pendingPersist && inst.persist) inst.persist();
+          else if (inst._netRetryNow) inst._netRetryNow(); // まだ読み込めていない → 読み込みが成功すれば保留中の変更も送られる
+        }
+        setTimeout(check, IDLE.pollMs);
+      };
+      check();
+    });
+  }
+  function autoLogout() {
+    if (idleBusy || !read()) return;
+    if (Date.now() - sharedActivity() < IDLE.timeoutMs) return; // 他のタブで操作がある
+    if (otherTabUnsent()) return;                               // 他のタブが未送信の変更を送るのを待つ
+    idleBusy = true;
+    hideIdleWarning();
+    var inst = window.__portalInstance;
+    if (!hasPending(inst)) { doLogout({}); return; }
+    showIdleLock('未送信の変更を送信しています…');
+    var attempt = function() {
+      flushPending(inst, IDLE.flushMs).then(function(ok) {
+        if (ok) { doLogout({}); return; }
+        showIdleLock('長時間操作がなかったため画面をロックしました。未送信の変更があるため、送信できてからログアウトします（自動で再試行しています）');
+        setTimeout(attempt, IDLE.retryMs);
+      });
+    };
+    attempt();
+  }
+  function idleTick() {
+    setTimeout(idleTick, IDLE.tickMs);
+    idleCheck();
+  }
+  function idleCheck() {
+    if (!read()) return;
+    var inst = window.__portalInstance;
+    var shared = sharedActivity();
+    // 既存のページのタイマーも、全タブの操作で判定するようにする
+    if (inst && typeof inst._lastActivity === 'number' && inst._lastActivity < shared) inst._lastActivity = shared;
+    var p = hasPending(inst);
+    if (p || lastUnsent) { writeUnsent(p); lastUnsent = p; }
+    if (idleBusy || !inst || !inst._inactivityTimer) return;
+    var idle = Date.now() - shared;
+    if (idle >= IDLE.timeoutMs) autoLogout();
+    else if (idle >= IDLE.warnMs) showIdleWarning();
+    else hideIdleWarning();
+  }
+  function showIdleWarning() {
+    var w = document.getElementById('_idle_warn');
+    if (!w) {
+      w = document.createElement('div');
+      w.id = '_idle_warn';
+      w.setAttribute('role', 'alert');
+      w.style.cssText = 'display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9995;background:#fff;border:1px solid #E7C15F;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);padding:10px 16px;font-size:13px;color:#3F414C;font-family:sans-serif;align-items:center;gap:12px;';
+      var t = document.createElement('span');
+      t.textContent = '操作がないため、5分後に自動でログアウトします';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.id = '_idle_warn_btn';
+      b.textContent = '続ける';
+      b.style.cssText = 'border:none;background:#E7C15F;color:#fff;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;';
+      b.addEventListener('click', function() { noteActivity(); });
+      w.appendChild(t);
+      w.appendChild(b);
+      (document.body || document.documentElement).appendChild(w);
+    }
+    w.style.display = 'flex';
+  }
+  function hideIdleWarning() {
+    var w = document.getElementById('_idle_warn');
+    if (w && w.style.display !== 'none') w.style.display = 'none';
+  }
+  // 画面のロック（データを隠す）。noDiscard=true のときは「破棄してログアウト」を出さない（手動のログアウトで送信中）
+  function showIdleLock(msg, noDiscard) {
+    var l = document.getElementById('_idle_lock');
+    if (!l) {
+      l = document.createElement('div');
+      l.id = '_idle_lock';
+      l.style.cssText = 'display:none;position:fixed;inset:0;z-index:10000;background:#F5F6F8;align-items:center;justify-content:center;flex-direction:column;gap:18px;font-family:sans-serif;padding:16px;';
+      var t = document.createElement('div');
+      t.id = '_idle_lock_msg';
+      t.style.cssText = 'font-size:14px;color:#3F414C;text-align:center;max-width:360px;line-height:1.7;';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.id = '_idle_lock_discard';
+      b.textContent = '変更を破棄してログアウト';
+      b.style.cssText = 'border:1px solid #DDDEE2;background:#fff;color:#6B7280;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;';
+      b.addEventListener('click', function() {
+        if (confirm('未送信の変更は失われます。ログアウトしますか？')) doLogout({});
+      });
+      l.appendChild(t);
+      l.appendChild(b);
+      (document.body || document.documentElement).appendChild(l);
+    }
+    document.getElementById('_idle_lock_msg').textContent = msg;
+    document.getElementById('_idle_lock_discard').style.display = noDiscard ? 'none' : '';
+    l.style.display = 'flex';
+  }
+  function hideIdleLock() {
+    var l = document.getElementById('_idle_lock');
+    if (l) l.style.display = 'none';
   }
 
   function initGsi() {
@@ -211,6 +369,8 @@
     },
     post: post,
     net: NET, // P1-NET-01: タイムアウト・再試行の設定（テストで短くするために公開）
+    idle: IDLE, // P1-LOGOUT-01: 自動ログアウトの設定（テストで短くするために公開）
+    _idleCheck: function() { idleCheck(); }, // P1-LOGOUT-01: テスト用（見張りの1回分）
     handleAuthError: handleAuthError,
     logout: logout,
     // サーバーの応答の me（ロール）を画面に反映する
@@ -226,9 +386,14 @@
   };
   window.handleCredential = handleCredential;
   // 1時間無操作の自動ログアウト（各ページの既存タイマーから呼ばれる）
-  window.__logout = function() { logout({ force: true }); };
+  window.__logout = function() { autoLogout(); }; // P1-LOGOUT-01: 全タブの操作・未送信の変更を確かめてから
 
   injectStyle();
+  // P1-LOGOUT-01: 操作の記録（全タブで共有）と、自動ログアウトの見張り
+  ['click', 'keydown', 'mousemove', 'touchstart'].forEach(function(ev) { document.addEventListener(ev, noteActivity, { passive: true }); });
+  noteActivity();
+  setTimeout(idleTick, IDLE.tickMs);
+  window.addEventListener('pagehide', function() { writeUnsent(false); });
   removeLegacy(); // v34: 旧APIキー・旧ログイン情報を端末から消す（ログインの有無に関係なく）
   var cur = read();
   setRoleAttr(cur);

@@ -13,6 +13,8 @@
 <script src="portal-auth.js"></script>
 <script>/* v34: 未ログインで直接開いた場合は、トップページ（ログイン画面）へ移動する */if(!(window.PortalAuth&&PortalAuth.session()))location.replace('./');</script>
 <style>
+  /* P1-AUDIT-01: 共通CSS（portal-common.css）は他のページ向けに画面全体のスクロールを止めているため、このページだけ縦にスクロールできるようにする */
+  html, body { height: auto; overflow: auto; }
   body { margin: 0; background: #F5F6F8; color: #3F414C; font-family: 'Noto Sans JP', sans-serif; }
   .au-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
   .au-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
