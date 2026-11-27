@@ -169,7 +169,9 @@
         // 保留扱いにして、読み込みの後に送り直す。サーバーが先に変わっていれば、競合と同じくサーバーを優先し、利用者に知らせる
         // （送信は fetchSheets がサーバーの版を確かめてから行う。版番号での競合判定があるため古い内容で上書きはしない）
         if (cached && cached.__unsent) this._pendingPersist = true;
-        if (cached) { delete cached.__baseTs; delete cached.__unsent; }
+        // P1-SAVE-03: 結果が分からなかった保存（保存ID・基準の版番号）。サーバーの最後の保存が自分のものかを見分けるために使う
+        if (cached && Array.isArray(cached.__saves)) this._unconfirmedSaves = cached.__saves.filter(u => u && u.id).slice(-5);
+        if (cached) { delete cached.__baseTs; delete cached.__unsent; delete cached.__saves; }
         // P1-SAVE-02: 保存のときに画面の状態ごと書かれた「接続済み」などは持ち込まない（起動直後はまだサーバーに接続していない）
         if (cached) { delete cached.ssReady; delete cached.lastSyncAt; }
         const d = this.migrate(cached);
@@ -292,6 +294,15 @@
           this.setState({ loading: false, ssReady: true });
           return;
         }
+        // P1-SAVE-03: サーバーが進んでいたのは、応答を受け取れなかった自分の保存だった → 取り込まず、続きを送る（知らせない）
+        if (this._isOwnLostSave(d.lastSave, d.lastModified)) {
+          this._adoptOwnLostSave(d.lastModified, d);
+          if (shouldLock) this._hideSsLock();
+          this.setState({ syncStatus: 'ok', loading: false, ssReady: true, lastSyncAt: Date.now() }, () => {
+            if (this._pendingPersist && !this._persistInFlight) this.persist();
+          });
+          return;
+        }
         if (d.lastModified) localStorage.setItem('nitta_last_modified', d.lastModified);
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length === 0) {
@@ -384,6 +395,15 @@
           if (!silent) this._hideSsLock();
           return;
         }
+        // P1-SAVE-03: 応答を受け取れなかった自分の保存だった → 取り込まず、続きを送る（知らせない）
+        if (this._isOwnLostSave(d.lastSave, d.lastModified)) {
+          this._adoptOwnLostSave(d.lastModified, d);
+          if (!silent) this._hideSsLock();
+          this.setState({ syncStatus: 'ok', ssReady: true }, () => {
+            if (this._pendingPersist && !this._persistInFlight) this.persist();
+          });
+          return;
+        }
         if (d.lastModified) localStorage.setItem('nitta_last_modified', d.lastModified);
         const parsed = this.migrate(this.parseSheets(d));
         if (!parsed.periods || parsed.periods.length===0) { if(!silent){ this._hideSsLock(); this.showToast('SSにデータがありません');} return; }
@@ -463,10 +483,14 @@
         this.showToast('理事の権限では変更できない項目は、元に戻しました（閲覧のみ）');
       }
     }
-    this._writeCache(d, true); // このタブの版番号を基準として、手元の変更を含むキャッシュを書く（P1-SAVE-02: 保存が確認できるまで「未送信」）
     const auth = this._authBody(); // P0-AUTH-01: セッション（本文で送る）
     const hasSession = !!auth.session;
     const url = scriptUrl || localStorage.getItem('nitta_script_url') || '';
+    // P1-SAVE-03: 送る保存には保存IDを付け、結果が分かるまで「未確認の保存」として覚える（端末の保存内容にも書く）
+    const willSend = !!(url && hasSession && this.state.ssReady && !this._persistInFlight);
+    const saveId = willSend ? this.gen() : '';
+    if (willSend) this._unconfirmedSaves = [...(this._unconfirmedSaves || []), { id: saveId, base: this._tabTs || '0' }].slice(-5);
+    this._writeCache(d, true); // このタブの版番号を基準として、手元の変更を含むキャッシュを書く（P1-SAVE-02: 保存が確認できるまで「未送信」）
     // 配列内の行によってキー構成が違うと、GAS側が「先頭行のキー」だけを列見出しにする実装のため、
     // 後発フィールド（bankAccounts・accountName等、一部の行にしか無い項目）が保存時に列ごと欠落する。
     // 送信前に各配列を「全行キーの和集合」に揃えて、この事故を防ぐ（GAS側も同様に修正済みだが二重の保険）。
@@ -506,13 +530,14 @@
       fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify(Object.assign({ action: 'save', data: dataForSend, clientLastModified }, auth)),
+        body: JSON.stringify(Object.assign({ action: 'save', data: dataForSend, clientLastModified, saveId }, auth)),
       })
       .then(r => r.json())
       .then(res => {
         // P0-AUTH-01: 認証エラー。本文が届かなかっただけ（missing）なら保留にして後で送り直す
         if (res && res.authError) {
           this._persistInFlight = false;
+          this._dropUnconfirmed(saveId); // P1-SAVE-03: 認証で止まった保存は書き込まれていない
           this._pendingPersist = true;
           this._queuedPersist = false; // P1-SAVE-02: 保留にまとめる（送り直すときに最新の内容を送る）
           this.setState({ syncStatus: 'error' });
@@ -530,6 +555,7 @@
         // P0-AUTH-01: 権限で拒否された（理事が閲覧専用のデータを変更していた）→ 何も保存されていない。サーバーから読み直す
         if (res && res.forbidden) {
           this._persistInFlight = false;
+          this._dropUnconfirmed(saveId); // P1-SAVE-03
           this._queuedPersist = false; // P1-SAVE-02
           this.setState({ syncStatus: 'error' });
           this._recoverForbidden(res);
@@ -538,6 +564,14 @@
         }
         if (res.conflict) {
           this._persistInFlight = false;
+          this._dropUnconfirmed(saveId); // P1-SAVE-03: 競合で拒否された保存は書き込まれていない
+          // P1-SAVE-03: 間の保存が、応答を受け取れなかった自分の保存だった → 他の端末の変更ではない。版番号を進めて、今の内容を送り直す
+          if (!res.busy && this._isOwnLostSave(res.lastSave, res.serverLastModified)) {
+            this._queuedPersist = false;
+            this._adoptOwnLostSave(res.serverLastModified, null);
+            this.persist(onResult);
+            return;
+          }
           this._queuedPersist = false; // P1-SAVE-02: 保留にまとめる（読み直しでサーバーを優先し、利用者に知らせる）
           this.setState({ syncStatus: 'error' });
           this._pendingPersist = true; // 競合時は保留扱い（復旧の読み直しで、サーバーを優先して取り込む）
@@ -553,6 +587,8 @@
         this._queuedPersist = false;
         this.setState({ syncStatus: (res.ok && !queued) ? 'ok' : (res.ok ? 'syncing' : 'error') });
         this._pendingPersist = !res.ok || queued; // 成功時は解除、失敗時は保留扱いにして再送信できるようにする
+        if (res.ok) this._unconfirmedSaves = []; // P1-SAVE-03: 保存が確認できた（それより前の未確認の保存も、この保存に含まれる）
+        else this._dropUnconfirmed(saveId);      // P1-SAVE-03: 保存の中止（何も書き込まれていない）
         if (res.ok) {
           // P0-RESURRECT-01: 保存に成功した項目は既知ID台帳に登録する（以後、他端末で削除されても未同期の新規と誤判定しない）
           this._saveKnownIds(SYNC_ID_KEYS, dataForSend);
@@ -590,11 +626,34 @@
   // P0-TAB-01: データのキャッシュと「そのデータの基準になった版番号（__baseTs）」を1つのキーに一体で書く。
   // 別々のキーにすると、タブの書き込みが前後したときに「新しい版番号＋古いデータ」の組み合わせが残り、
   // そこから開いたタブが他のタブの変更を上書きしてしまう。
+  // P1-SAVE-03: サーバーの最後の保存（lastSave）が、応答を受け取れなかった自分の保存か。
+  // 保存ID と基準の版番号が一致し、その後に他の変更が無い（最後の保存の新しい版番号が今の版番号）場合だけ自分の保存とみなす
+  _isOwnLostSave(lastSave, serverTs) {
+    const list = this._unconfirmedSaves || [];
+    if (!lastSave || !lastSave.id || !list.length || !serverTs) return false;
+    if (String(lastSave.to) !== String(serverTs)) return false;
+    return list.some(u => u.id === lastSave.id && String(u.base) === String(lastSave.from));
+  },
+  // 自分の保存が届いていた → 版番号を進め、端末の内容（届いた保存＋その後の変更）を送り直す準備をする。
+  // 他の端末の変更は間に無いので、端末の内容はサーバーの内容を含んでいる（取り込まない・知らせない）
+  _adoptOwnLostSave(serverTs, serverData) {
+    console.log('P1-SAVE-03: 応答を受け取れなかった自分の保存が届いていました（版 ' + serverTs + '）。続きを送ります');
+    this._tabTs = String(serverTs);
+    this._unconfirmedSaves = [];
+    if (serverData) this._saveKnownIds(SYNC_ID_KEYS, serverData);
+    this._pendingPersist = true;
+    this._conflictRecoveries = 0;
+  },
+  _dropUnconfirmed(saveId) {
+    if (saveId && this._unconfirmedSaves) this._unconfirmedSaves = this._unconfirmedSaves.filter(u => u.id !== saveId);
+  },
+
   // P1-SAVE-02: __unsent はサーバーへの保存が確認できていない変更を含むこと（省略時は送信中・保留中かどうかで決める）
   _writeCache(data, unsent) {
     if (unsent === undefined) unsent = !!(this._persistInFlight || this._pendingPersist || this._queuedPersist);
     const meta = { __baseTs: this._tabTs || '0' };
     if (unsent) meta.__unsent = true;
+    if (unsent && this._unconfirmedSaves && this._unconfirmedSaves.length) meta.__saves = this._unconfirmedSaves; // P1-SAVE-03
     try { localStorage.setItem('nitta_v5', JSON.stringify(Object.assign({}, data, meta))); } catch(e) {}
     if (this._tabTs) { try { localStorage.setItem('nitta_last_modified', this._tabTs); } catch(e) {} } // 互換のため書く（競合判定には使わない）
   },

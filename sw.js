@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v39'; // v39: P1-LOGOUT-01 自動ログアウトを全タブで判定・未送信の変更を先に送る・5分前の予告／変更履歴のスクロール／決算書の決算確定で振替を除く
+const CACHE = 'nitta-portal-v40'; // v40: P1-SAVE-03 保存IDで、応答を受け取れなかった自分の保存を見分ける
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
