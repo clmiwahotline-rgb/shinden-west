@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v40'; // v40: P1-SAVE-03 保存IDで、応答を受け取れなかった自分の保存を見分ける
+const CACHE = 'nitta-portal-v42'; // v42: P1-CARRY-01 入出金管理に前期繰越（前期末の残高との比較・記録・未割当分の行き先）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

@@ -236,6 +236,46 @@
             </div>
           </sc-for>
         </div>
+        <!-- P1-CARRY-01: 前期繰越（前期末の残高と、今期の前期繰越金の記録を比べる） -->
+        <sc-if value="{{ carryShow }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:14px 18px;marginBottom:14px;" data-noprint="">
+            <div style="display:flex;alignItems:center;gap:10px;flexWrap:wrap;marginBottom:10px;">
+              <div style="fontSize:14px;fontWeight:700;color:#3F414C;">前期繰越</div>
+              <div style="fontSize:12px;color:#6B7280;">{{ carryTitle }}</div>
+              <span style="{{ carryStatusStyle }}">{{ carryStatusLabel }}</span>
+              <div style="flex:1;"></div>
+              <sc-if value="{{ carryBtnShow }}" hint-placeholder-val="{{ false }}">
+                <button data-edit="" onClick="{{ onRecordCarry }}" style="border:none;background:#E7C15F;color:#3F414C;padding:7px 16px;borderRadius:8px;fontSize:12px;fontWeight:600;cursor:pointer;">{{ carryBtnLabel }}</button>
+              </sc-if>
+            </div>
+            <div style="display:flex;fontSize:11px;fontWeight:600;color:#6B7280;padding:4px 0;borderBottom:1px solid rgba(0,0,0,0.06);">
+              <span style="flex:1;">口座</span>
+              <span style="width:130px;textAlign:right;">前期末の残高</span>
+              <span style="width:130px;textAlign:right;">今期の記録</span>
+              <span style="width:90px;textAlign:right;">状態</span>
+            </div>
+            <sc-for list="{{ carryRows }}" as="row" hint-placeholder-count="2">
+              <div style="display:flex;fontSize:12px;color:#3F414C;padding:6px 0;borderBottom:1px solid rgba(0,0,0,0.04);">
+                <span style="flex:1;">{{ row.label }}
+                  <sc-if value="{{ row.destShow }}" hint-placeholder-val="{{ false }}">
+                    <select data-edit="" value="{{ row.destValue }}" onChange="{{ row.onDest }}" style="marginLeft:8px;border:1px solid rgba(0,0,0,0.15);borderRadius:6px;padding:2px 6px;fontSize:11px;background:#fff;">
+                      <option value="">行き先：未割当</option>
+                      <sc-for list="{{ row.destOptions }}" as="opt" hint-placeholder-count="2">
+                        <option value="{{ opt.value }}">{{ opt.label }}</option>
+                      </sc-for>
+                    </select>
+                  </sc-if>
+                </span>
+                <span style="width:130px;textAlign:right;">{{ row.prevStr }}</span>
+                <span style="width:130px;textAlign:right;">{{ row.curStr }}</span>
+                <span style="{{ row.statusStyle }}">{{ row.statusStr }}</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ carryNoteShow }}" hint-placeholder-val="{{ false }}">
+              <div style="fontSize:11px;color:#92400e;marginTop:8px;">{{ carryNote }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
         <!-- Year nav + Month tabs -->
         <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:14px 18px;marginBottom:14px;">
           <div style="display:flex;alignItems:center;gap:8px;marginBottom:12px;">
@@ -940,6 +980,108 @@ class Component extends DCLogic {
     this.showToast(`振替を記録しました（${this.fmt(amt)}）`);
   }
 
+  // P1-CARRY-01: 前期末の残高（現金・口座ごと）と、今期の前期繰越金の記録を比べる。
+  // 前期 = 今の期より前に始まった期のうち、いちばん新しい期。前期の全取引（振替・前期繰越金を含む）を合計する。
+  // 今期の記録 = 収入で、科目名に「前期繰越」を含む取引（手で入れたものも含む）。
+  _carryInfo() {
+    const periods = this.state.periods || [];
+    const pid = this.state.currentPeriodId;
+    const cp = periods.find(p => p.id === pid) || {};
+    const cpStart = String(cp.startDate || '').slice(0, 10);
+    if (!cpStart) return null;
+    const prev = periods
+      .filter(p => p.id !== pid && String(p.startDate || '').slice(0, 10) && String(p.startDate).slice(0, 10) < cpStart)
+      .sort((a, b) => String(b.startDate).slice(0, 10).localeCompare(String(a.startDate).slice(0, 10)))[0];
+    if (!prev) return null;
+    const txs = this.state.transactions || [];
+    const names = (cp.bankAccounts || []).filter(Boolean);
+    const multi = names.length > 1;
+    // 今期の口座に当てはめる（今期が口座1本なら口座はまとめる。今期に無い口座名は「未割当」）
+    const keyOf = t => {
+      if ((t.accountType || '口座') === '現金') return '現金';
+      const n = t.accountName || '';
+      return '口座|' + ((multi && names.includes(n)) ? n : '');
+    };
+    const prevEnd = {}; let unmatched = false;
+    txs.filter(t => t.periodId === prev.id).forEach(t => {
+      const k = keyOf(t);
+      if (multi && k === '口座|' && (t.accountType || '口座') === '口座') unmatched = true;
+      prevEnd[k] = (prevEnd[k] || 0) + (t.income || 0) - (t.expense || 0);
+    });
+    const isCarry = t => t.periodId === pid && /前期繰越/.test(String(t.category || '')) && ((t.income || 0) > 0 || (t.expense || 0) > 0 || t.groupType === '繰越');
+    const carryTx = txs.filter(isCarry);
+    const cur = {}; const recs = {};
+    carryTx.forEach(t => {
+      const k = keyOf(t);
+      cur[k] = (cur[k] || 0) + (t.income || 0) - (t.expense || 0);
+      (recs[k] = recs[k] || []).push(t);
+    });
+    // 前期に残高の無い今期の口座に付けた記録は、前期の未割当分（口座の区別が無い期から引き継いだ残高など）の記録とみなす
+    if (multi) Object.keys(recs).forEach(k => {
+      if (k === '現金' || k === '口座|' || (prevEnd[k] || 0) !== 0) return;
+      cur['口座|'] = (cur['口座|'] || 0) + cur[k];
+      recs['口座|'] = [...(recs['口座|'] || []), ...recs[k]];
+      delete cur[k]; delete recs[k];
+    });
+    const order = ['現金', ...(multi ? names.map(n => '口座|' + n) : []), '口座|'];
+    const keys = [...new Set([...order, ...Object.keys(prevEnd), ...Object.keys(cur)])]
+      .filter(k => (prevEnd[k] || 0) !== 0 || (cur[k] || 0) !== 0 || (recs[k] || []).length);
+    const labelOf = k => k === '現金' ? '現金' : (k === '口座|' ? (multi ? '口座（前期の未割当分）' : '口座') : k.slice(3));
+    const rows = keys.map(k => ({ key: k, label: labelOf(k), prev: prevEnd[k] || 0, cur: cur[k] || 0, recs: recs[k] || [] }));
+    const hasPrevTx = txs.some(t => t.periodId === prev.id);
+    const status = !carryTx.length ? (rows.some(r => r.prev !== 0) ? 'none' : 'empty') : (rows.every(r => r.prev === r.cur) ? 'ok' : 'diff');
+    return { cp, cpStart, prev, multi, names, rows, status, hasPrevTx, unmatched };
+  }
+
+  // P1-CARRY-01: 前期の未割当分の行き先（今期の口座）。記録が1件あればその場で割り当てる。無ければ記録するときに使う
+  setCarryDest(name) {
+    if (this._canEdit && !this._canEdit('transactions')) return; // P0-AUTH-01
+    const info = this._carryInfo();
+    const row = info && info.rows.find(r => r.key === '口座|');
+    if (row && row.recs.length === 1) {
+      const id = row.recs[0].id;
+      this.setState(s => ({ carryDest: name, transactions: s.transactions.map(t => t.id === id ? { ...t, accountName: name } : t) }),
+        () => { this.persist(); this.showToast(name ? '前期繰越金を「' + name + '」に割り当てました' : '前期繰越金を未割当に戻しました'); });
+    } else {
+      this.setState({ carryDest: name });
+    }
+  }
+
+  // P1-CARRY-01: 前期末の残高に合わせて、今期の前期繰越金を記録・更新する（確認の画面で金額を見せてから）
+  recordCarry() {
+    if (this._canEdit && !this._canEdit('transactions')) return; // P0-AUTH-01
+    const info = this._carryInfo();
+    if (!info || info.status === 'ok' || info.status === 'empty') return;
+    const yen = n => (n < 0 ? '−' : '') + '¥' + Math.abs(n || 0).toLocaleString('ja-JP');
+    const pid = this.state.currentPeriodId;
+    const add = [], upd = {}, del = new Set(), lines = [];
+    info.rows.forEach(r => {
+      if (r.prev === r.cur) return;
+      const dest = (info.multi && r.key === '口座|' && info.names.includes(this.state.carryDest)) ? this.state.carryDest : '';
+      const [type, name] = r.key === '現金' ? ['現金', ''] : ['口座', r.key === '口座|' ? (dest || (r.recs[0] && r.recs[0].accountName) || '') : r.key.slice(3)];
+      const amt = { income: r.prev > 0 ? r.prev : 0, expense: r.prev < 0 ? -r.prev : 0 };
+      if (r.recs.length) {
+        // 既にある記録は消さずに金額を直す（同じ口座に複数あれば、2件目以降は削除して1件にまとめる）
+        if (r.prev === 0) { r.recs.forEach(t => del.add(t.id)); lines.push(r.label + '：' + yen(r.cur) + ' → 削除（前期末の残高が 0 円）'); return; }
+        upd[r.recs[0].id] = (type === '口座' && r.key === '口座|') ? { ...amt, accountName: name } : amt;
+        r.recs.slice(1).forEach(t => del.add(t.id));
+        lines.push(r.label + '：' + yen(r.cur) + ' → ' + yen(r.prev) + (r.recs.length > 1 ? '（' + r.recs.length + '件を1件にまとめる）' : ''));
+      } else {
+        add.push({ id: this.gen(), periodId: pid, date: info.cpStart, description: '前期繰越金（' + (name || r.label) + '）', category: '前期繰越金',
+          accountType: type, accountName: type === '口座' ? name : '', income: amt.income, expense: amt.expense });
+        lines.push(r.label + (r.key === '口座|' && name ? '（→ ' + name + '）' : '') + '：' + yen(r.prev) + ' を記録');
+      }
+    });
+    if (!lines.length) return;
+    const msg = '前期（' + (info.prev.name || '') + '）の期末残高に合わせて、今期の前期繰越金を記録します。\n\n' + lines.join('\n') +
+      '\n\n日付：' + info.cpStart + '（今期の開始日）／科目：前期繰越金（収入）\nよろしいですか？';
+    if (!confirm(msg)) return;
+    this.setState(s => ({
+      transactions: [...s.transactions.filter(t => !del.has(t.id)).map(t => upd[t.id] ? { ...t, ...upd[t.id] } : t), ...add],
+    }), () => this.persist());
+    this.showToast('前期繰越金を記録しました');
+  }
+
   saveBalanceCheck() {
     if (this._canEdit && !this._canEdit('transactions')) return; // P0-AUTH-01
     const { bcDate, bcCashActual, bcAccountActuals, bcNote } = this.state;
@@ -1270,6 +1412,37 @@ class Component extends DCLogic {
         : [{label:'口座残高', value:fmtS(bankBal), color:balColor(bankBal,'#3F414C'), accent:false}]
       ),
     ];
+
+    // P1-CARRY-01: 前期繰越の欄
+    const carry = this._carryInfo();
+    const carryShow = !!(carry && (carry.hasPrevTx || carry.rows.length));
+    const carryStatusMap = {
+      none:  ['未記録', '#92400e', '#fef3c7'],
+      diff:  ['差異あり', '#b91c1c', '#fee2e2'],
+      ok:    ['一致', '#166534', '#dcfce7'],
+      empty: ['繰越なし', '#475569', '#f1f5f9'],
+    };
+    const cs = carryStatusMap[(carry && carry.status) || 'empty'];
+    const carryRows = carry ? carry.rows.map(r => ({
+      label: r.label, prevStr: fmtS(r.prev), curStr: r.recs.length ? fmtS(r.cur) : '—',
+      statusStr: r.prev === r.cur ? '一致' : (r.recs.length ? '差異あり' : '未記録'),
+      statusStyle: { width: '90px', textAlign: 'right', fontWeight: '600', color: r.prev === r.cur ? '#166534' : '#b91c1c' },
+      destShow: !!(carry.multi && r.key === '口座|' && r.recs.length <= 1),
+      destValue: r.recs.length === 1 ? (carry.names.includes(r.recs[0].accountName) ? r.recs[0].accountName : '') : (carry.names.includes(this.state.carryDest) ? this.state.carryDest : ''),
+      destOptions: (carry.names || []).map(n => ({ value: n, label: '行き先：' + n })),
+      onDest: (e) => this.setCarryDest(e.target.value),
+    })) : [];
+    const carryVals = {
+      carryShow, carryRows,
+      carryTitle: carry ? '前期（' + (carry.prev.name || '') + '）の期末残高 → 今期の前期繰越金（科目名に「前期繰越」を含む収入）' : '',
+      carryStatusLabel: cs[0],
+      carryStatusStyle: { fontSize: '11px', fontWeight: '600', color: cs[1], background: cs[2], padding: '2px 9px', borderRadius: '10px' },
+      carryBtnShow: !!(carry && (carry.status === 'none' || carry.status === 'diff')),
+      carryBtnLabel: carry && carry.status === 'diff' ? '前期末残高に合わせて更新' : '前期繰越を記録',
+      onRecordCarry: () => this.recordCarry(),
+      carryNoteShow: !!(carry && carry.unmatched),
+      carryNote: '前期の口座のうち、今期の口座設定に無い名前（または口座の区別が無い期）の残高は「口座（前期の未割当分）」にまとめています。行き先の口座を選ぶと、その口座に記録します（割り当てた後も「一致」のままです）。',
+    };
 
     // Running balance for filtered view
     // 月・年で絞り込んでも0からではなく、期首からの繰越残高を引き継いで表示する
@@ -1846,6 +2019,7 @@ class Component extends DCLogic {
       totalIncome:this.fmt(totalIncome), totalExpense:this.fmt(totalExpense), netBalance:this.fmt(totalIncome-totalExpense),
       cashBalance:this.fmt(cashBal), bankBalance:this.fmt(bankBal),
       balanceCards,
+      ...carryVals, // P1-CARRY-01
       showBulkAssign, bulkAssignLabel, bulkAssignBtns,
       hasMultiAccounts,
       bankAccountNames,
