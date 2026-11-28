@@ -279,20 +279,25 @@
         <!-- Year nav + Month tabs -->
         <div style="background:#fff;borderRadius:14px;boxShadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #DDDEE2;padding:14px 18px;marginBottom:14px;">
           <div style="display:flex;alignItems:center;gap:8px;marginBottom:12px;">
-            <button data-variant="secondary" onClick="{{ onTxPrevYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">←</button>
             <div style="display:flex;gap:4px;flex:1;justifyContent:center;">
               <sc-for list="{{ txPeriodTabs }}" as="tab" hint-placeholder-count="3">
                 <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
               </sc-for>
             </div>
-            <div style="fontSize:12px;color:#6B7280;minWidth:80px;textAlign:center;">{{ txYearLabel }}</div>
-            <button data-variant="secondary" onClick="{{ onTxNextYear }}" style="border:none;background:rgba(0,0,0,0.05);color:#3F414C;padding:5px 12px;borderRadius:7px;fontSize:12px;fontWeight:500;cursor:pointer;">→</button>
+            <div style="fontSize:12px;color:#6B7280;textAlign:center;">{{ txYearLabel }}</div>
           </div>
           <div style="display:flex;gap:4px;flexWrap:wrap;">
             <sc-for list="{{ txMonthTabs }}" as="tab" hint-placeholder-count="13">
               <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
             </sc-for>
           </div>
+          <!-- P1-TABS-01: 期の期間外の日付の取引（一覧に出ないが残高には入る）を知らせる -->
+          <sc-if value="{{ outsideShow }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;alignItems:center;gap:10px;flexWrap:wrap;marginTop:10px;padding:8px 12px;borderRadius:8px;background:#fef3c7;color:#92400e;fontSize:12px;" data-noprint="">
+              <span style="flex:1;">{{ outsideMsg }}</span>
+              <button onClick="{{ onToggleOutside }}" style="border:1px solid #E7C15F;background:#fff;color:#3F414C;padding:4px 12px;borderRadius:6px;fontSize:12px;fontWeight:600;cursor:pointer;">{{ outsideBtnLabel }}</button>
+            </div>
+          </sc-if>
         </div>
         <!-- Account filter bar -->
         <div style="display:flex;gap:6px;marginBottom:14px;" data-noprint="">
@@ -915,6 +920,26 @@ class Component extends DCLogic {
       accountSettingsModal:false,
     }),()=>{ this.persist(); this.showToast?.('口座設定を保存しました'); });
   }
+  // P1-TABS-01: 期を切り替える。一覧の月・期間外の表示は、切り替えた期に合わせて戻す
+  _switchPeriod(id) {
+    if (!id) return;
+    this.setState({ currentPeriodId: id, txMonth: '全月', txShowOutside: false });
+  }
+  // P1-TABS-01: 期の期間（開始日〜終了日）。終了日が無い期は開始日から先をすべて期間内とする
+  _periodRange(p) {
+    const start = String((p && p.startDate) || '').slice(0, 10);
+    const end = String((p && p.endDate) || '').slice(0, 10) || '9999-12-31';
+    return { start, end };
+  }
+  // P1-TABS-01: 新しい取引・振替の日付の初期値（今日が期の期間内なら今日、期間外なら期の開始日）
+  _defaultTxDate() {
+    const today = new Date().toISOString().slice(0, 10);
+    const cp = (this.state.periods || []).find(p => p.id === this.state.currentPeriodId);
+    const { start, end } = this._periodRange(cp);
+    if (!start || (today >= start && today <= end)) return today;
+    return start;
+  }
+
   setTxAccountName(txId, name) {
     if (this._canEdit && !this._canEdit('transactions')) return; // P0-AUTH-01
     this.setState(s=>({
@@ -1307,9 +1332,12 @@ class Component extends DCLogic {
     const txFilter = this.state.txFilter||'全て';
     const txMonth = this.state.txMonth||'全月';
 
-    // Determine display year (fiscal year = 4月start). Default to current period's year
+    // P1-TABS-01: 一覧は「選んでいる期の期間（開始日〜終了日）」で絞り込む（年度の切り替えは廃止）
     const periodStartYear = cp.startDate?parseInt(cp.startDate.slice(0,4)):new Date().getFullYear();
-    const txYear = this.state.txYear||periodStartYear;
+    const txYear = periodStartYear;
+    const { start: cpRangeStart, end: cpRangeEnd } = this._periodRange(cp);
+    const inPeriod = t => !!t.date && (!cpRangeStart || (t.date >= cpRangeStart && t.date <= cpRangeEnd));
+    const txShowOutside = !!this.state.txShowOutside;
 
     // Year navigation
     const REIWA_BASE = 2018;
@@ -1321,33 +1349,40 @@ class Component extends DCLogic {
       {label:'当期', year:periodStartYear},
       {label:'翌期', year:nextPeriodYear},
     ];
-    const txPeriodTabs = periodTabData.map(tab=>({
-      ...tab,
-      onClick:()=>this.setState({txYear:tab.year,txMonth:'全月'}),
-      style:{border:'none',padding:'6px 18px',borderRadius:'20px',fontSize:'12px',fontWeight:'600',cursor:'pointer',
-        background:txYear===tab.year?'#3F414C':'rgba(0,0,0,0.05)',
-        color:txYear===tab.year?'#fff':'#3F414C'},
+    // P1-TABS-01: 前期・当期・翌期は、期（開始日の順）の切り替え。前後の期が無いときは薄く表示して押せない
+    const periodsByStart = [...(this.state.periods||[])].filter(p=>p.startDate).sort((a,b)=>String(a.startDate).localeCompare(String(b.startDate)));
+    const cpIdx = periodsByStart.findIndex(p=>p.id===cp.id);
+    const prevP = cpIdx>0 ? periodsByStart[cpIdx-1] : null;
+    const nextP = cpIdx>=0 && cpIdx<periodsByStart.length-1 ? periodsByStart[cpIdx+1] : null;
+    const txPeriodTabs = [
+      {label: prevP ? '前期（'+(prevP.name||'')+'）' : '前期', target: prevP},
+      {label: '当期（'+(cp.name||'')+'）', target: null, active: true},
+      {label: nextP ? '翌期（'+(nextP.name||'')+'）' : '翌期', target: nextP},
+    ].map(tab=>({
+      label: tab.label,
+      onClick: ()=>{ if (tab.target) this._switchPeriod(tab.target.id); },
+      style:{border:'none',padding:'6px 18px',borderRadius:'20px',fontSize:'12px',fontWeight:'600',
+        cursor: tab.active ? 'default' : (tab.target ? 'pointer' : 'not-allowed'),
+        opacity: (tab.active || tab.target) ? 1 : 0.4,
+        background: tab.active ? '#3F414C' : 'rgba(0,0,0,0.05)',
+        color: tab.active ? '#fff' : '#3F414C'},
     }));
-    const txYearLabel = `${txYear}年度`;
-    const onTxPrevYear = ()=>this.setState({txYear:txYear-1,txMonth:'全月'});
-    const onTxNextYear = ()=>this.setState({txYear:txYear+1,txMonth:'全月'});
+    const txYearLabel = cpRangeStart ? this.fmtD(cpRangeStart) + ' 〜 ' + (cp.endDate ? this.fmtD(cpRangeEnd) : '') : '';
 
     // Month tabs (4月〜3月)
     const MONTHS = ['全月','4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
     const btnTabStyle = (active)=>({border:'none',padding:'5px 11px',borderRadius:'16px',fontSize:'11px',fontWeight:'500',cursor:'pointer',background:active?'#3F414C':'rgba(0,0,0,0.04)',color:active?'#fff':'#6B7280'});
     const txMonthTabs = MONTHS.map(m=>({
-      label:m, onClick:()=>this.setState({txMonth:m}),
+      label:m, onClick:()=>this.setState({txMonth:m, txShowOutside:false}),
       style:btnTabStyle(txMonth===m),
     }));
 
     // Filter pTx by year (fiscal), month, account
     const monthToNum = {'4月':4,'5月':5,'6月':6,'7月':7,'8月':8,'9月':9,'10月':10,'11月':11,'12月':12,'1月':1,'2月':2,'3月':3};
-    const yearFiltered = pTx.filter(t=>{
-      if (!t.date) return false;
-      const d = new Date(t.date);
-      const y = d.getMonth()>=3 ? d.getFullYear() : d.getFullYear()-1;
-      return y===txYear;
-    });
+    // P1-TABS-01: 期間外の日付（日付なしを含む）の取引。「表示する」で一覧に加える（全月のときだけ）
+    const outsideTx = pTx.filter(t=>!inPeriod(t));
+    const showOutsideNow = txShowOutside && txMonth==='全月' && outsideTx.length>0;
+    const yearFiltered = pTx.filter(t=>inPeriod(t) || (showOutsideNow && !inPeriod(t)));
     const monthFiltered = txMonth==='全月'?yearFiltered:yearFiltered.filter(t=>{
       const mn = monthToNum[txMonth];
       return t.date && parseInt(t.date.slice(5,7))===mn;
@@ -1415,6 +1450,14 @@ class Component extends DCLogic {
       ),
     ];
 
+    // P1-TABS-01: 期間外の日付の取引の注意
+    const outsideVals = {
+      outsideShow: outsideTx.length>0,
+      outsideMsg: '期の期間外の日付（または日付なし）の取引が ' + outsideTx.length + ' 件あります。一覧には出ていませんが、残高には含まれています。' + (showOutsideNow ? '（一覧に「⚠期間外」として表示中）' : ''),
+      outsideBtnLabel: showOutsideNow ? '期間内だけ表示' : '表示する',
+      onToggleOutside: ()=>this.setState({txShowOutside: !showOutsideNow, txMonth:'全月'}),
+    };
+
     // P1-CARRY-01: 前期繰越の欄
     const carry = this._carryInfo();
     const carryShow = !!(carry && (carry.hasPrevTx || carry.rows.length));
@@ -1449,16 +1492,19 @@ class Component extends DCLogic {
     // Running balance for filtered view
     // 月・年で絞り込んでも0からではなく、期首からの繰越残高を引き継いで表示する
     const monthToNumForCutoff = {'4月':4,'5月':5,'6月':6,'7月':7,'8月':8,'9月':9,'10月':10,'11月':11,'12月':12,'1月':1,'2月':2,'3月':3};
-    const viewCutoffMonth = txMonth==='全月' ? 4 : monthToNumForCutoff[txMonth];
-    const viewCutoffYear = viewCutoffMonth>=4 ? txYear : txYear+1;
-    const viewCutoffDate = `${viewCutoffYear}-${String(viewCutoffMonth).padStart(2,'0')}-01`;
+    // P1-TABS-01: 基準日は期の開始日（月を選んだときはその月の1日）。期間外も表示するときは最初から（カードの残高と一致する）
+    const cpStartMonth = cpRangeStart ? parseInt(cpRangeStart.slice(5,7)) : 4;
+    const viewCutoffMonth = txMonth==='全月' ? null : monthToNumForCutoff[txMonth];
+    const viewCutoffDate = showOutsideNow ? '' : (viewCutoffMonth===null
+      ? (cpRangeStart || `${txYear}-04-01`)
+      : `${viewCutoffMonth>=cpStartMonth ? txYear : txYear+1}-${String(viewCutoffMonth).padStart(2,'0')}-01`);
     let filtCashBal=0,filtBankBal=0;
     pTx.forEach(t=>{
       if (!t.date || t.date >= viewCutoffDate) return;
       if ((t.accountType||'口座')==='現金') filtCashBal+=(t.income||0)-(t.expense||0);
       else filtBankBal+=(t.income||0)-(t.expense||0);
     });
-    const txSortedFiltered = [...filteredTx].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{
+    const txSortedFiltered = [...filteredTx].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).map(t=>{
       const isCashTx=(t.accountType||'口座')==='現金';
       if(isCashTx){filtCashBal+=(t.income||0)-(t.expense||0);}else{filtBankBal+=(t.income||0)-(t.expense||0);}
       return{...t,_cashBal:filtCashBal,_bankBal:filtBankBal,_fbal:filtCashBal+filtBankBal};
@@ -1467,7 +1513,7 @@ class Component extends DCLogic {
     const accountOptionsForRow = [{value:'',label:'未割当'}, ...bankAccountNames.map(n=>({value:n,label:n}))];
     const txRows = page === 'ledger' ? [...txSortedFiltered].reverse().map(t=>({
       ...t,
-      dateStr:this.fmtD(t.date),
+      dateStr:(t.date?this.fmtD(t.date):'（日付なし）') + (inPeriod(t)?'':' ⚠期間外'),
       incStr:t.income>0?this.fmt(t.income):'—',
       expStr:t.expense>0?this.fmt(t.expense):'—',
       balStr:fmtS(t._fbal),
@@ -1733,7 +1779,7 @@ class Component extends DCLogic {
       onCancelEdit:()=>this.setState({editingPeriodId:null,editingDates:{}}),
       activeLabel:p.id===currentPeriodId?'現在の期':'',
       activeBadge:p.id===currentPeriodId?{...bBase,background:'#dcfce7',color:'#166534'}:{...bBase,background:'transparent',color:'transparent'},
-      onSelect:()=>this.setState({currentPeriodId:p.id}),
+      onSelect:()=>this._switchPeriod(p.id),
     })) : [];
 
     // Modal
@@ -1743,7 +1789,7 @@ class Component extends DCLogic {
     return {
       p:{dashboard:page==='dashboard',officers:page==='officers',members:page==='members',invoices:page==='invoices',ledger:page==='ledger',budget:page==='budget',statements:page==='statements',tasks:page==='tasks',events:page==='events',assembly:page==='assembly',settings:page==='settings',printInvoice:!!(this.state.printDoc)},
       navItems, periodOptions, currentPeriodId,
-      onChangePeriod:(e)=>this.setState({currentPeriodId:e.target.value}),
+      onChangePeriod:(e)=>this._switchPeriod(e.target.value),
       currentPeriodName:cp.name,
       periodName:cp.name, periodStart:this.fmtD(cp.startDate), periodEnd:this.fmtD(cp.endDate),
       prevPeriodName:cp.name,
@@ -2017,11 +2063,12 @@ class Component extends DCLogic {
       hankoStatusColor:this.state.hankoUnlocked?'#7BC095':'#A1A1AA',
       txRows, txFilters, budgetCategoryOptions, budgetIncomeCats, budgetExpenseCats,
       txTypeIsIncome, txTypeIsExpense,
-      txYearLabel, txMonthTabs, txPeriodTabs, onTxPrevYear, onTxNextYear,
+      txYearLabel, txMonthTabs, txPeriodTabs,
       totalIncome:this.fmt(totalIncome), totalExpense:this.fmt(totalExpense), netBalance:this.fmt(totalIncome-totalExpense),
       cashBalance:this.fmt(cashBal), bankBalance:this.fmt(bankBal),
       balanceCards,
       ...carryVals, // P1-CARRY-01
+      ...outsideVals, // P1-TABS-01
       showBulkAssign, bulkAssignLabel, bulkAssignBtns,
       hasMultiAccounts,
       bankAccountNames,
@@ -2100,7 +2147,7 @@ class Component extends DCLogic {
           onDel: ()=>{ if(confirm('この記録を削除しますか？')) this.setState(s=>({balanceLogs:(s.balanceLogs||[]).filter(x=>x.id!==l.id)}),()=>this.persist()); },
         };
       }),
-      onAddTx:()=>this.openModal('transaction',null,{txType:'収入',date:new Date().toISOString().slice(0,10),description:'',category:'',amount:0,accountType:'口座',accountName:bankAccountNames[0]||''}),
+      onAddTx:()=>this.openModal('transaction',null,{txType:'収入',date:this._defaultTxDate(),description:'',category:'',amount:0,accountType:'口座',accountName:bankAccountNames[0]||''}),
       onExportTxCSV:()=>this.exportTxCSV?.(),
       onExportInvoicesCSV:()=>this.exportInvoicesCSV?.(),
       onExportMembersCSV:()=>this.exportMembersCSV?.(),
@@ -2133,7 +2180,7 @@ class Component extends DCLogic {
 
       // Transfer modal
       showTransferModal:this.state.transferModal||false,
-      onAddTransfer:()=>this.setState({transferModal:true,transferDate:new Date().toISOString().slice(0,10),transferAmount:0,transferFrom:(hasMultiAccounts?bankAccountNames[0]:'口座'),transferTo:'現金',transferDesc:''}),
+      onAddTransfer:()=>this.setState({transferModal:true,transferDate:this._defaultTxDate(),transferAmount:0,transferFrom:(hasMultiAccounts?bankAccountNames[0]:'口座'),transferTo:'現金',transferDesc:''}),
       transferAccountOptions: hasMultiAccounts
         ? [{value:'現金',label:'現金'}, ...bankAccountNames.map(n=>({value:n,label:n}))]
         : [{value:'口座',label:'口座'},{value:'現金',label:'現金'}],

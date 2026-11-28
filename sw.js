@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v43'; // v43: P1-CARRY-01 前期繰越の欄は40期から（前期が2026-04-01以降に始まった期のときだけ）
+const CACHE = 'nitta-portal-v44'; // v44: P1-TABS-01 前期・当期・翌期タブを期の切り替えに／期間外の日付の取引の注意／新しい取引の日付の初期値
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
