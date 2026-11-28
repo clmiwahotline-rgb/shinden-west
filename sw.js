@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v44'; // v44: P1-TABS-01 前期・当期・翌期タブを期の切り替えに／期間外の日付の取引の注意／新しい取引の日付の初期値
+const CACHE = 'nitta-portal-v45'; // v45: P1-LEDGER-AUDIT 現金出納帳の範囲を日付で（繰越の二重計上を修正）／残高確認の帳簿残高を確認日まで
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

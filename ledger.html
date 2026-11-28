@@ -365,6 +365,9 @@
               <div style="marginBottom:14px;">
                 <label style="display:block;fontSize:11px;fontWeight:600;color:#6B7280;marginBottom:4px;">確認日</label>
                 <input type="date" value="{{ bcDate }}" onChange="{{ onBcDate }}" style="width:220px;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:8px 10px;fontSize:13px;">
+                <sc-if value="{{ bcAfterShow }}" hint-placeholder-val="{{ false }}">
+                  <div style="fontSize:11px;color:#92400e;marginTop:6px;">{{ bcAfterMsg }}</div>
+                </sc-if>
               </div>
               <div style="display:grid;gridTemplateColumns:1fr;gap:10px;marginBottom:14px;">
                 <div>
@@ -1109,26 +1112,39 @@ class Component extends DCLogic {
     this.showToast('前期繰越金を記録しました');
   }
 
+  // P1-LEDGER-AUDIT: 確認日までの取引で帳簿残高を計算する（確認日より後の日付の取引は含めない。日付の無い取引は含める）
+  _bookAsOf(date) {
+    const pid = this.state.currentPeriodId;
+    const d = String(date || '').slice(0, 10);
+    const all = (this.state.transactions || []).filter(t => t.periodId === pid);
+    const upTo = d ? all.filter(t => !t.date || t.date <= d) : all;
+    const sum = list => list.reduce((s, t) => s + (t.income || 0) - (t.expense || 0), 0);
+    const cash = sum(upTo.filter(t => (t.accountType || '口座') === '現金'));
+    const bankTx = upTo.filter(t => (t.accountType || '口座') === '口座');
+    const byName = name => sum(bankTx.filter(t => (t.accountName || '') === name));
+    return { cash, bank: sum(bankTx), byName, after: all.length - upTo.length };
+  }
+
   saveBalanceCheck() {
     if (this._canEdit && !this._canEdit('transactions')) return; // P0-AUTH-01
     const { bcDate, bcCashActual, bcAccountActuals, bcNote } = this.state;
     const pid = this.state.currentPeriodId;
-    const periodTx = this.state.transactions.filter(t=>t.periodId===pid);
     const cp = (this.state.periods||[]).find(p=>p.id===pid)||{};
     const bankAccountNames = (cp.bankAccounts||[]).filter(Boolean);
     const hasMulti = bankAccountNames.length>1;
-    const cashBook = periodTx.filter(t=>(t.accountType||'口座')==='現金').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+    const bk = this._bookAsOf(bcDate); // P1-LEDGER-AUDIT
+    const cashBook = bk.cash;
     const entries = [
       {label:'現金', actual: Number(bcCashActual)||0, book: cashBook, diff: (Number(bcCashActual)||0) - cashBook},
     ];
     if (hasMulti) {
       bankAccountNames.forEach(name=>{
-        const book = periodTx.filter(t=>(t.accountType||'口座')==='口座' && (t.accountName||'')===name).reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+        const book = bk.byName(name);
         const actual = Number((bcAccountActuals||{})[name])||0;
         entries.push({label:name, actual, book, diff: actual-book});
       });
     } else {
-      const bankBook = periodTx.filter(t=>(t.accountType||'口座')==='口座').reduce((s,t)=>s+(t.income||0)-(t.expense||0),0);
+      const bankBook = bk.bank;
       const actual = Number((bcAccountActuals||{})['口座'])||0;
       entries.push({label:'口座', actual, book: bankBook, diff: actual-bankBook});
     }
@@ -1170,25 +1186,23 @@ class Component extends DCLogic {
     const esc=str=>String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const fmt=n=>(n||0).toLocaleString('ja-JP');
     const fmtWa=d=>{if(!d)return'';try{const[y,m,dd]=d.split('-');return`令和${parseInt(y)-2018}年${parseInt(m)}月${parseInt(dd)}日`;}catch(e){return d;}};
-    // 対象取引を期間で絞り込み（年度またぎ：4月〜翌3月のように mFrom > mTo の場合はOR判定）
-    const inMonthRange=m=>mFrom<=mTo ? (m>=mFrom&&m<=mTo) : (m>=mFrom||m<=mTo);
-    const txs=(this.state.transactions||[]).filter(t=>{
-      if(t.periodId&&t.periodId!==pid) return false;
-      if(!t.date) return false;
-      const m=parseInt(t.date.slice(5,7));
-      return inMonthRange(m);
-    }).sort((a,b)=>a.date.localeCompare(b.date));
+    // P1-LEDGER-AUDIT: 月の範囲を日付の範囲にする（期の開始月から年を決める。例：4月〜3月 → 2026-04-01〜2027-03-31）。
+    // 以前は月の数字だけで判定していたため、4月〜3月で印刷すると1〜3月の取引が繰越残高と本文の両方に入っていた
+    const baseYear=cp.startDate?parseInt(cp.startDate.slice(0,4)):new Date().getFullYear();
+    const startMonth=cp.startDate?parseInt(cp.startDate.slice(5,7)):4;
+    const yearOf=m=>m>=startMonth?baseYear:baseYear+1;
+    const pad2=n=>String(n).padStart(2,'0');
+    const rangeFrom=`${yearOf(mFrom)}-${pad2(mFrom)}-01`;
+    const rangeTo=`${yearOf(mTo)}-${pad2(mTo)}-${pad2(new Date(yearOf(mTo),mTo,0).getDate())}`;
+    const periodTxs=(this.state.transactions||[]).filter(t=>!(t.periodId&&t.periodId!==pid) && t.date);
+    const txs=periodTxs.filter(t=>t.date>=rangeFrom && t.date<=rangeTo).sort((a,b)=>a.date.localeCompare(b.date));
+    const afterCount=periodTxs.filter(t=>t.date>rangeTo).length;
     // 月ごとに集計
     const months=[];
     for(let m=mFrom;m<=mTo;m++) months.push(m);
     let cashBal=0,bankBal=0;
-    // 期開始からmFrom-1月末までの繰越残高
-    const prevTxs=(this.state.transactions||[]).filter(t=>{
-      if(t.periodId&&t.periodId!==pid) return false;
-      if(!t.date) return false;
-      const m=parseInt(t.date.slice(5,7));
-      return m<mFrom;
-    });
+    // 繰越残高：範囲の開始日より前の日付の取引（期首より前の日付の取引を含む）
+    const prevTxs=periodTxs.filter(t=>t.date<rangeFrom);
     prevTxs.forEach(t=>{
       if((t.accountType||'口座')==='現金'){cashBal+=(t.income||0)-(t.expense||0);}
       else{bankBal+=(t.income||0)-(t.expense||0);}
@@ -1197,8 +1211,6 @@ class Component extends DCLogic {
     const thSL='border:1px solid #999;padding:5px 7px;text-align:left;font-size:8.5pt;';
     const tdA='border:1px solid #ccc;padding:3px 7px;text-align:right;font-size:8.5pt;';
     const tdL='border:1px solid #ccc;padding:3px 7px;font-size:8.5pt;';
-    const baseYear=cp.startDate?parseInt(cp.startDate.slice(0,4)):new Date().getFullYear();
-    const yearOf=m=>m>=4?baseYear:baseYear+1;
     // 口座ごとの残高内訳（今期に複数口座が設定されている場合）
     const bankAccountNames=(cp.bankAccounts||[]).filter(Boolean);
     const perAccountBal={}; bankAccountNames.forEach(n=>perAccountBal[n]=0);
@@ -1299,6 +1311,7 @@ class Component extends DCLogic {
           <td style="border-top:1.5pt solid #000;padding:6px 7px;text-align:right;">${fmt(cashBal+bankBal)}</td>
         </tr>
       </table>
+      ${afterCount?`<div style="font-size:8.5pt;margin-top:8px;">※ ${yearOf(mTo)}年${mTo}月より後の日付の取引 ${afterCount} 件は含みません。</div>`:''}
     </div>`;
     this.setState({cashbookModal:false});
     this._openPrintWindow(html,'現金出納帳');
@@ -1311,7 +1324,7 @@ class Component extends DCLogic {
 
     const pOfficers = officers.filter(o=>o.periodId===currentPeriodId);
     const pInvoices = invoices.filter(i=>i.periodId===currentPeriodId);
-    const pTx = transactions.filter(t=>t.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
+    const pTx = transactions.filter(t=>t.periodId===currentPeriodId).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))); // P1-LEDGER-AUDIT: 日付の無い取引でもエラーにしない
     const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
     const pEvents = events.filter(e=>e.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
 
@@ -1449,6 +1462,9 @@ class Component extends DCLogic {
         : [{label:'口座残高', value:fmtS(bankBal), color:balColor(bankBal,'#3F414C'), accent:false}]
       ),
     ];
+
+    // P1-LEDGER-AUDIT: 残高確認の帳簿残高（確認日まで）
+    const bcBook = this._bookAsOf(this.state.bcDate||new Date().toISOString().slice(0,10));
 
     // P1-TABS-01: 期間外の日付の取引の注意
     const outsideVals = {
@@ -2100,27 +2116,30 @@ class Component extends DCLogic {
       onBcCashActual: (e)=>this.setState({bcCashActual:e.target.value}),
       onBcBankActual: (e)=>this.setState({bcBankActual:e.target.value}),
       onBcNote: (e)=>this.setState({bcNote:e.target.value}),
-      bcCashBookStr: this.fmt(cashBal),
-      bcBankBookStr: this.fmt(bankBal),
+      // P1-LEDGER-AUDIT: 帳簿残高は確認日までの取引で計算し、符号付きで表示する
+      bcCashBookStr: fmtS(bcBook.cash),
+      bcBankBookStr: fmtS(bcBook.bank),
+      bcAfterShow: bcBook.after>0,
+      bcAfterMsg: '確認日より後の日付の取引 ' + bcBook.after + ' 件は、帳簿残高に含めていません。',
       // 口座ごとの残高チェック入力欄（複数口座設定時はアカウント名ごと、単一時は現金＋口座の2枠）
       bcTargets: (hasMultiAccounts ? bankAccountNames.map(name=>{
         const acc = perAccountBal.find(a=>a.name===name);
-        return {key:name, label:name, bookStr:this.fmt(acc?acc.bal:0),
+        return {key:name, label:name, bookStr:fmtS(bcBook.byName(name)),
           value:(this.state.bcAccountActuals||{})[name]||'',
           onChange:(e)=>this.setState(s=>({bcAccountActuals:{...(s.bcAccountActuals||{}), [name]:e.target.value}}))};
-      }) : [{key:'口座', label:'口座', bookStr:this.fmt(bankBal),
+      }) : [{key:'口座', label:'口座', bookStr:fmtS(bcBook.bank),
           value:(this.state.bcAccountActuals||{})['口座']||'',
           onChange:(e)=>this.setState(s=>({bcAccountActuals:{...(s.bcAccountActuals||{}), '口座':e.target.value}}))}]
       ).map(t=>{
         const actual = Number(t.value)||0;
-        const book = hasMultiAccounts ? (perAccountBal.find(a=>a.name===t.key)?.bal||0) : bankBal;
+        const book = hasMultiAccounts ? bcBook.byName(t.key) : bcBook.bank;
         const diff = actual-book;
         return {...t, diffStr:(diff>=0?'+':'')+diff.toLocaleString('ja-JP')+'円',
           diffStyle:{fontSize:'12px',fontWeight:'600',color:diff===0?'#7BC095':diff>0?'#ff9500':'#E57373',marginTop:'4px'}};
       }),
       ...(() => {
         const ca = Number(this.state.bcCashActual)||0;
-        const cd = ca - cashBal;
+        const cd = ca - bcBook.cash;
         const diffStyle = (d)=>({fontSize:'12px',fontWeight:'600',color:d===0?'#7BC095':d>0?'#ff9500':'#E57373',marginTop:'4px'});
         return {
           bcCashDiffStr: (cd>=0?'+':'')+cd.toLocaleString('ja-JP')+'円',
