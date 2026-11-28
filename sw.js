@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v45'; // v45: P1-LEDGER-AUDIT 現金出納帳の範囲を日付で（繰越の二重計上を修正）／残高確認の帳簿残高を確認日まで
+const CACHE = 'nitta-portal-v46'; // v46: P1-PERIOD-PW 期の日付の変更の確認用パスワードを無くし、保存のときの確認に置き換え
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',

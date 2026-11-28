@@ -1303,6 +1303,22 @@ class Component extends DCLogic {
   }
 
 
+  // P1-PERIOD-PW: 期の日付を保存する前の確認（入力の点検・変更内容・期間外になる取引・他の期との重なり）。保存してよいときだけ true
+  _confirmPeriodDates(p, startDate, endDate) {
+    const s = String(startDate || ''), e = String(endDate || '');
+    if (!s || !e) { alert('開始日と終了日の両方を入力してください。'); return false; }
+    if (s > e) { alert('開始日が終了日より後になっています。'); return false; }
+    if (s === (p.startDate || '') && e === (p.endDate || '')) { this.setState({ editingPeriodId: null, editingDates: {} }); return false; }
+    const fd = d => d ? String(d).replace(/-/g, '/') : '（未設定）';
+    const lines = ['「' + (p.name || '期') + '」の期間を変更します。', '', '開始日：' + fd(p.startDate) + ' → ' + fd(s), '終了日：' + fd(p.endDate) + ' → ' + fd(e)];
+    const outside = (this.state.transactions || []).filter(t => t.periodId === p.id && t.date && (t.date < s || t.date > e)).length;
+    if (outside) lines.push('', '・この期の取引のうち ' + outside + ' 件が新しい期間の外になります（取引は変わらず、入出金管理で「期間外」として表示されます）。');
+    const overlap = (this.state.periods || []).filter(x => x.id !== p.id && x.startDate && s <= (x.endDate || '9999-12-31') && x.startDate <= e).map(x => x.name || '（名前なし）');
+    if (overlap.length) lines.push('', '・次の期と期間が重なります：' + overlap.join('、'));
+    lines.push('', 'よろしいですか？');
+    return confirm(lines.join('\n'));
+  }
+
   renderVals() {
     const {page,periods,currentPeriodId,officers,members,invoices,transactions,budgetItems,events,modal,formData,toast} = this.state;
     const cp = periods.find(p=>p.id===currentPeriodId)||{name:'—',startDate:'',endDate:''};
@@ -1644,8 +1660,6 @@ class Component extends DCLogic {
       editEnd: editingPeriodId===p.id?(editingDates.endDate||p.endDate||''):p.endDate||'',
       onEditDate:()=>{
         if (this._canEdit && !this._canEdit('periods')) return; // P0-AUTH-01: 期間の変更は全権限のみ
-        const pw=prompt('パスワードを入力してください');
-        if(pw!=='2490'){if(pw!==null)alert('パスワードが違います');return;}
         this.setState({editingPeriodId:p.id,editingDates:{startDate:p.startDate||'',endDate:p.endDate||''}});
       },
       onEditStart:(e)=>this.setState(s=>({editingDates:{...s.editingDates,startDate:e.target.value}})),
@@ -1653,6 +1667,7 @@ class Component extends DCLogic {
       onSaveEdit:()=>{
         if (this._canEdit && !this._canEdit('periods')) return;
         const {startDate,endDate}=this.state.editingDates||{};
+        if (!this._confirmPeriodDates(p,startDate,endDate)) return; // P1-PERIOD-PW
         this.setState(s=>({
           periods:s.periods.map(x=>x.id===p.id?{...x,startDate,endDate}:x),
           editingPeriodId:null,editingDates:{},
