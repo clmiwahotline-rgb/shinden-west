@@ -207,7 +207,7 @@
               </select>
               <div style="fontSize:11px;color:#A1A1AA;marginTop:3px;">種別を変えると年会費が自動設定</div></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">年会費（円）</label>
-              <input data-field="fee" value="{{ formData.fee }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
+              <input data-field="fee" sc-camel-value="{{ formData.fee }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">電話番号</label>
@@ -219,7 +219,7 @@
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">メールアドレス</label>
               <input data-field="email" value="{{ formData.email }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="example@mail.com"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">入会年月</label>
-              <input data-field="joinDate" value="{{ formData.joinDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="month"></div>
+              <input data-field="joinDate" sc-camel-value="{{ formData.joinDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="month"></div>
           </div>
         </div>
       </sc-if>
@@ -235,7 +235,7 @@
               <option value="訂正その他">訂正その他</option>
             </select></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">実施日</label>
-            <input data-field="statusDate" value="{{ formData.statusDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+            <input data-field="statusDate" sc-camel-value="{{ formData.statusDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">メモ・理由</label>
             <textarea data-field="statusNote" value="{{ formData.statusNote }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;resize:vertical;" rows="3" placeholder="退会理由や変更内容を記録してください"></textarea></div>
         </div>
@@ -262,7 +262,7 @@
                 <option value="会費">会費</option><option value="広告費">広告費</option><option value="看板費">看板費</option><option value="その他">その他</option>
               </select></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">金額（円）</label>
-              <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
+              <input data-field="amount" sc-camel-value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">状態</label>
@@ -276,7 +276,7 @@
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">発行日</label>
-              <input data-field="issuedDate" value="{{ formData.issuedDate }}" onChange="{{ onInvoiceIssuedDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="issuedDate" sc-camel-value="{{ formData.issuedDate }}" onChange="{{ onInvoiceIssuedDateChange }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">支払期限</label>
               <select data-field="dueDate" value="{{ formData.dueDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <sc-for list="{{ dueDateOptions }}" as="opt" hint-placeholder-count="2">
@@ -286,7 +286,7 @@
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">入金日</label>
-              <input data-field="paidDate" value="{{ formData.paidDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="paidDate" sc-camel-value="{{ formData.paidDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">状態</label>
               <select data-field="status" value="{{ formData.status }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <option value="未払">未払</option><option value="入金済">入金済</option><option value="取消">取消</option>
@@ -303,7 +303,7 @@
         <div style="display:flex;flexDirection:column;gap:13px;">
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">日付</label>
-              <input data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="date" sc-camel-value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">収入 / 支出</label>
               <select data-field="txType" value="{{ formData.txType }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <option value="収入">収入</option><option value="支出">支出</option>
@@ -337,7 +337,7 @@
               </select></div>
           </div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:4px;">金額（円）</label>
-            <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
+            <input data-field="amount" sc-camel-value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
         </div>
       </sc-if>
 
@@ -350,7 +350,7 @@
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">科目名</label>
             <input data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 会費収入"></div>
           <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">予算額（円）</label>
-            <input data-field="amount" value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
+            <input data-field="amount" sc-camel-value="{{ formData.amount }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="number"></div>
         </div>
       </sc-if>
 
@@ -364,11 +364,11 @@
                 <option value="お祭り・縁日">お祭り・縁日</option><option value="総会・会議">総会・会議</option><option value="研修事業">研修事業</option><option value="文化・交流">文化・交流</option><option value="その他">その他</option>
               </select></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">開催日</label>
-              <input data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="date" sc-camel-value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
           </div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">終了日（複数日）</label>
-              <input data-field="endDate" value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="endDate" sc-camel-value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">参加者数</label>
               <input data-field="participants" value="{{ formData.participants }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 約300名"></div>
           </div>
@@ -383,7 +383,7 @@
             <input data-field="title" value="{{ formData.title }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 総会案内状の送付"></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">期日</label>
-              <input data-field="dueDate" value="{{ formData.dueDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="dueDate" sc-camel-value="{{ formData.dueDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">カテゴリ</label>
               <select data-field="category" value="{{ formData.category }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;background:#fff;">
                 <option value="">なし</option><option value="運営">運営</option><option value="広報">広報</option><option value="財務">財務</option><option value="イベント">イベント</option><option value="その他">その他</option>
@@ -407,9 +407,9 @@
             <input data-field="name" value="{{ formData.name }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" placeholder="例: 第4期"></div>
           <div style="display:grid;gridTemplateColumns:1fr 1fr;gap:10px;">
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">開始日</label>
-              <input data-field="startDate" value="{{ formData.startDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="startDate" sc-camel-value="{{ formData.startDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
             <div><label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">終了日</label>
-              <input data-field="endDate" value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
+              <input data-field="endDate" sc-camel-value="{{ formData.endDate }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" type="date"></div>
           </div>
         </div>
       </sc-if>
@@ -680,9 +680,9 @@ class Component extends DCLogic {
 
     const pOfficers = officers.filter(o=>o.periodId===currentPeriodId);
     const pInvoices = invoices.filter(i=>i.periodId===currentPeriodId);
-    const pTx = transactions.filter(t=>t.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
+    const pTx = transactions.filter(t=>t.periodId===currentPeriodId).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
     const pBudget = budgetItems.filter(b=>b.periodId===currentPeriodId);
-    const pEvents = events.filter(e=>e.periodId===currentPeriodId).sort((a,b)=>a.date.localeCompare(b.date));
+    const pEvents = events.filter(e=>e.periodId===currentPeriodId).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
 
     const totalIncome = pTx.reduce((s,t)=>s+(t.income||0),0);
     const totalExpense = pTx.reduce((s,t)=>s+(t.expense||0),0);
@@ -763,7 +763,7 @@ class Component extends DCLogic {
 
     // Running balance for filtered view
     let filtCashBal=0,filtBankBal=0;
-    const txSortedFiltered = [...filteredTx].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{
+    const txSortedFiltered = [...filteredTx].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).map(t=>{
       const isCashTx=(t.accountType||'口座')==='現金';
       if(isCashTx){filtCashBal+=(t.income||0)-(t.expense||0);}else{filtBankBal+=(t.income||0)-(t.expense||0);}
       return{...t,_cashBal:filtCashBal,_bankBal:filtBankBal,_fbal:filtCashBal+filtBankBal};

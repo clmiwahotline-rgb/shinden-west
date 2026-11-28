@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v46'; // v46: P1-PERIOD-PW 期の日付の変更の確認用パスワードを無くし、保存のときの確認に置き換え
+const CACHE = 'nitta-portal-v47'; // v47: P1-MISC-A 事前の保存に CSS・ロゴ・入口を追加／保存も通信も無いときはトップページ
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
@@ -17,6 +17,8 @@ const HTML_ASSETS = [
 
 const STATIC_ASSETS = [
   'portal-shared.js', 'support.js', 'portal-auth.js',
+  // P1-MISC-A: 電波が無いときに見た目が崩れないよう、共通の CSS とロゴも保存する
+  'portal-common.css', 'uploads/logo-splash.png', 'uploads/logo-horizontal-clean.png',
 ];
 
 // ===== インストール: 全ページを事前キャッシュ =====
@@ -26,7 +28,7 @@ self.addEventListener('install', event => {
     caches.open(CACHE).then(cache => {
       // HTMLとJSを事前キャッシュ（失敗しても続行）
       return Promise.allSettled(
-        [...HTML_ASSETS, ...STATIC_ASSETS].map(url =>
+        ['./', ...HTML_ASSETS, ...STATIC_ASSETS].map(url => // P1-MISC-A: サイトの入口（末尾が / の URL）も保存
           cache.add(url).catch(e => console.warn('SW precache failed:', url, e.message))
         )
       );
@@ -59,13 +61,13 @@ self.addEventListener('fetch', event => {
   const isAsset =
     HTML_ASSETS.some(a => url.pathname.endsWith('/' + a) || url.pathname.endsWith(a)) ||
     STATIC_ASSETS.some(a => url.pathname.endsWith('/' + a) || url.pathname.endsWith(a)) ||
-    url.pathname === '/' || url.pathname === '';
+    url.pathname === '/' || url.pathname === '' || url.pathname.endsWith('/'); // P1-MISC-A: サブフォルダで公開していても入口を対象に
 
   if (!isLocal || !isAsset) return;
 
   event.respondWith(
     caches.open(CACHE).then(cache =>
-      cache.match(req).then(cached => {
+      cache.match(req, { ignoreSearch: true }).then(cached => { // P1-MISC-A: ?… の違いは無視して探す
         // バックグラウンドで最新版を取得してキャッシュ更新
         const networkFetch = fetch(req).then(res => {
           if (res && res.ok && res.status === 200) {
@@ -76,7 +78,11 @@ self.addEventListener('fetch', event => {
 
         // キャッシュがあれば即返す（Stale-While-Revalidate）
         // なければネットワークを待つ
-        return cached || networkFetch;
+        // P1-MISC-A: 保存も通信も無いとき、ページを開く操作なら保存しているトップページを返す（ブラウザのエラー画面にしない）
+        if (cached) return cached;
+        return networkFetch.then(res => res || (req.mode === 'navigate'
+          ? cache.match('index.html').then(r => r || Response.error())
+          : Response.error()));
       })
     )
   );

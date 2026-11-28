@@ -155,7 +155,7 @@
         </div>
         <div>
           <label style="display:block;fontSize:12px;fontWeight:600;color:#6B7280;marginBottom:5px;">日付</label>
-          <input type="date" data-field="date" value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" />
+          <input type="date" data-field="date" sc-camel-value="{{ formData.date }}" onChange="{{ onInput }}" style="width:100%;border:1px solid rgba(0,0,0,0.15);borderRadius:8px;padding:9px 11px;fontSize:13px;" />
         </div>
       </div>
 
@@ -214,7 +214,7 @@
         <button data-variant="secondary" onClick="{{ onClosePreview }}" style="border:none;background:rgba(0,0,0,0.05);color:#6B7280;padding:5px 14px;borderRadius:8px;fontSize:13px;flexShrink:0;marginLeft:12px;">✕ 閉じる</button>
       </div>
       <sc-if value="{{ previewIsImage }}" hint-placeholder-val="{{ false }}">
-        <img src="{{ previewImgSrc }}" style="width:100%;maxHeight:70vh;objectFit:contain;borderRadius:8px;background:#F5F6F8;" />
+        <img sc-camel-src="{{ previewImgSrc }}" style="width:100%;maxHeight:70vh;objectFit:contain;borderRadius:8px;background:#F5F6F8;" />
       </sc-if>
       <sc-if value="{{ previewHasText }}" hint-placeholder-val="{{ false }}">
         <pre style="whiteSpace:pre-wrap;wordBreak:break-word;background:#F5F6F8;borderRadius:8px;padding:14px;fontSize:12px;lineHeight:1.7;color:#3F414C;maxHeight:60vh;overflowY:auto;fontFamily:'BIZ UDPGothic','Noto Sans JP',sans-serif;margin:0;">{{ previewTextContent }}</pre>
