@@ -57,7 +57,7 @@
   // P1-NET-01: Google 側の一時的な不調（結果の受け渡しの 404・応答が来ない・本文が届かない）への耐性。
   // 読むだけの操作は、タイムアウトつきで送り直してよい（何度送ってもデータは変わらない）。
   // 保存・ログイン・ユーザーの変更は送り直さない（二重になる／ログインの使い捨てトークンは再利用できない）。
-  var READ_ACTIONS = ['load', 'users.list', 'sessions.list', 'auditLog', 'auditVerify', 'getHanko'];
+  var READ_ACTIONS = ['load', 'users.list', 'sessions.list', 'auditLog', 'auditVerify', 'getHanko', 'getFile']; // P1-MISC-B: getFile（資料の添付を見る）も読むだけ
   var NET = { timeoutMs: 45000, retryWaits: [3000, 10000], recheckWaitMs: 2000, bgRetryMs: 60000 };
   var AUTH_FAIL = ['invalid', 'expired', 'revoked', 'users_unavailable'];
   function wait(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }

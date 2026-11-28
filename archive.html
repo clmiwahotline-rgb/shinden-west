@@ -226,7 +226,7 @@
         </div>
       </sc-if>
       <div style="display:flex;justifyContent:flex-end;marginTop:18px;paddingTop:16px;borderTop:1px solid rgba(0,0,0,0.07);">
-        <a href="{{ previewDownloadHref }}" download="{{ previewFileName }}" target="_blank" rel="noopener" style="border:none;background:#E7C15F;color:#fff;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:600;textDecoration:none;">⬇ ダウンロード</a>
+        <a href="{{ previewDownloadHref }}" download="{{ previewFileName }}" target="_blank" rel="noopener" onClick="{{ onPreviewDownload }}" style="border:none;background:#E7C15F;color:#fff;padding:9px 20px;borderRadius:8px;fontSize:13px;fontWeight:600;textDecoration:none;">⬇ ダウンロード</a>
       </div>
     </div>
   </div>
@@ -281,14 +281,60 @@ class Component extends DCLogic {
   }
   handleDrop(e){e.preventDefault();const f=(e.dataTransfer&&e.dataTransfer.files)||[];if(f[0])this._processFile(f[0]);}
   handleFileSelect(e){const f=(e.target.files)||[];if(f[0])this._processFile(f[0]);e.target.value='';}
+  // P1-MISC-B: ログイン中のセッションで送る（P0-AUTH-01 で旧APIキーの書き方のまま残り、アップロードが必ず失敗していた）
   _uploadFileToDrive(filename,mimeType,dataUrl){
-    const url=this.state.scriptUrl||localStorage.getItem('nitta_script_url')||'';
-    const key=''; // P0-AUTH-01: APIキーは使わない（セッションは _authBody が付ける）
+    if(!window.PortalAuth||!window.PortalAuth.token())return Promise.reject(new Error('no-session'));
     const base64=(dataUrl.split(',')[1])||'';
-    if(!url||!key)return Promise.reject(new Error('no-cloud'));
-    return fetch(url,{method:'POST',body:JSON.stringify({key,action:'uploadFile',filename,mimeType,base64})})
-      .then(r=>r.json())
-      .then(res=>{if(res.ok)return res;throw new Error(res.error||'upload failed');});
+    return window.PortalAuth.post({action:'uploadFile',filename,mimeType,base64}).then(res=>{
+      if(res&&res.authError&&window.PortalAuth.handleAuthError(res))throw new Error('auth');
+      if(res&&res.ok&&res.fileId)return res;
+      throw new Error((res&&res.error)||'upload failed');
+    });
+  }
+  // P1-MISC-B: Drive に置いた添付の ID（新しい記録は fileId、以前の記録はリンクの id=… から）。埋め込みのファイルは ''
+  _driveId(f){
+    if(!f||f.dataUrl)return '';
+    if(f.fileId)return String(f.fileId);
+    const m=/[?&]id=([A-Za-z0-9_-]+)/.exec(f.downloadUrl||f.imgUrl||'');
+    return m?m[1]:'';
+  }
+  // P1-MISC-B: Drive の添付をログイン中のセッションで取り出す（共有のリンクは使わない）。失敗したら null
+  _fetchDriveFile(f){
+    const id=this._driveId(f);
+    if(!id)return Promise.resolve(null);
+    this._driveCache=this._driveCache||{};
+    if(this._driveCache[id])return Promise.resolve(this._driveCache[id]);
+    if(!window.PortalAuth||!window.PortalAuth.token()){this.showToast('ファイルを見るにはログインが必要です');return Promise.resolve(null);}
+    this.showToast('ファイルを読み込んでいます…');
+    return window.PortalAuth.post({action:'getFile',fileId:id}).then(r=>{
+      if(r&&r.authError&&window.PortalAuth.handleAuthError(r))return null;
+      if(!r||!r.ok||!/^data:/.test(r.dataUrl||'')){this.showToast('ファイルを読み込めませんでした'+(r&&r.error?'（'+r.error+'）':''));return null;}
+      this._driveCache[id]=r.dataUrl;
+      return r.dataUrl;
+    }).catch(()=>{this.showToast('ファイルを読み込めませんでした（通信エラー）');return null;});
+  }
+  _saveDataUrl(dataUrl,name){
+    return fetch(dataUrl).then(r=>r.blob()).then(b=>{
+      const u=URL.createObjectURL(b);const a=document.createElement('a');
+      a.href=u;a.download=name||'file';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(u),10000);
+    });
+  }
+  // P1-MISC-B: Drive の添付なら取り出してから保存する。埋め込みのファイルはリンクのまま（false を返す）
+  _downloadDrive(e,file){
+    if(!this._driveId(file))return false;
+    if(e){e.preventDefault();e.stopPropagation();}
+    this._fetchDriveFile(file).then(u=>{if(u)this._saveDataUrl(u,file.name);});
+    return true;
+  }
+  // P1-MISC-B: プレビューを開く。Drive の画像は取り出して表示する
+  _openPreview(doc){
+    this.setState({previewDoc:doc});
+    const f=doc.file;
+    if(!f||f.type!=='image'||!this._driveId(f))return;
+    this._fetchDriveFile(f).then(u=>{
+      if(u&&this.state.previewDoc&&this.state.previewDoc.id===doc.id)this.setState({previewDoc:{...doc,file:{...f,dataUrl:u}}});
+    });
   }
   _processFile(file){
     const MAX=2*1024*1024;
@@ -306,11 +352,12 @@ class Component extends DCLogic {
       }
       this.setState(s=>({formData:{...s.formData,_uploading:true,file:{name,mimeType,type,textContent,_uploading:true}}}));
       this._uploadFileToDrive(name,mimeType,dataUrl).then(res=>{
+        this._driveCache=this._driveCache||{};this._driveCache[res.fileId]=dataUrl;
         this.setState(s=>({
-          formData:{...s.formData,_uploading:false,url:res.url,
-            file:{name,mimeType,type,textContent,downloadUrl:res.downloadUrl,imgUrl:res.imgUrl,uploaded:true}},
+          formData:{...s.formData,_uploading:false,
+            file:{name,mimeType,type,textContent,fileId:res.fileId,uploaded:true}},
         }));
-        this.showToast(`${name} をアップロードしました（Google Driveに保存・自動でリンク設定）`);
+        this.showToast(`${name} をアップロードしました（Google Driveに保存。ログイン中の人だけが見られます）`);
       }).catch(err=>{
         console.warn('Drive upload failed:',err.message);
         // アップロード失敗時はこの端末限定でそのまま保持（他端末には同期されない旨を警告）
@@ -366,11 +413,15 @@ class Component extends DCLogic {
         hasNotes:!!(doc.notes&&doc.notes.trim()),
         notesPreview:(doc.notes||'').slice(0,120),
         hasFile:!!doc.file,
-        fileHref:doc.file?(doc.file.dataUrl||doc.file.downloadUrl||''):'',
+        fileHref:doc.file?(doc.file.dataUrl||'#'):'', // P1-MISC-B: Drive の添付は共有のリンクを使わず、押したときに取り出す
         onEdit:()=>this.setState({modal:{show:true,editId:doc.id},formData:{...doc}}),
-        onOpen:(e)=>{e.stopPropagation();if(doc.url)window.open(doc.url,'_blank');},
-        onPreview:(e)=>{e.stopPropagation();this.setState({previewDoc:doc});},
-        onDownloadClick:(e)=>{e.stopPropagation();},
+        onOpen:(e)=>{e.stopPropagation();if(!doc.url)return;
+          // P1-MISC-B: 添付ファイルそのものの Drive のリンクなら、共有のリンクではなくプレビューで開く
+          const id=this._driveId(doc.file);
+          if(id&&doc.url.indexOf(id)>=0){this._openPreview(doc);return;}
+          window.open(doc.url,'_blank');},
+        onPreview:(e)=>{e.stopPropagation();this._openPreview(doc);},
+        onDownloadClick:(e)=>{e.stopPropagation();this._downloadDrive(e,doc.file);},
         onDelete:(e)=>{e.stopPropagation();if(!confirm(`「${doc.title}」を削除しますか？`))return;this.setState(s=>({archiveDocs:s.archiveDocs.filter(d=>d.id!==doc.id)}),()=>this.persist());this.showToast('削除しました');},
       };
     });
@@ -427,8 +478,9 @@ class Component extends DCLogic {
       previewDoc:this.state.previewDoc,
       previewShow:!!this.state.previewDoc,
       previewFileName:(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.name)||'',
-      previewImgSrc:(this.state.previewDoc&&this.state.previewDoc.file&&(this.state.previewDoc.file.dataUrl||this.state.previewDoc.file.imgUrl))||'',
-      previewDownloadHref:(this.state.previewDoc&&this.state.previewDoc.file&&(this.state.previewDoc.file.dataUrl||this.state.previewDoc.file.downloadUrl))||'',
+      previewImgSrc:(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.dataUrl)||'', // P1-MISC-B: Drive の画像は取り出してから表示
+      previewDownloadHref:(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.dataUrl)||'#',
+      onPreviewDownload:(e)=>{const f=this.state.previewDoc&&this.state.previewDoc.file;if(f&&!f.dataUrl)this._downloadDrive(e,f);},
       previewIsImage:!!(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.type==='image'),
       previewHasText:!!(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.textContent),
       previewTextContent:(this.state.previewDoc&&this.state.previewDoc.file&&this.state.previewDoc.file.textContent)||'',

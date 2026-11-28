@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v47'; // v47: P1-MISC-A 事前の保存に CSS・ロゴ・入口を追加／保存も通信も無いときはトップページ
+const CACHE = 'nitta-portal-v48'; // v48: P1-MISC-B 資料の添付のアップロードを直す・Drive の添付はログイン中の人だけ（GAS v32）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
