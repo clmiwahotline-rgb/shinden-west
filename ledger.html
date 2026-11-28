@@ -993,6 +993,8 @@ class Component extends DCLogic {
       .filter(p => p.id !== pid && String(p.startDate || '').slice(0, 10) && String(p.startDate).slice(0, 10) < cpStart)
       .sort((a, b) => String(b.startDate).slice(0, 10).localeCompare(String(a.startDate).slice(0, 10)))[0];
     if (!prev) return null;
+    // 40期から有効（前期が39期＝2026-04-01 以降に始まった期のときだけ）。38期は口座別の残高が無いため、39期の前期繰越金は手入力のまま
+    if (String(prev.startDate).slice(0, 10) < '2026-04-01') return null;
     const txs = this.state.transactions || [];
     const names = (cp.bankAccounts || []).filter(Boolean);
     const multi = names.length > 1;

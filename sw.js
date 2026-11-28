@@ -6,7 +6,7 @@
  *   - 次のアクセスで更新版が表示される
  */
 
-const CACHE = 'nitta-portal-v42'; // v42: P1-CARRY-01 入出金管理に前期繰越（前期末の残高との比較・記録・未割当分の行き先）
+const CACHE = 'nitta-portal-v43'; // v43: P1-CARRY-01 前期繰越の欄は40期から（前期が2026-04-01以降に始まった期のときだけ）
 
 const HTML_ASSETS = [
   'index.html', 'officers.html', 'members.html', 'invoices.html',
